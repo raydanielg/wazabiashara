@@ -96,6 +96,7 @@ tailwind.config = {
   .awning span{ flex:1; border:3px solid #3b4652; border-top:none; border-radius:0 0 999px 999px; margin:0 -1.5px; }
   .awning span:nth-child(odd){ background:#ef5350; }
   .awning span:nth-child(even){ background:#ffc64d; }
+  @media(max-width:639px){ .awning{ display:none; } }
 
   /* ============ Custom keyframes (zinaongezea animate.css) ============ */
   @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
@@ -139,6 +140,7 @@ tailwind.config = {
   /* Mobile: navbar always has solid background */
   @media(max-width:1023px){
     #siteHeader .nav-bar-bg{ background:rgba(255,255,255,.97); backdrop-filter:blur(8px); }
+    #siteHeader.scrolled .nav-bar-bg{ box-shadow:0 6px 20px -8px rgba(1,36,31,.12); }
   }
   .nav-link{ position:relative; }
   .nav-link::after{ content:''; position:absolute; left:0; bottom:-4px; height:3px; width:0;
@@ -254,14 +256,14 @@ if (!function_exists('wz_mini')) {
 <!-- ================= HEADER (topbar + nav) ================= -->
 <header id="siteHeader" class="fixed top-0 inset-x-0 z-50">
 
-  <!-- ===== TOPBAR: mawasiliano + LANGUAGE DROPDOWN ===== -->
-  <div class="bg-emerald-900 text-emerald-100 text-[11px] sm:text-[13px] font-bold relative z-[60]">
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-9 sm:h-10 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-3 sm:gap-5 min-w-0">
-        <a href="tel:+{{ $whatsapp }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-gold-300 transition shrink-0">
+  <!-- ===== TOPBAR: mawasiliano + LANGUAGE DROPDOWN (hidden on mobile) ===== -->
+  <div class="hidden sm:block bg-emerald-900 text-emerald-100 text-[13px] font-bold relative z-[60]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 h-10 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-5 min-w-0">
+        <a href="tel:+{{ $whatsapp }}" class="inline-flex items-center gap-1.5 hover:text-gold-300 transition shrink-0">
           {!! wz_mini('phone') !!} <span>+{{ $whatsapp }}</span>
         </a>
-        <a href="mailto:info@wazabiashara.co.tz" class="hidden xs:inline-flex items-center gap-1.5 hover:text-gold-300 transition truncate min-w-0">
+        <a href="mailto:info@wazabiashara.co.tz" class="inline-flex items-center gap-1.5 hover:text-gold-300 transition truncate min-w-0">
           {!! wz_mini('mail') !!} <span class="truncate">info@wazabiashara.co.tz</span>
         </a>
         <span class="hidden md:inline-flex items-center gap-1.5 text-emerald-300 shrink-0">
@@ -272,9 +274,9 @@ if (!function_exists('wz_mini')) {
       <!-- Language dropdown -->
       <div class="relative shrink-0">
         <button id="langBtn" aria-haspopup="listbox" aria-expanded="false"
-                class="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-2.5 sm:pl-3 pr-2 sm:pr-2.5 py-1 sm:py-1.5 transition">
+                class="inline-flex items-center gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-3 pr-2.5 py-1.5 transition">
           <span class="text-gold-400">{!! wz_mini('globe') !!}</span>
-          <span id="langLabel" class="text-[11px] sm:text-[13px]">Kiswahili</span>
+          <span id="langLabel">Kiswahili</span>
           <span id="langChev" class="transition-transform duration-200">{!! wz_mini('chev','w-3.5 h-3.5') !!}</span>
         </button>
         <div id="langMenu" role="listbox"
@@ -292,8 +294,8 @@ if (!function_exists('wz_mini')) {
     </div>
   </div>
 
-  <!-- awning signature strip -->
-  <div class="awning" aria-hidden="true">
+  <!-- awning signature strip (hidden on mobile) -->
+  <div class="awning hidden sm:flex" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
@@ -301,20 +303,20 @@ if (!function_exists('wz_mini')) {
   <!-- ===== NAVBAR ===== -->
   <div class="nav-bar-bg lg:bg-transparent">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-[56px] sm:h-[72px] gap-2">
+      <div class="flex items-center justify-between h-[52px] sm:h-[72px] gap-2">
 
       <!-- Logo -->
       <a href="#home" class="flex items-center gap-2 sm:gap-3 group min-w-0">
         <span class="relative shrink-0">
           <img src="{{ asset('logo.png') }}" alt="{{ $appName }}"
-               class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl object-contain"
+               class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-2xl object-contain"
                onerror="this.style.display='none';document.getElementById('logoFallback').style.display='grid';">
           <span id="logoFallback" style="display:none"
-                class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-xl sm:text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
+                class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-lg sm:text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
         </span>
         <span class="leading-tight min-w-0">
-          <span class="block font-black text-base sm:text-xl text-emerald-500 tracking-tight truncate">{{ $appName }}</span>
-          <span class="hidden xs:block text-[10px] sm:text-[11px] font-bold text-gold-600 -mt-0.5 truncate" data-i18n="slogan">{{ $slogan }}</span>
+          <span class="block font-black text-sm sm:text-xl text-emerald-500 tracking-tight truncate">{{ $appName }}</span>
+          <span class="hidden sm:block text-[11px] font-bold text-gold-600 -mt-0.5 truncate" data-i18n="slogan">{{ $slogan }}</span>
         </span>
       </a>
 
@@ -340,21 +342,41 @@ if (!function_exists('wz_mini')) {
         @endguest
       </div>
 
-      <!-- Mobile burger -->
-      <button id="burger" aria-label="Fungua menyu" aria-expanded="false"
-              class="lg:hidden relative h-10 w-10 sm:h-11 sm:w-11 grid place-items-center rounded-xl border-2 border-emerald-200 text-emerald-600 active:scale-95 transition-transform shrink-0">
-        <svg id="burgerOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
-          <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
-        <svg id="burgerClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
-          <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
+      <!-- Mobile: language toggle + burger side by side -->
+      <div class="flex items-center gap-2 lg:hidden shrink-0">
+        <!-- Mobile language toggle -->
+        <button id="langBtnMobile" aria-haspopup="listbox" aria-expanded="false"
+                class="relative grid place-items-center h-9 w-9 rounded-lg border border-emerald-200 text-emerald-600 active:scale-95 transition">
+          <span class="text-gold-500">{!! wz_mini('globe') !!}</span>
+        </button>
+        <!-- Burger -->
+        <button id="burger" aria-label="Fungua menyu" aria-expanded="false"
+                class="relative h-9 w-9 grid place-items-center rounded-lg border-2 border-emerald-200 text-emerald-600 active:scale-95 transition shrink-0">
+          <svg id="burgerOpen" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg id="burgerClose" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
       </div>
     </div>
   </div>
 
+  <!-- Mobile language menu -->
+  <div id="langMenuMobile" class="lg:hidden hidden absolute right-3 top-[52px] z-[70] w-40 bg-white text-emerald-800 rounded-xl shadow-cardlg border-2 border-gray-100 overflow-hidden">
+    <button data-lang="sw" class="lang-opt-m w-full flex items-center justify-between px-4 py-3 font-extrabold hover:bg-emerald-50 transition">
+      <span class="flex items-center gap-2"><span class="h-5 w-5 grid place-items-center rounded-full bg-emerald-50 border border-emerald-200 text-[9px] font-black">SW</span> Kiswahili</span>
+      <span class="lang-check-m text-emerald-500">{!! wz_mini('check') !!}</span>
+    </button>
+    <button data-lang="en" class="lang-opt-m w-full flex items-center justify-between px-4 py-3 font-extrabold hover:bg-emerald-50 transition border-t border-gray-100">
+      <span class="flex items-center gap-2"><span class="h-5 w-5 grid place-items-center rounded-full bg-gold-50 border border-gold-200 text-[9px] font-black">EN</span> English</span>
+      <span class="lang-check-m text-emerald-500 hidden">{!! wz_mini('check') !!}</span>
+    </button>
+  </div>
+
   <!-- Mobile menu -->
   <div id="mobileMenu" class="lg:hidden hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-cardlg animate__animated animate__fadeIn animate__faster">
-    <nav class="px-4 sm:px-6 py-4 sm:py-5 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
+    <nav class="px-4 sm:px-6 py-4 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
       <a href="#home"       class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_home">Nyumbani</a>
       <a href="#huduma"     class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_features">Huduma</a>
       <a href="#jinsi"      class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_how">Jinsi Inavyofanya Kazi</a>
@@ -377,7 +399,7 @@ if (!function_exists('wz_mini')) {
 </header>
 
 <!-- ================= HERO ================= -->
-<section id="home" class="relative pt-[110px] sm:pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
+<section id="home" class="relative pt-[72px] sm:pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
   <!-- ambient blobs -->
   <div class="pointer-events-none absolute -top-10 -left-24 w-[420px] h-[420px] bg-emerald-400/15 anim-blob blur-2xl"></div>
   <div class="pointer-events-none absolute top-40 -right-24 w-[380px] h-[380px] bg-gold-400/20 anim-blob blur-2xl" style="animation-delay:-4s"></div>
@@ -916,10 +938,13 @@ function applyLang(lang){
   document.querySelectorAll('.lang-opt').forEach(btn => {
     btn.querySelector('.lang-check').classList.toggle('hidden', btn.dataset.lang !== LANG);
   });
+  document.querySelectorAll('.lang-opt-m').forEach(btn => {
+    btn.querySelector('.lang-check-m').classList.toggle('hidden', btn.dataset.lang !== LANG);
+  });
   document.dispatchEvent(new CustomEvent('wz:lang', { detail: LANG }));
 }
 
-/* ---------- Language dropdown ---------- */
+/* ---------- Language dropdown (desktop) ---------- */
 const langBtn = document.getElementById('langBtn'),
       langMenu = document.getElementById('langMenu'),
       langChev = document.getElementById('langChev');
@@ -929,11 +954,29 @@ function toggleLang(force){
   langBtn.setAttribute('aria-expanded', open);
   langChev.style.transform = open ? 'rotate(180deg)' : '';
 }
-langBtn.addEventListener('click', e => { e.stopPropagation(); toggleLang(); });
-document.addEventListener('click', () => toggleLang(false));
-langMenu.addEventListener('click', e => e.stopPropagation());
-document.querySelectorAll('.lang-opt').forEach(btn =>
-  btn.addEventListener('click', () => { applyLang(btn.dataset.lang); toggleLang(false); }));
+if (langBtn) {
+  langBtn.addEventListener('click', e => { e.stopPropagation(); toggleLang(); });
+  document.addEventListener('click', () => toggleLang(false));
+  langMenu.addEventListener('click', e => e.stopPropagation());
+  document.querySelectorAll('.lang-opt').forEach(btn =>
+    btn.addEventListener('click', () => { applyLang(btn.dataset.lang); toggleLang(false); }));
+}
+
+/* ---------- Language dropdown (mobile) ---------- */
+const langBtnMobile = document.getElementById('langBtnMobile'),
+      langMenuMobile = document.getElementById('langMenuMobile');
+function toggleLangMobile(force){
+  const open = force != null ? force : !langMenuMobile.classList.contains('hidden');
+  langMenuMobile.classList.toggle('hidden', !open);
+  if (langBtnMobile) langBtnMobile.setAttribute('aria-expanded', open);
+}
+if (langBtnMobile) {
+  langBtnMobile.addEventListener('click', e => { e.stopPropagation(); toggleLangMobile(); });
+  document.addEventListener('click', () => toggleLangMobile(false));
+  if (langMenuMobile) langMenuMobile.addEventListener('click', e => e.stopPropagation());
+  document.querySelectorAll('.lang-opt-m').forEach(btn =>
+    btn.addEventListener('click', () => { applyLang(btn.dataset.lang); toggleLangMobile(false); }));
+}
 
 /* ---------- Header scroll ---------- */
 const header = document.getElementById('siteHeader');
