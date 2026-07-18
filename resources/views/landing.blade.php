@@ -583,7 +583,7 @@ if (!function_exists('wz_mini')) {
     </div>
 
     {{-- Stepper --}}
-    <div class="mt-14 sm:mt-16 max-w-4xl mx-auto" data-anim="fadeInUp" data-delay="1">
+    <div class="mt-14 sm:mt-16 max-w-5xl mx-auto" data-anim="fadeInUp" data-delay="1">
       @php
       $stxt = [
         ['1','Jisajili kwa Simu','Weka jina, namba ya simu na jina la biashara yako. Thibitisha kwa OTP — dakika 2 tu.'],
@@ -592,27 +592,31 @@ if (!function_exists('wz_mini')) {
       ];
       @endphp
 
-      <div class="relative">
-        {{-- Vertical line connecting steps --}}
-        <div class="absolute left-6 sm:left-8 top-4 bottom-4 w-0.5 bg-emerald-200"></div>
-
+      {{-- Horizontal stepper bar --}}
+      <ol class="flex items-center w-full p-4 sm:p-6 space-x-2 sm:space-x-4 text-sm font-bold text-center bg-emerald-50 border-2 border-emerald-200 rounded-2xl shadow-card">
         @foreach($stxt as $i => $s)
-        <div class="relative flex items-start gap-4 sm:gap-6 pb-8 sm:pb-10 last:pb-0" data-anim="fadeInUp" data-delay="{{ $i+1 }}">
-          {{-- Step number circle --}}
-          <div class="relative z-10 flex-shrink-0">
-            <span class="grid place-items-center h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 border-2 border-emerald-800 shadow-md font-black text-xl sm:text-2xl text-white">
-              {{ $s[0] }}
-            </span>
-          </div>
-          {{-- Content --}}
-          <div class="flex-1 pt-1 sm:pt-2">
-            <h3 class="font-black text-lg sm:text-2xl text-emerald-700" data-i18n="s{{ $i+1 }}_t">{{ $s[1] }}</h3>
-            <p class="mt-1.5 text-gray-500 font-semibold text-sm sm:text-base leading-relaxed max-w-lg" data-i18n="s{{ $i+1 }}_d">{{ $s[2] }}</p>
-          </div>
-          {{-- Gold check badge --}}
-          <div class="hidden sm:flex flex-shrink-0 items-center justify-center h-10 w-10 rounded-xl bg-gold-50 border-2 border-gold-200 mt-2">
-            <span class="text-gold-600">{!! wz_mini('check','w-5 h-5') !!}</span>
-          </div>
+        <li class="flex items-center {{ $i === 0 ? 'text-emerald-700' : 'text-gray-400' }} {{ $i === count($stxt)-1 ? 'flex-1' : 'flex-1' }}">
+          <span class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 me-2 text-sm sm:text-base font-black border-2 {{ $i === 0 ? 'border-emerald-600 text-emerald-700 bg-white' : 'border-gray-300 text-gray-400 bg-white' }} rounded-full shrink-0">
+            {{ $s[0] }}
+          </span>
+          <span class="hidden sm:inline">{{ $s[1] }}</span>
+          <span class="sm:hidden">{{ explode(' ', $s[1])[0] }}</span>
+          @if($i < count($stxt)-1)
+          <svg class="w-5 h-5 ms-2 mx-auto" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 16 4-4-4-4m6 8 4-4-4-4"/></svg>
+          @endif
+        </li>
+        @endforeach
+      </ol>
+
+      {{-- Step details --}}
+      <div class="mt-8 grid sm:grid-cols-3 gap-6">
+        @foreach($stxt as $i => $s)
+        <div class="bg-white rounded-2xl border-2 border-gray-100 shadow-card p-5 sm:p-6" data-anim="fadeInUp" data-delay="{{ $i+1 }}">
+          <span class="flex items-center justify-center w-10 h-10 mb-3 font-black text-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 rounded-full">
+            {{ $s[0] }}
+          </span>
+          <h3 class="font-black text-base sm:text-lg text-emerald-700" data-i18n="s{{ $i+1 }}_t">{{ $s[1] }}</h3>
+          <p class="mt-2 text-gray-500 font-semibold text-sm leading-relaxed" data-i18n="s{{ $i+1 }}_d">{{ $s[2] }}</p>
         </div>
         @endforeach
       </div>
