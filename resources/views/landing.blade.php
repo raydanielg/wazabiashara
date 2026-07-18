@@ -62,6 +62,7 @@ tailwind.config = {
   theme: {
     extend: {
       fontFamily: { sans: ['Nunito','sans-serif'] },
+      screens: { xs: '400px' },
       colors: {
         emerald: {50:'#e6f5f1',100:'#b3e0d4',200:'#80cbc0',300:'#4db5a8',400:'#1a9f8e',500:'#024938',600:'#023d30',700:'#013028',800:'#01241f',900:'#001816'},
         gold:    {50:'#fff5e0',100:'#ffe6b3',200:'#ffd680',300:'#ffc64d',400:'#ffb71a',500:'#f9ac00',600:'#d49700',700:'#b07c00',800:'#8c6100',900:'#684600'}
@@ -370,7 +371,7 @@ if (!function_exists('wz_mini')) {
 </header>
 
 <!-- ================= HERO ================= -->
-<section id="home" class="relative pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
+<section id="home" class="relative pt-[120px] sm:pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
   <!-- ambient blobs -->
   <div class="pointer-events-none absolute -top-10 -left-24 w-[420px] h-[420px] bg-emerald-400/15 anim-blob blur-2xl"></div>
   <div class="pointer-events-none absolute top-40 -right-24 w-[380px] h-[380px] bg-gold-400/20 anim-blob blur-2xl" style="animation-delay:-4s"></div>
