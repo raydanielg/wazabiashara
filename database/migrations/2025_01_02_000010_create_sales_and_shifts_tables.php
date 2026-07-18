@@ -28,6 +28,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        // Add FK constraint for customer_debts.sale_id (table created in earlier migration)
+        Schema::table('customer_debts', function (Blueprint $table) {
+            $table->foreign('sale_id')->references('id')->on('sales')->nullOnDelete();
+        });
+
         Schema::create('sale_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
@@ -80,6 +85,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::table('customer_debts', function (Blueprint $table) {
+            $table->dropForeign(['sale_id']);
+        });
         Schema::dropIfExists('shifts');
         Schema::dropIfExists('sale_returns');
         Schema::dropIfExists('sale_payments');
