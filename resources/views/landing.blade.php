@@ -25,13 +25,26 @@ $year     = date('Y');
 <title>{{ $appName }} — {{ $slogan }}</title>
 <meta name="description" content="Mfumo wa kifedha na usimamizi wa biashara za Tanzania — POS, stoo, matawi, madeni na ripoti. Web na Mobile. Offline mode. M-Pesa, Tigo Pesa, Airtel Money.">
 
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
-<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon.png') }}">
-<link rel="shortcut icon" href="{{ asset('favicon.png') }}">
-<meta name="theme-color" content="#001816">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo.png') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('logo.png') }}">
+<link rel="shortcut icon" href="{{ asset('logo.png') }}">
+<meta name="theme-color" content="#024938">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wazabiashara">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Wazabiashara">
+<meta name="msapplication-TileColor" content="#024938">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="{{ asset('manifest.json') }}">
 <meta property="og:title" content="{{ $appName }}">
 <meta property="og:description" content="{{ $slogan }}">
-<meta property="og:image" content="{{ asset('favicon.png') }}">
+<meta property="og:image" content="{{ asset('logo.png') }}">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $appName }}">
+<meta name="twitter:description" content="{{ $slogan }}">
+<meta name="twitter:image" content="{{ asset('logo.png') }}">
 <meta property="og:type" content="website">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -1092,6 +1105,65 @@ function Testimonials(){
 }
 
 ReactDOM.createRoot(document.getElementById('react-testimonials')).render(<Testimonials/>);
+</script>
+
+<!-- ===== PWA: Service Worker Registration + Install Prompt ===== -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+/* PWA Install Prompt — shows once, never again after dismiss/install */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  if (localStorage.getItem('wz_pwa_dismissed') === '1') return;
+  deferredPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-install-banner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#024938,#013028);border-top:3px solid #f9ac00;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:slideUp .4s ease';
+  banner.innerHTML = `
+    <img src="/logo.png" alt="Wazabiashara" style="width:42px;height:42px;border-radius:10px;flex-shrink:0">
+    <div style="flex:1;min-width:0">
+      <p style="font-weight:900;color:#fff;font-size:14px;margin:0;font-family:Nunito,sans-serif">Sakinisha Wazabiashara</p>
+      <p style="font-weight:600;color:#a7d3cc;font-size:12px;margin:2px 0 0;font-family:Nunito,sans-serif">Tumia kama app — haraka na offline</p>
+    </div>
+    <button id="pwa-install-btn" style="background:linear-gradient(to right,#f9ac00,#d49700);color:#01241f;font-weight:900;font-size:13px;padding:10px 18px;border:none;border-radius:10px;cursor:pointer;flex-shrink:0;font-family:Nunito,sans-serif;white-space:nowrap">Sakinisha</button>
+    <button id="pwa-dismiss-btn" style="background:transparent;color:#a7d3cc;font-weight:700;font-size:18px;padding:4px 8px;border:none;cursor:pointer;flex-shrink:0;font-family:Nunito,sans-serif">×</button>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    localStorage.setItem('wz_pwa_dismissed', '1');
+    deferredPrompt = null;
+    banner.remove();
+  });
+
+  document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+    localStorage.setItem('wz_pwa_dismissed', '1');
+    deferredPrompt = null;
+    banner.remove();
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  localStorage.setItem('wz_pwa_dismissed', '1');
+  const b = document.getElementById('pwa-install-banner');
+  if (b) b.remove();
+  deferredPrompt = null;
+});
 </script>
 
 </body>

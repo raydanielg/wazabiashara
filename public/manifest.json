@@ -1,0 +1,74 @@
+{
+  "name": "Wazabiashara — Biashara Yako, Mkononi Mwako",
+  "short_name": "Wazabiashara",
+  "description": "Jukwaa la kifedha na usimamizi wa biashara za Tanzania — POS, stoo, matawi, madeni na ripoti. Web na Mobile, hata bila intaneti.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#024938",
+  "theme_color": "#024938",
+  "categories": ["business", "finance", "productivity", "shopping"],
+  "lang": "sw",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Fungua Akaunti",
+      "short_name": "Jisajili",
+      "url": "/register",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Ingia kwenye Akaunti",
+      "short_name": "Ingia",
+      "url": "/login",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Dashibodi",
+      "short_name": "Dashibodi",
+      "url": "/home",
+      "icons": [{ "src": "/logo.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

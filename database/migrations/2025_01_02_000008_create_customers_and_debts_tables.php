@@ -25,7 +25,7 @@ return new class extends Migration
         Schema::create('customer_debts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('sale_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedBigInteger('sale_id')->nullable();
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 12, 2);
             $table->decimal('balance', 12, 2);
