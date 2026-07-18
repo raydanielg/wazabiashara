@@ -250,16 +250,16 @@ if (!function_exists('wz_mini')) {
 <header id="siteHeader" class="fixed top-0 inset-x-0 z-50">
 
   <!-- ===== TOPBAR: mawasiliano + LANGUAGE DROPDOWN ===== -->
-  <div class="bg-emerald-900 text-emerald-100 text-[13px] font-bold relative z-[60]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-5 min-w-0">
-        <a href="tel:+{{ $whatsapp }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-gold-300 transition">
+  <div class="bg-emerald-900 text-emerald-100 text-[11px] sm:text-[13px] font-bold relative z-[60]">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-9 sm:h-10 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3 sm:gap-5 min-w-0">
+        <a href="tel:+{{ $whatsapp }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-gold-300 transition shrink-0">
           {!! wz_mini('phone') !!} <span>+{{ $whatsapp }}</span>
         </a>
-        <a href="mailto:info@wazabiashara.co.tz" class="inline-flex items-center gap-1.5 hover:text-gold-300 transition truncate">
+        <a href="mailto:info@wazabiashara.co.tz" class="hidden xs:inline-flex items-center gap-1.5 hover:text-gold-300 transition truncate min-w-0">
           {!! wz_mini('mail') !!} <span class="truncate">info@wazabiashara.co.tz</span>
         </a>
-        <span class="hidden md:inline-flex items-center gap-1.5 text-emerald-300">
+        <span class="hidden md:inline-flex items-center gap-1.5 text-emerald-300 shrink-0">
           {!! wz_mini('pin') !!} <span>Tanzania</span>
         </span>
       </div>
@@ -267,9 +267,9 @@ if (!function_exists('wz_mini')) {
       <!-- Language dropdown -->
       <div class="relative shrink-0">
         <button id="langBtn" aria-haspopup="listbox" aria-expanded="false"
-                class="inline-flex items-center gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-3 pr-2.5 py-1.5 transition">
+                class="inline-flex items-center gap-1.5 sm:gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-2.5 sm:pl-3 pr-2 sm:pr-2.5 py-1 sm:py-1.5 transition">
           <span class="text-gold-400">{!! wz_mini('globe') !!}</span>
-          <span id="langLabel">Kiswahili</span>
+          <span id="langLabel" class="text-[11px] sm:text-[13px]">Kiswahili</span>
           <span id="langChev" class="transition-transform duration-200">{!! wz_mini('chev','w-3.5 h-3.5') !!}</span>
         </button>
         <div id="langMenu" role="listbox"
@@ -294,21 +294,21 @@ if (!function_exists('wz_mini')) {
   </div>
 
   <!-- ===== NAVBAR ===== -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-[72px]">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-[60px] sm:h-[72px] gap-2">
 
       <!-- Logo -->
-      <a href="#home" class="flex items-center gap-3 group">
-        <span class="relative">
+      <a href="#home" class="flex items-center gap-2 sm:gap-3 group min-w-0">
+        <span class="relative shrink-0">
           <img src="{{ asset('logo.png') }}" alt="{{ $appName }}"
-               class="h-11 w-11 rounded-2xl object-contain"
+               class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl object-contain"
                onerror="this.style.display='none';document.getElementById('logoFallback').style.display='grid';">
           <span id="logoFallback" style="display:none"
-                class="h-11 w-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
+                class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-xl sm:text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
         </span>
-        <span class="leading-tight">
-          <span class="block font-black text-xl text-emerald-500 tracking-tight">{{ $appName }}</span>
-          <span class="block text-[11px] font-bold text-gold-600 -mt-0.5" data-i18n="slogan">{{ $slogan }}</span>
+        <span class="leading-tight min-w-0">
+          <span class="block font-black text-base sm:text-xl text-emerald-500 tracking-tight truncate">{{ $appName }}</span>
+          <span class="hidden xs:block text-[10px] sm:text-[11px] font-bold text-gold-600 -mt-0.5 truncate" data-i18n="slogan">{{ $slogan }}</span>
         </span>
       </a>
 
@@ -336,7 +336,7 @@ if (!function_exists('wz_mini')) {
 
       <!-- Mobile burger -->
       <button id="burger" aria-label="Fungua menyu" aria-expanded="false"
-              class="lg:hidden relative h-11 w-11 grid place-items-center rounded-xl border-2 border-emerald-200 text-emerald-600 active:scale-95 transition-transform">
+              class="lg:hidden relative h-10 w-10 sm:h-11 sm:w-11 grid place-items-center rounded-xl border-2 border-emerald-200 text-emerald-600 active:scale-95 transition-transform shrink-0">
         <svg id="burgerOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
         <svg id="burgerClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ if (!function_exists('wz_mini')) {
 
   <!-- Mobile menu -->
   <div id="mobileMenu" class="lg:hidden hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-cardlg animate__animated animate__fadeIn animate__faster">
-    <nav class="px-6 py-5 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
+    <nav class="px-4 sm:px-6 py-4 sm:py-5 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
       <a href="#home"       class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_home">Nyumbani</a>
       <a href="#huduma"     class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_features">Huduma</a>
       <a href="#jinsi"      class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_how">Jinsi Inavyofanya Kazi</a>
