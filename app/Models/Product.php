@@ -10,7 +10,7 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['business_id', 'category_id', 'name', 'barcode', 'sku', 'image', 'unit', 'cost_price', 'selling_price', 'reorder_level', 'expiry_date', 'status'];
+    protected $fillable = ['business_id', 'category_id', 'name', 'brand', 'barcode', 'sku', 'image', 'unit', 'cost_price', 'selling_price', 'wholesale_price', 'reorder_level', 'expiry_date', 'supplier_id', 'location', 'allow_decimal', 'tax_rate', 'status'];
 
     protected $casts = ['expiry_date' => 'date'];
 

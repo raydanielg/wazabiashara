@@ -15,13 +15,19 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::where('business_id', auth()->user()->business_id)
+        $businessId = auth()->user()->business_id;
+        $suppliers = Supplier::where('business_id', $businessId)
             ->withCount('purchases')
             ->when(request('search'), fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"))
             ->orderByDesc('id')
             ->paginate(20);
 
-        return view('suppliers.index', compact('suppliers'));
+        $totalSuppliers = Supplier::where('business_id', $businessId)->count();
+        $activeSuppliers = Supplier::where('business_id', $businessId)->where('status', 'active')->count();
+        $totalBalance = Supplier::where('business_id', $businessId)->sum('balance');
+        $totalPurchases = Purchase::where('business_id', $businessId)->count();
+
+        return view('suppliers.index', compact('suppliers', 'totalSuppliers', 'activeSuppliers', 'totalBalance', 'totalPurchases'));
     }
 
     public function store(Request $request)
@@ -41,6 +47,9 @@ class SupplierController extends Controller
             'address' => $request->address,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Msambazaji ameongezwa!']);
+        }
         return redirect()->route('suppliers.index')->with('success', 'Msambazaji ameongezwa!');
     }
 
@@ -49,6 +58,10 @@ class SupplierController extends Controller
         if ($supplier->business_id !== auth()->user()->business_id) abort(403);
         $request->validate(['name' => 'required|string|max:255']);
         $supplier->update($request->only(['name', 'phone', 'email', 'address', 'status']));
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Msambazaji amesasishwa!']);
+        }
         return redirect()->route('suppliers.index')->with('success', 'Msambazaji amesasishwa!');
     }
 
@@ -56,21 +69,31 @@ class SupplierController extends Controller
     {
         if ($supplier->business_id !== auth()->user()->business_id) abort(403);
         $supplier->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Msambazaji amefutwa.']);
+        }
         return redirect()->route('suppliers.index')->with('success', 'Msambazaji amefutwa.');
     }
 
     public function purchases()
     {
-        $purchases = Purchase::where('business_id', auth()->user()->business_id)
+        $businessId = auth()->user()->business_id;
+        $purchases = Purchase::where('business_id', $businessId)
             ->with(['supplier', 'branch', 'items.product'])
             ->orderByDesc('id')
             ->paginate(20);
 
-        $suppliers = Supplier::where('business_id', auth()->user()->business_id)->where('status', 'active')->get();
+        $suppliers = Supplier::where('business_id', $businessId)->where('status', 'active')->get();
         $branches = auth()->user()->business->branches;
-        $products = Product::where('business_id', auth()->user()->business_id)->where('status', 'active')->orderBy('name')->get();
+        $products = Product::where('business_id', $businessId)->where('status', 'active')->orderBy('name')->get();
 
-        return view('suppliers.purchases', compact('purchases', 'suppliers', 'branches', 'products'));
+        $totalPurchases = Purchase::where('business_id', $businessId)->count();
+        $monthPurchases = Purchase::where('business_id', $businessId)->whereMonth('created_at', now()->month)->count();
+        $monthTotal = Purchase::where('business_id', $businessId)->whereMonth('created_at', now()->month)->sum('total');
+        $creditPurchases = Purchase::where('business_id', $businessId)->where('payment_status', 'credit')->count();
+
+        return view('suppliers.purchases', compact('purchases', 'suppliers', 'branches', 'products', 'totalPurchases', 'monthPurchases', 'monthTotal', 'creditPurchases'));
     }
 
     public function storePurchase(Request $request)

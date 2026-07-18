@@ -2,76 +2,245 @@
 
 @section('title', 'Wasambazaji')
 
+@section('page_title', 'Wasambazaji')
+
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="space-y-5">
+    {{-- Header --}}
+    <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-black text-emerald-700">🚚 Wasambazaji</h1>
-            <p class="text-sm text-gray-500 font-semibold">Simamia wasambazaji na manunuzi</p>
+            <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 18a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 18h6m-6 0v-6m6 6V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12"/></svg>
+                Wasambazaji
+            </h1>
+            <p class="text-sm text-gray-500 mt-0.5">Simamia wasambazaji na manunuzi</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('suppliers.purchases') }}" class="px-5 py-2.5 rounded-xl border-2 border-emerald-200 text-emerald-600 font-bold text-sm hover:bg-emerald-50">📋 Manunuzi</a>
-            <button onclick="document.getElementById('supModal').classList.remove('hidden')" class="btn-gold font-extrabold px-5 py-2.5 rounded-xl">+ Msambazaji</button>
+            <a href="{{ route('suppliers.purchases') }}" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition-all flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Manunuzi
+            </a>
+            <button onclick="openSupModal()" class="btn-gold font-bold px-4 py-2 rounded-lg inline-flex items-center gap-2 text-sm shadow-sm hover:shadow-md transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Msambazaji
+            </button>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+    {{-- KPI Cards --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 grid place-items-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
+                </div>
+                <div><p class="text-xs text-gray-500 font-semibold">Wasambazaji</p><p class="text-xl font-bold text-gray-800">{{ $totalSuppliers }}</p></div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 grid place-items-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div><p class="text-xs text-gray-500 font-semibold">Hai</p><p class="text-xl font-bold text-emerald-600">{{ $activeSuppliers }}</p></div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-red-50 grid place-items-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                </div>
+                <div><p class="text-xs text-gray-500 font-semibold">Deni Jumla</p><p class="text-xl font-bold text-red-600">TZS {{ number_format($totalBalance, 0) }}</p></div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gold-50 grid place-items-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div><p class="text-xs text-gray-500 font-semibold">Manunuzi</p><p class="text-xl font-bold text-gold-600">{{ $totalPurchases }}</p></div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Table --}}
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-emerald-50 text-emerald-700 font-black text-xs uppercase">
-                    <tr><th class="px-4 py-3 text-left">Jina</th><th class="px-4 py-3 text-left">Simu</th><th class="px-4 py-3 text-right">Salio la Deni</th><th class="px-4 py-3 text-center">Manunuzi</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-center">Kitendo</th></tr>
+                <thead class="bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wide">
+                    <tr><th class="px-4 py-3 text-left">Jina</th><th class="px-4 py-3 text-left hidden sm:table-cell">Simu</th><th class="px-4 py-3 text-right">Salio la Deni</th><th class="px-4 py-3 text-center hidden md:table-cell">Manunuzi</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-center">Kitendo</th></tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($suppliers as $s)
-                    <tr class="hover:bg-emerald-50/30">
-                        <td class="px-4 py-3 font-bold text-gray-700">{{ $s->name }}</td>
-                        <td class="px-4 py-3 text-gray-500 font-semibold">{{ $s->phone ?? '—' }}</td>
-                        <td class="px-4 py-3 text-right font-black {{ $s->balance > 0 ? 'text-red-600' : 'text-emerald-600' }}">TZS {{ number_format($s->balance, 0) }}</td>
-                        <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">{{ $s->purchases_count }}</span></td>
-                        <td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-bold {{ $s->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500' }}">{{ $s->status }}</span></td>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-50 grid place-items-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 18a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 18h6m-6 0v-6m6 6V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12"/></svg>
+                                </div>
+                                <span class="font-semibold text-gray-700">{{ $s->name }}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 font-medium hidden sm:table-cell">{{ $s->phone ?? '—' }}</td>
+                        <td class="px-4 py-3 text-right font-bold {{ $s->balance > 0 ? 'text-red-600' : 'text-emerald-600' }}">TZS {{ number_format($s->balance, 0) }}</td>
+                        <td class="px-4 py-3 text-center hidden md:table-cell"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600">{{ $s->purchases_count }}</span></td>
+                        <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $s->status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500' }}">{{ $s->status }}</span></td>
                         <td class="px-4 py-3 text-center">
-                            <button onclick="editSup({{ $s->id }}, '{{ addslashes($s->name) }}', '{{ $s->phone ?? '' }}', '{{ $s->email ?? '' }}', '{{ addslashes($s->address ?? '') }}', '{{ $s->status }}')" class="text-emerald-600 font-bold text-xs">Hariri</button>
-                            <form method="POST" action="{{ route('suppliers.destroy', $s) }}" class="inline" onsubmit="return confirm('Futa?')">@csrf @method('DELETE')<button class="text-red-500 font-bold text-xs ml-2">Futa</button></form>
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editSup({{ $s->id }}, '{{ addslashes($s->name) }}', '{{ $s->phone ?? '' }}', '{{ $s->email ?? '' }}', '{{ addslashes($s->address ?? '') }}', '{{ $s->status }}')" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-all flex items-center justify-center" title="Hariri"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                                <button onclick="deleteSup({{ $s->id }})" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-all flex items-center justify-center" title="Futa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                            </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-4 py-12 text-center text-gray-400 font-bold">Hakuna wasambazaji.</td></tr>
+                    <tr><td colspan="6" class="px-4 py-16 text-center">
+                        <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 18a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 18h6m-6 0v-6m6 6V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12"/></svg>
+                        <p class="text-gray-400 font-medium text-sm">Hakuna wasambazaji.</p>
+                    </td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        {{ $suppliers->links() }}
+        <div class="px-4 py-3 border-t border-gray-100">{{ $suppliers->links() }}</div>
     </div>
 </div>
 
-<div id="supModal" class="hidden fixed inset-0 z-50 bg-black/40 grid place-items-center p-4">
-    <div class="bg-white rounded-2xl shadow-cardlg p-6 w-full max-w-md">
-        <h3 class="font-black text-lg text-emerald-700 mb-4" id="supModalTitle">Msambazaji Mpya</h3>
-        <form id="supForm" method="POST" action="{{ route('suppliers.store') }}">
-            @csrf <input type="hidden" name="id" id="supId">
-            <div class="space-y-3">
-                <div><label class="block text-sm font-bold text-gray-600 mb-1">Jina *</label><input name="name" id="supName" required class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-emerald-400 outline-none font-semibold"></div>
-                <div><label class="block text-sm font-bold text-gray-600 mb-1">Simu</label><input name="phone" id="supPhone" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-emerald-400 outline-none font-semibold"></div>
-                <div><label class="block text-sm font-bold text-gray-600 mb-1">Email</label><input name="email" id="supEmail" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-emerald-400 outline-none font-semibold"></div>
-                <div><label class="block text-sm font-bold text-gray-600 mb-1">Mahali</label><textarea name="address" id="supAddress" rows="2" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-emerald-400 outline-none font-semibold"></textarea></div>
-                <div id="supStatusField" class="hidden"><label class="block text-sm font-bold text-gray-600 mb-1">Status</label><select name="status" id="supStatus" class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-emerald-400 outline-none font-semibold bg-white"><option value="active">Hai</option><option value="inactive">Imezimwa</option></select></div>
+{{-- Supplier Modal Drawer --}}
+<div id="supOverlay" class="fixed inset-0 bg-black/40 z-50 hidden" onclick="closeSupModal()"></div>
+<div id="supModal" class="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white z-50 transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto flex flex-col">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2" id="supModalTitle">
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             </div>
-            <div class="flex gap-3 mt-5">
-                <button type="button" onclick="closeSupModal()" class="flex-1 px-4 py-2.5 rounded-xl border-2 border-gray-200 font-bold text-gray-600">Funga</button>
-                <button type="submit" class="flex-1 btn-gold font-black py-2.5 rounded-xl">Hifadhi</button>
-            </div>
-        </form>
+            Msambazaji Mpya
+        </h2>
+        <button onclick="closeSupModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+
+    <form id="supForm" class="flex-1 overflow-y-auto p-5 space-y-4">
+        @csrf <input type="hidden" name="id" id="supId">
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Jina *</label>
+            <input name="name" id="supName" required class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Simu</label>
+            <input name="phone" id="supPhone" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</label>
+            <input name="email" id="supEmail" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Mahali</label>
+            <textarea name="address" id="supAddress" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all"></textarea>
+        </div>
+        <div id="supStatusField" class="hidden">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
+            <select name="status" id="supStatus" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium bg-white appearance-none cursor-pointer transition-all"><option value="active">Hai</option><option value="inactive">Imezimwa</option></select>
+        </div>
+    </form>
+
+    <div class="p-5 border-t border-gray-100 flex-shrink-0">
+        <button type="button" id="supSubmitBtn" onclick="submitSupForm()" class="w-full btn-gold font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Hifadhi
+        </button>
     </div>
 </div>
 
 <script>
-function closeSupModal() { document.getElementById('supModal').classList.add('hidden'); document.getElementById('supForm').reset(); document.getElementById('supId').value=''; document.getElementById('supModalTitle').textContent='Msambazaji Mpya'; document.getElementById('supStatusField').classList.add('hidden'); document.getElementById('supForm').action='{{ route("suppliers.store") }}'; document.getElementById('supForm').querySelector('input[name="_method"]')?.remove(); }
-function editSup(id,name,phone,email,address,status) {
-    document.getElementById('supId').value=id; document.getElementById('supName').value=name; document.getElementById('supPhone').value=phone; document.getElementById('supEmail').value=email; document.getElementById('supAddress').value=address; document.getElementById('supStatus').value=status;
-    document.getElementById('supModalTitle').textContent='Hariri Msambazaji'; document.getElementById('supStatusField').classList.remove('hidden');
-    document.getElementById('supForm').action='{{ route("suppliers.update", "__ID__") }}'.replace('__ID__', id);
-    document.getElementById('supForm').insertAdjacentHTML('afterbegin', '<input type="hidden" name="_method" value="PUT">');
-    document.getElementById('supModal').classList.remove('hidden');
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+let supEditMode = false;
+let supEditId = null;
+
+function openSupModal() {
+    supEditMode = false;
+    supEditId = null;
+    document.getElementById('supModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></div> Msambazaji Mpya';
+    document.getElementById('supForm').reset();
+    document.getElementById('supId').value='';
+    document.getElementById('supStatusField').classList.add('hidden');
+    showSupModal();
 }
+function closeSupModal() {
+    document.getElementById('supOverlay').classList.add('hidden');
+    document.getElementById('supModal').classList.add('translate-x-full');
+    document.body.style.overflow = '';
+}
+function showSupModal() {
+    document.getElementById('supOverlay').classList.remove('hidden');
+    document.getElementById('supModal').classList.remove('translate-x-full');
+    document.body.style.overflow = 'hidden';
+}
+function editSup(id,name,phone,email,address,status) {
+    supEditMode = true;
+    supEditId = id;
+    document.getElementById('supModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div> Hariri Msambazaji';
+    document.getElementById('supId').value=id; document.getElementById('supName').value=name; document.getElementById('supPhone').value=phone; document.getElementById('supEmail').value=email; document.getElementById('supAddress').value=address; document.getElementById('supStatus').value=status;
+    document.getElementById('supStatusField').classList.remove('hidden');
+    showSupModal();
+}
+function submitSupForm() {
+    const btn = document.getElementById('supSubmitBtn');
+    const form = document.getElementById('supForm');
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((v, k) => { if (k !== '_token') data[k] = v; });
+
+    const url = supEditMode ? '/suppliers/' + supEditId : '/suppliers';
+    const method = supEditMode ? 'PUT' : 'POST';
+
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Inahifadhi...';
+
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify(data),
+    })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi';
+        if (res.success) {
+            showToast('success', 'Imefanikiwa', res.message);
+            closeSupModal();
+            setTimeout(() => location.reload(), 800);
+        } else if (res.errors) {
+            Object.keys(res.errors).forEach(k => res.errors[k].forEach(m => showToast('error', 'Hitilafu', m)));
+        } else {
+            showToast('error', 'Hitilafu', res.message || 'Imeshindwa.');
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi';
+        showToast('error', 'Hitilafu', 'Tatizo la mtandao.');
+    });
+}
+function deleteSup(id) {
+    Swal.fire({
+        title: 'Una uhakika?', text: 'Msambazaji huyu atafutwa kabisa.',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#dc2626', cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ndiyo, Futa', cancelButtonText: 'Ghairi',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/suppliers/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showToast('success', 'Imefanikiwa', res.message);
+                    setTimeout(() => location.reload(), 800);
+                }
+            });
+        }
+    });
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSupModal(); });
 </script>
 @endsection

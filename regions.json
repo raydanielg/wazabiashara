@@ -1,0 +1,192 @@
+{
+  "country": "Tanzania",
+  "code": "TZ",
+  "regions": [
+    {
+      "id": 1,
+      "code": "01",
+      "name": "Arusha",
+      "capital": "Arusha"
+    },
+    {
+      "id": 2,
+      "code": "02",
+      "name": "Dar es Salaam",
+      "capital": "Dar es Salaam"
+    },
+    {
+      "id": 3,
+      "code": "03",
+      "name": "Dodoma",
+      "capital": "Dodoma"
+    },
+    {
+      "id": 4,
+      "code": "04",
+      "name": "Geita",
+      "capital": "Geita"
+    },
+    {
+      "id": 5,
+      "code": "05",
+      "name": "Iringa",
+      "capital": "Iringa"
+    },
+    {
+      "id": 6,
+      "code": "06",
+      "name": "Kagera",
+      "capital": "Bukoba"
+    },
+    {
+      "id": 7,
+      "code": "07",
+      "name": "Katavi",
+      "capital": "Mpanda"
+    },
+    {
+      "id": 8,
+      "code": "08",
+      "name": "Kigoma",
+      "capital": "Kigoma"
+    },
+    {
+      "id": 9,
+      "code": "09",
+      "name": "Kilimanjaro",
+      "capital": "Moshi"
+    },
+    {
+      "id": 10,
+      "code": "10",
+      "name": "Lindi",
+      "capital": "Lindi"
+    },
+    {
+      "id": 11,
+      "code": "11",
+      "name": "Manyara",
+      "capital": "Babati"
+    },
+    {
+      "id": 12,
+      "code": "12",
+      "name": "Mara",
+      "capital": "Musoma"
+    },
+    {
+      "id": 13,
+      "code": "13",
+      "name": "Mbeya",
+      "capital": "Mbeya"
+    },
+    {
+      "id": 14,
+      "code": "14",
+      "name": "Morogoro",
+      "capital": "Morogoro"
+    },
+    {
+      "id": 15,
+      "code": "15",
+      "name": "Mtwara",
+      "capital": "Mtwara"
+    },
+    {
+      "id": 16,
+      "code": "16",
+      "name": "Mwanza",
+      "capital": "Mwanza"
+    },
+    {
+      "id": 17,
+      "code": "17",
+      "name": "Njombe",
+      "capital": "Njombe"
+    },
+    {
+      "id": 18,
+      "code": "18",
+      "name": "Pwani",
+      "capital": "Kibaha"
+    },
+    {
+      "id": 19,
+      "code": "19",
+      "name": "Rukwa",
+      "capital": "Sumbawanga"
+    },
+    {
+      "id": 20,
+      "code": "20",
+      "name": "Ruvuma",
+      "capital": "Songea"
+    },
+    {
+      "id": 21,
+      "code": "21",
+      "name": "Shinyanga",
+      "capital": "Shinyanga"
+    },
+    {
+      "id": 22,
+      "code": "22",
+      "name": "Simiyu",
+      "capital": "Bariadi"
+    },
+    {
+      "id": 23,
+      "code": "23",
+      "name": "Singida",
+      "capital": "Singida"
+    },
+    {
+      "id": 24,
+      "code": "24",
+      "name": "Songwe",
+      "capital": "Vwawa"
+    },
+    {
+      "id": 25,
+      "code": "25",
+      "name": "Tabora",
+      "capital": "Tabora"
+    },
+    {
+      "id": 26,
+      "code": "26",
+      "name": "Tanga",
+      "capital": "Tanga"
+    },
+    {
+      "id": 27,
+      "code": "27",
+      "name": "Zanzibar North",
+      "capital": "Mkokotoni"
+    },
+    {
+      "id": 28,
+      "code": "28",
+      "name": "Zanzibar South",
+      "capital": "Koani"
+    },
+    {
+      "id": 29,
+      "code": "29",
+      "name": "Zanzibar Central/South",
+      "capital": "Koani"
+    },
+    {
+      "id": 30,
+      "code": "30",
+      "name": "Zanzibar West",
+      "capital": "Zanzibar City"
+    },
+    {
+      "id": 31,
+      "code": "31",
+      "name": "Zanzibar Urban",
+      "capital": "Zanzibar City"
+    }
+  ]
+}

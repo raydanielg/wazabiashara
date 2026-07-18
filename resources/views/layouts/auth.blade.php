@@ -24,6 +24,9 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700,800,900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    {{-- Toastify-JS --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -32,14 +35,10 @@
 
     <style>
         @keyframes simpleFadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes toastIn { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
-        @keyframes toastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(100%); } }
         @keyframes floatText { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
         @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes slideUpDelay { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulseGlow { 0%,100% { opacity:0.4; } 50% { opacity:0.7; } }
-        .toast-in { animation: toastIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-        .toast-out { animation: toastOut 0.3s ease-in both; }
         .ajax-loader { position:fixed; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #024938, #f9ac00, #024938); background-size: 200% 100%; animation: ajaxProgress 1s linear infinite; z-index:9999; display:none; }
         @keyframes ajaxProgress { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
         .page-transition { animation: simpleFadeIn 0.35s ease-out both; }
@@ -75,9 +74,6 @@
 
     {{-- AJAX Progress Bar --}}
     <div id="ajaxLoader" class="ajax-loader"></div>
-
-    {{-- Toast Container (top right) --}}
-    <div id="toastContainer" class="fixed top-5 right-5 z-[60] flex flex-col gap-3 w-full max-w-sm pointer-events-none"></div>
 
     <main id="authMain" class="relative z-10 min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-0 lg:gap-8 items-center">
@@ -182,50 +178,108 @@
     {{-- Sweet Alert Component --}}
     @include('components.sweet-alert')
 
-    {{-- Toast System --}}
+    {{-- Toastify-JS Toast System --}}
+    <style>
+        .toastify {
+            font-family: 'Nunito', sans-serif !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2) !important;
+            padding: 14px 18px !important;
+            min-width: 300px !important;
+            max-width: 380px !important;
+        }
+        .toastify-colse-btn {
+            opacity: 0.6 !important;
+            transition: opacity 0.2s !important;
+        }
+        .toastify-colse-btn:hover { opacity: 1 !important; }
+        .toastify-title {
+            font-weight: 800 !important;
+            font-size: 14px !important;
+            margin-bottom: 2px !important;
+        }
+        .toastify-message {
+            font-weight: 500 !important;
+            font-size: 13px !important;
+            opacity: 0.9 !important;
+        }
+        .toastify-icon {
+            width: 22px !important;
+            height: 22px !important;
+            flex-shrink: 0 !important;
+        }
+        .toastify-progress {
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            height: 3px !important;
+            border-radius: 0 0 0 12px !important;
+            opacity: 0.7 !important;
+        }
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
     <script>
     (function() {
-        const container = document.getElementById('toastContainer');
+        const icons = {
+            success: '<svg class="toastify-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            error: '<svg class="toastify-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            warning: '<svg class="toastify-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+            info: '<svg class="toastify-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        };
+
+        const styles = {
+            success: { bg: 'linear-gradient(135deg, #024938, #013028)', accent: '#f9ac00' },
+            error:   { bg: 'linear-gradient(135deg, #dc2626, #991b1b)', accent: '#fca5a5' },
+            warning: { bg: 'linear-gradient(135deg, #d97706, #92400e)', accent: '#fde68a' },
+            info:    { bg: 'linear-gradient(135deg, #2563eb, #1e3a8a)', accent: '#93c5fd' }
+        };
 
         function showToast(type, title, message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast-in pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-lg border backdrop-blur-sm';
-
-            let iconSvg, bgClass, borderClass;
-            if (type === 'success') {
-                iconSvg = '<svg class="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                bgClass = 'bg-emerald-50/95';
-                borderClass = 'border-emerald-200';
-            } else if (type === 'error') {
-                iconSvg = '<svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                bgClass = 'bg-red-50/95';
-                borderClass = 'border-red-200';
-            } else if (type === 'warning') {
-                iconSvg = '<svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
-                bgClass = 'bg-amber-50/95';
-                borderClass = 'border-amber-200';
-            } else {
-                iconSvg = '<svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                bgClass = 'bg-blue-50/95';
-                borderClass = 'border-blue-200';
-            }
-
-            toast.classList.add(...bgClass.split(' '), ...borderClass.split(' '));
-            toast.innerHTML = iconSvg +
-                '<div class="flex-1 min-w-0">' +
-                    '<p class="text-sm font-semibold text-gray-800">' + title + '</p>' +
-                    (message ? '<p class="text-sm text-gray-500 mt-0.5">' + message + '</p>' : '') +
+            const s = styles[type] || styles.info;
+            const icon = icons[type] || icons.info;
+            const html = '<div style="display:flex;align-items:flex-start;gap:10px;">' +
+                '<div style="color:' + s.accent + ';">' + icon + '</div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div class="toastify-title">' + title + '</div>' +
+                    (message ? '<div class="toastify-message">' + message + '</div>' : '') +
                 '</div>' +
-                '<button onclick="this.parentElement.classList.add(\'toast-out\'); setTimeout(()=>this.parentElement.remove(), 300)" class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">' +
-                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
-                '</button>';
+                '</div>';
 
-            container.appendChild(toast);
+            const toast = Toastify({
+                node: undefined,
+                text: html,
+                escapeMarkup: false,
+                duration: 5000,
+                close: true,
+                gravity: 'top',
+                position: 'right',
+                stopOnFocus: true,
+                style: {
+                    background: s.bg,
+                    color: '#fff',
+                },
+                onClick: function() {},
+                offset: { x: 20, y: 20 },
+            });
 
-            setTimeout(() => {
-                toast.classList.add('toast-out');
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
+            toast.showToast();
+
+            // Add progress bar to the toast element
+            setTimeout(function() {
+                const el = document.querySelector('.toastify:last-child');
+                if (el) {
+                    const bar = document.createElement('div');
+                    bar.className = 'toastify-progress';
+                    bar.style.background = s.accent;
+                    bar.style.animation = 'toastProgress 5s linear forwards';
+                    el.style.position = 'relative';
+                    el.style.overflow = 'hidden';
+                    el.appendChild(bar);
+                }
+            }, 50);
         }
 
         window.showToast = showToast;

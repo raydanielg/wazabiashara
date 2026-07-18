@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Purchase extends Model
 {
-    protected $fillable = ['business_id', 'branch_id', 'supplier_id', 'reference', 'total', 'payment_status', 'status', 'user_id'];
+    protected $fillable = ['business_id', 'branch_id', 'supplier_id', 'reference', 'subtotal', 'discount', 'vat', 'total', 'paid', 'payment_status', 'status', 'user_id', 'purchase_date'];
 
     public function business()
     {

@@ -125,4 +125,33 @@ class ReportController extends Controller
 
         return view('reports.profit-loss', compact('monthRevenue', 'monthCost', 'grossProfit', 'monthExpenses', 'netProfit', 'expensesByCategory'));
     }
+
+    public function chartData()
+    {
+        $user = auth()->user();
+        $businessId = $user->business_id;
+        $branchId = session('active_branch_id') ?? $user->branch_id;
+
+        $salesQuery = Sale::where('business_id', $businessId)->where('status', 'completed');
+        if ($branchId && !$user->isBusinessAdmin()) {
+            $salesQuery->where('branch_id', $branchId);
+        }
+
+        $last7Days = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $total = (clone $salesQuery)->whereDate('created_at', $date)->sum('total');
+            $last7Days->push(['date' => $date->format('D d'), 'total' => (float) $total]);
+        }
+
+        $salesByMethod = (clone $salesQuery)->whereMonth('created_at', now()->month)
+            ->select('payment_method', \DB::raw('SUM(total) as total'))
+            ->groupBy('payment_method')
+            ->get();
+
+        return response()->json([
+            'last7Days' => $last7Days,
+            'salesByMethod' => $salesByMethod,
+        ]);
+    }
 }

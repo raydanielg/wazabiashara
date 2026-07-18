@@ -11,13 +11,19 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = Customer::where('business_id', auth()->user()->business_id)
+        $businessId = auth()->user()->business_id;
+        $customers = Customer::where('business_id', $businessId)
             ->withCount(['debts', 'sales'])
             ->when(request('search'), fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"))
             ->orderByDesc('id')
             ->paginate(20);
 
-        return view('customers.index', compact('customers'));
+        $totalCustomers = Customer::where('business_id', $businessId)->count();
+        $activeCustomers = Customer::where('business_id', $businessId)->where('status', 'active')->count();
+        $customersWithDebt = Customer::where('business_id', $businessId)->where('current_debt', '>', 0)->count();
+        $totalDebt = Customer::where('business_id', $businessId)->sum('current_debt');
+
+        return view('customers.index', compact('customers', 'totalCustomers', 'activeCustomers', 'customersWithDebt', 'totalDebt'));
     }
 
     public function store(Request $request)
@@ -30,7 +36,7 @@ class CustomerController extends Controller
             'credit_limit' => 'nullable|numeric|min:0',
         ]);
 
-        Customer::create([
+        $customer = Customer::create([
             'business_id' => auth()->user()->business_id,
             'name' => $request->name,
             'phone' => $request->phone,
@@ -39,6 +45,9 @@ class CustomerController extends Controller
             'credit_limit' => $request->credit_limit ?? 0,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Mteja ameongezwa!', 'customer' => $customer]);
+        }
         return redirect()->route('customers.index')->with('success', 'Mteja ameongezwa!');
     }
 
@@ -49,6 +58,9 @@ class CustomerController extends Controller
         $request->validate(['name' => 'required|string|max:255']);
         $customer->update($request->only(['name', 'phone', 'email', 'address', 'credit_limit', 'status']));
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Mteja amesasishwa!', 'customer' => $customer]);
+        }
         return redirect()->route('customers.index')->with('success', 'Mteja amesasishwa!');
     }
 
@@ -56,6 +68,10 @@ class CustomerController extends Controller
     {
         if ($customer->business_id !== auth()->user()->business_id) abort(403);
         $customer->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Mteja amefutwa.']);
+        }
         return redirect()->route('customers.index')->with('success', 'Mteja amefutwa.');
     }
 

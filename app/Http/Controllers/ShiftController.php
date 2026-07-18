@@ -11,14 +11,20 @@ class ShiftController extends Controller
 {
     public function index()
     {
-        $shifts = Shift::where('business_id', auth()->user()->business_id)
+        $businessId = auth()->user()->business_id;
+        $shifts = Shift::where('business_id', $businessId)
             ->with(['user', 'branch'])
             ->orderByDesc('id')
             ->paginate(20);
 
         $activeShift = Shift::where('user_id', auth()->id())->where('status', 'open')->first();
 
-        return view('shifts.index', compact('shifts', 'activeShift'));
+        $totalShifts = Shift::where('business_id', $businessId)->count();
+        $openShifts = Shift::where('business_id', $businessId)->where('status', 'open')->count();
+        $todayShifts = Shift::where('business_id', $businessId)->whereDate('opened_at', today())->count();
+        $totalVariance = Shift::where('business_id', $businessId)->where('status', 'closed')->sum('variance');
+
+        return view('shifts.index', compact('shifts', 'activeShift', 'totalShifts', 'openShifts', 'todayShifts', 'totalVariance'));
     }
 
     public function open(Request $request)

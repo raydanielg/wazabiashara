@@ -37,6 +37,10 @@ class CategoryController extends Controller
             'description' => $request->description,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Kategoria imeongezwa!']);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Kategoria imeongezwa!');
     }
 
@@ -47,6 +51,10 @@ class CategoryController extends Controller
         $request->validate(['name' => 'required|string|max:255']);
         $category->update($request->only(['name', 'parent_id', 'icon', 'description']));
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Kategoria imesasishwa!']);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Kategoria imesasishwa!');
     }
 
@@ -54,6 +62,11 @@ class CategoryController extends Controller
     {
         if ($category->business_id !== auth()->user()->business_id) abort(403);
         $category->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Kategoria imefutwa.']);
+        }
+
         return redirect()->route('categories.index')->with('success', 'Kategoria imefutwa.');
     }
 }

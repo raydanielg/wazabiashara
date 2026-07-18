@@ -10,7 +10,7 @@ class Supplier extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['business_id', 'name', 'phone', 'email', 'address', 'balance', 'status'];
+    protected $fillable = ['business_id', 'type', 'name', 'phone', 'email', 'address', 'opening_balance', 'credit_limit', 'balance', 'status'];
 
     public function business()
     {

@@ -15,7 +15,7 @@
 
         {{-- Form --}}
         <div class="p-8">
-            <form method="POST" action="{{ route('register') }}" class="space-y-5">
+            <form id="registerForm" class="space-y-5">
                 @csrf
 
                 {{-- Name --}}
@@ -108,9 +108,9 @@
                 </div>
 
                 {{-- Submit --}}
-                <button type="submit" class="w-full py-3 text-sm font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                    Create Account
+                <button type="submit" id="registerBtn" class="w-full py-3 text-sm font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg id="registerBtnIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    <span id="registerBtnText">Create Account</span>
                 </button>
             </form>
 
@@ -130,15 +130,19 @@
 
     <p class="mt-6 text-center text-xs text-gray-400">&copy; {{ date('Y') }} Wazabiashara. All rights reserved.</p>
 </div>
-@endsection
 
-{{-- Phone Input Scripts --}}
+{{-- AJAX Register + Phone Input Scripts --}}
 <script>
 (function() {
     const phoneDisplay = document.getElementById('phone-display');
     const phoneHidden  = document.getElementById('phone-hidden');
-    const form         = document.querySelector('form[action="{{ route('register') }}"]');
+    const form         = document.getElementById('registerForm');
+    const btn          = document.getElementById('registerBtn');
+    const btnText      = document.getElementById('registerBtnText');
+    const btnIcon      = document.getElementById('registerBtnIcon');
+    const loader       = document.getElementById('ajaxLoader');
 
+    // Phone sync
     if (phoneDisplay && phoneHidden) {
         function syncPhone() {
             let raw = phoneDisplay.value.replace(/\D/g, '');
@@ -160,19 +164,78 @@
             setTimeout(syncPhone, 0);
         });
         phoneDisplay.addEventListener('blur', syncPhone);
-
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                syncPhone();
-                if (!phoneHidden.value || phoneHidden.value.length !== 12) {
-                    e.preventDefault();
-                    phoneDisplay.focus();
-                    phoneDisplay.classList.add('border-red-300', 'ring-2', 'ring-red-100');
-                }
-            });
-        }
-
         syncPhone();
     }
+
+    if (!form) return;
+
+    const spinnerSvg = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>';
+    const registerSvg = btnIcon.innerHTML;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validate phone first
+        if (phoneHidden && (!phoneHidden.value || phoneHidden.value.length !== 12)) {
+            phoneDisplay.focus();
+            phoneDisplay.classList.add('border-red-300', 'ring-2', 'ring-red-100');
+            showToast('error', 'Hitilafu', 'Tafadhali andika namba ya simu sahihi (9 digits).');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((v, k) => data[k] = v);
+
+        // Loading state
+        btn.disabled = true;
+        btnText.textContent = 'Inaundwa...';
+        btnIcon.innerHTML = spinnerSvg;
+        if (loader) loader.style.display = 'block';
+
+        fetch('{{ route("ajax.register") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (loader) loader.style.display = 'none';
+            if (res.success) {
+                showToast('success', 'Karibu!', res.message);
+                btnText.textContent = 'Inaelekeza...';
+                setTimeout(() => {
+                    window.location.href = res.redirect;
+                }, 1200);
+            } else if (res.errors) {
+                // Show validation errors
+                Object.keys(res.errors).forEach(function(field) {
+                    res.errors[field].forEach(function(msg) {
+                        showToast('error', 'Hitilafu', msg);
+                    });
+                });
+                btn.disabled = false;
+                btnText.textContent = 'Create Account';
+                btnIcon.innerHTML = registerSvg;
+            } else {
+                showToast('error', 'Hitilafu', res.message || 'Imeshindwa kusajili.');
+                btn.disabled = false;
+                btnText.textContent = 'Create Account';
+                btnIcon.innerHTML = registerSvg;
+            }
+        })
+        .catch(err => {
+            if (loader) loader.style.display = 'none';
+            showToast('error', 'Hitilafu', 'Tatizo la mtandao. Jaribu tena.');
+            btn.disabled = false;
+            btnText.textContent = 'Create Account';
+            btnIcon.innerHTML = registerSvg;
+        });
+    });
 })();
 </script>
+@endsection

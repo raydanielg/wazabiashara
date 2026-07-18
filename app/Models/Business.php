@@ -10,9 +10,9 @@ class Business extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'type', 'region', 'phone', 'email', 'logo', 'plan', 'status', 'vat_rate', 'currency', 'language', 'trial_ends_at'];
+    protected $fillable = ['name', 'type', 'region', 'phone', 'email', 'logo', 'plan', 'status', 'vat_rate', 'currency', 'language', 'trial_ends_at', 'owner_name', 'address', 'tax_number', 'registration_number', 'website', 'social_media', 'dark_mode'];
 
-    protected $casts = ['trial_ends_at' => 'datetime'];
+    protected $casts = ['trial_ends_at' => 'datetime', 'social_media' => 'array'];
 
     public function branches()
     {
@@ -62,5 +62,50 @@ class Business extends Model
     public function stockTransfers()
     {
         return $this->hasMany(StockTransfer::class);
+    }
+
+    public function incomes()
+    {
+        return $this->hasMany(Income::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function quotations()
+    {
+        return $this->hasMany(Quotation::class);
+    }
+
+    public function accounts()
+    {
+        return $this->hasMany(Account::class);
+    }
+
+    public function cashFlows()
+    {
+        return $this->hasMany(CashFlow::class);
+    }
+
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
+    public function greetingCards()
+    {
+        return $this->hasMany(GreetingCard::class);
+    }
+
+    public function businessCards()
+    {
+        return $this->hasMany(BusinessCard::class);
+    }
+
+    public function printerSetting()
+    {
+        return $this->hasOne(PrinterSetting::class);
     }
 }

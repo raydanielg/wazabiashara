@@ -86,6 +86,10 @@ class ProductController extends Controller
             }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Bidhaa imeongezwa kikamilifu!']);
+        }
+
         return redirect()->route('products.index')->with('success', 'Bidhaa imeongezwa kikamilifu!');
     }
 
@@ -95,6 +99,16 @@ class ProductController extends Controller
         $categories = Category::where('business_id', auth()->user()->business_id)->orderBy('name')->get();
         $branches = auth()->user()->business->branches;
         $stock = $product->branchStock()->get()->keyBy('branch_id');
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'product' => $product,
+                'categories' => $categories,
+                'branches' => $branches,
+                'stock' => $stock,
+            ]);
+        }
+
         return view('products.edit', compact('product', 'categories', 'branches', 'stock'));
     }
 
@@ -116,6 +130,10 @@ class ProductController extends Controller
 
         $product->update($request->only(['name', 'barcode', 'sku', 'category_id', 'unit', 'cost_price', 'selling_price', 'reorder_level', 'expiry_date', 'status']));
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Bidhaa imesasishwa kikamilifu!']);
+        }
+
         return redirect()->route('products.index')->with('success', 'Bidhaa imesasishwa kikamilifu!');
     }
 
@@ -123,6 +141,11 @@ class ProductController extends Controller
     {
         $this->authorizeProduct($product);
         $product->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Bidhaa imefutwa.']);
+        }
+
         return redirect()->route('products.index')->with('success', 'Bidhaa imefutwa.');
     }
 

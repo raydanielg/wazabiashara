@@ -26,7 +26,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('branch_stock', function (Blueprint $table) {
+        Schema::create('branch_stocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
@@ -52,7 +52,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('stock_movements');
-        Schema::dropIfExists('branch_stock');
+        Schema::dropIfExists('branch_stocks');
         Schema::dropIfExists('products');
     }
 };

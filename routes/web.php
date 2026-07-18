@@ -12,6 +12,14 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockTransferController;
+use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ReturnController;
+use App\Http\Controllers\CashFlowController;
+use App\Http\Controllers\BusinessProfileController;
+use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\CardController;
 
 Route::get('/', function () {
     return view('landing');
@@ -21,8 +29,24 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 
 Auth::routes();
 
+Route::post('/ajax/login', [App\Http\Controllers\Auth\LoginController::class, 'ajaxLogin'])->name('ajax.login');
+Route::post('/ajax/register', [App\Http\Controllers\Auth\RegisterController::class, 'ajaxRegister'])->name('ajax.register');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+    // Business Registration
+    Route::get('/business/register', [App\Http\Controllers\BusinessController::class, 'create'])->name('business.register');
+    Route::post('/business/register', [App\Http\Controllers\BusinessController::class, 'store'])->name('business.store');
+
+    // Admin — Business Types
+    Route::prefix('admin/business-types')->name('admin.business-types.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\BusinessTypeController::class, 'index'])->name('index');
+        Route::post('/', [App\Http\Controllers\Admin\BusinessTypeController::class, 'store'])->name('store');
+        Route::put('/{businessType}', [App\Http\Controllers\Admin\BusinessTypeController::class, 'update'])->name('update');
+        Route::delete('/{businessType}', [App\Http\Controllers\Admin\BusinessTypeController::class, 'destroy'])->name('destroy');
+        Route::patch('/{businessType}/toggle', [App\Http\Controllers\Admin\BusinessTypeController::class, 'toggle'])->name('toggle');
+    });
 
     // POS
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
@@ -55,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/purchases', [SupplierController::class, 'storePurchase'])->name('suppliers.purchases.store');
 
     // Expenses
-    Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
+    Route::resource('expenses', ExpenseController::class)->except(['create', 'show']);
 
     // Shifts
     Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
@@ -75,4 +99,44 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
     Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
     Route::get('/reports/profit-loss', [ReportController::class, 'profitLoss'])->name('reports.profit-loss');
+    Route::get('/reports/chart-data', [ReportController::class, 'chartData'])->name('reports.chart-data');
+
+    // Incomes
+    Route::resource('incomes', IncomeController::class)->except(['create', 'show']);
+
+    // Payments
+    Route::resource('payments', PaymentController::class)->except(['create', 'show', 'edit', 'update']);
+
+    // Quotations
+    Route::resource('quotations', QuotationController::class)->except(['create', 'show', 'edit', 'update']);
+    Route::get('/quotations/{quotation}', [QuotationController::class, 'show'])->name('quotations.show');
+    Route::post('/quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
+
+    // Returns
+    Route::get('/returns', [ReturnController::class, 'index'])->name('returns.index');
+    Route::post('/returns/sale', [ReturnController::class, 'storeSaleReturn'])->name('returns.sale.store');
+    Route::post('/returns/purchase', [ReturnController::class, 'storePurchaseReturn'])->name('returns.purchase.store');
+
+    // Cash Flow & Accounts
+    Route::get('/cash-flow', [CashFlowController::class, 'index'])->name('cash-flow.index');
+    Route::post('/cash-flow/accounts', [CashFlowController::class, 'storeAccount'])->name('cash-flow.accounts.store');
+    Route::delete('/cash-flow/accounts/{account}', [CashFlowController::class, 'destroyAccount'])->name('cash-flow.accounts.destroy');
+
+    // Business Profile
+    Route::get('/business/profile', [BusinessProfileController::class, 'show'])->name('business.profile');
+    Route::put('/business/profile', [BusinessProfileController::class, 'update'])->name('business.profile.update');
+    Route::put('/business/printer-settings', [BusinessProfileController::class, 'updatePrinter'])->name('business.printer.update');
+
+    // Reminders
+    Route::resource('reminders', ReminderController::class)->except(['create', 'show', 'edit', 'update']);
+
+    // Cards
+    Route::get('/cards/greeting', [CardController::class, 'greetingIndex'])->name('cards.greeting');
+    Route::post('/cards/greeting', [CardController::class, 'greetingStore'])->name('cards.greeting.store');
+    Route::delete('/cards/greeting/{card}', [CardController::class, 'greetingDestroy'])->name('cards.greeting.destroy');
+    Route::get('/cards/greeting/share/{token}', [CardController::class, 'greetingShare'])->name('cards.greeting.share');
+    Route::get('/cards/business', [CardController::class, 'businessIndex'])->name('cards.business');
+    Route::post('/cards/business', [CardController::class, 'businessStore'])->name('cards.business.store');
+    Route::delete('/cards/business/{card}', [CardController::class, 'businessDestroy'])->name('cards.business.destroy');
+    Route::get('/cards/business/share/{token}', [CardController::class, 'businessShare'])->name('cards.business.share');
 });
