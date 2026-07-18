@@ -136,6 +136,10 @@ tailwind.config = {
   #siteHeader{ transition:background .35s, box-shadow .35s, backdrop-filter .35s; }
   #siteHeader.scrolled{ background:rgba(255,255,255,.94); backdrop-filter:blur(12px);
     box-shadow:0 10px 30px -12px rgba(1,36,31,.18); }
+  /* Mobile: navbar always has solid background */
+  @media(max-width:1023px){
+    #siteHeader .nav-bar-bg{ background:rgba(255,255,255,.97); backdrop-filter:blur(8px); }
+  }
   .nav-link{ position:relative; }
   .nav-link::after{ content:''; position:absolute; left:0; bottom:-4px; height:3px; width:0;
     border-radius:99px; background:linear-gradient(90deg,#f9ac00,#ffc64d); transition:width .3s; }
@@ -295,8 +299,9 @@ if (!function_exists('wz_mini')) {
   </div>
 
   <!-- ===== NAVBAR ===== -->
-  <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-[60px] sm:h-[72px] gap-2">
+  <div class="nav-bar-bg lg:bg-transparent">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-[56px] sm:h-[72px] gap-2">
 
       <!-- Logo -->
       <a href="#home" class="flex items-center gap-2 sm:gap-3 group min-w-0">
@@ -343,6 +348,7 @@ if (!function_exists('wz_mini')) {
         <svg id="burgerClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
+      </div>
     </div>
   </div>
 
@@ -371,7 +377,7 @@ if (!function_exists('wz_mini')) {
 </header>
 
 <!-- ================= HERO ================= -->
-<section id="home" class="relative pt-[120px] sm:pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
+<section id="home" class="relative pt-[110px] sm:pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
   <!-- ambient blobs -->
   <div class="pointer-events-none absolute -top-10 -left-24 w-[420px] h-[420px] bg-emerald-400/15 anim-blob blur-2xl"></div>
   <div class="pointer-events-none absolute top-40 -right-24 w-[380px] h-[380px] bg-gold-400/20 anim-blob blur-2xl" style="animation-delay:-4s"></div>
