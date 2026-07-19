@@ -20,6 +20,10 @@ use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\BusinessProfileController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\BillGalleryController;
+use App\Http\Controllers\ImportController;
 
 Route::get('/', function () {
     return view('landing');
@@ -62,6 +66,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/products/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('products.adjust-stock');
 
     // Categories
+    Route::get('/categories/party', [CategoryController::class, 'party'])->name('categories.party');
+    Route::get('/categories/expense', [CategoryController::class, 'expense'])->name('categories.expense');
+    Route::get('/categories/income', [CategoryController::class, 'income'])->name('categories.income');
     Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
 
     // Branches
@@ -143,4 +150,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cards/business', [CardController::class, 'businessStore'])->name('cards.business.store');
     Route::delete('/cards/business/{card}', [CardController::class, 'businessDestroy'])->name('cards.business.destroy');
     Route::get('/cards/business/share/{token}', [CardController::class, 'businessShare'])->name('cards.business.share');
+
+    // Settings
+    Route::get('/settings/app', [SettingsController::class, 'app'])->name('settings.app');
+    Route::put('/settings/app', [SettingsController::class, 'updateApp'])->name('settings.app.update');
+    Route::get('/settings/invoice', [SettingsController::class, 'invoice'])->name('settings.invoice');
+    Route::put('/settings/invoice', [SettingsController::class, 'updateInvoice'])->name('settings.invoice.update');
+    Route::get('/settings/transaction', [SettingsController::class, 'transaction'])->name('settings.transaction');
+    Route::put('/settings/transaction', [SettingsController::class, 'updateTransaction'])->name('settings.transaction.update');
+
+    // Calculators
+    Route::get('/calculators/emi', function () { return view('calculators.emi'); })->name('calculators.emi');
+    Route::get('/calculators/interest', function () { return view('calculators.interest'); })->name('calculators.interest');
+    Route::get('/calculators/tax', function () { return view('calculators.tax'); })->name('calculators.tax');
+
+    // Notebook
+    Route::get('/notebook', [NoteController::class, 'index'])->name('notebook.index');
+    Route::post('/notebook', [NoteController::class, 'store'])->name('notebook.store');
+    Route::put('/notebook/{note}', [NoteController::class, 'update'])->name('notebook.update');
+    Route::delete('/notebook/{note}', [NoteController::class, 'destroy'])->name('notebook.destroy');
+
+    // Bill Gallery
+    Route::get('/bill-gallery', [BillGalleryController::class, 'index'])->name('bill-gallery.index');
+    Route::post('/bill-gallery', [BillGalleryController::class, 'store'])->name('bill-gallery.store');
+    Route::delete('/bill-gallery/{bill}', [BillGalleryController::class, 'destroy'])->name('bill-gallery.destroy');
+
+    // Import Data
+    Route::get('/import', [ImportController::class, 'index'])->name('import.index');
+    Route::post('/import/parties', [ImportController::class, 'importParties'])->name('import.parties');
+    Route::post('/import/items', [ImportController::class, 'importItems'])->name('import.items');
 });

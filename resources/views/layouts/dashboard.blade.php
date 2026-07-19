@@ -138,11 +138,30 @@
             </a>
 
             {{-- Categories --}}
-            <a href="{{ route('categories.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+            <button onclick="toggleMenu('menu-categories')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('categories.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                 <span data-lang="sw">Categories</span>
                 <span class="hidden" data-lang="en">Categories</span>
-            </a>
+                <svg id="arrow-categories" class="w-4 h-4 ml-auto transition-transform {{ request()->routeIs('categories.*') ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="menu-categories" class="sidebar-submenu {{ request()->routeIs('categories.*') ? 'open' : '' }}">
+                <a href="{{ route('categories.index') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('categories.index') ? 'active' : '' }}">
+                    <span data-lang="sw">Item Categories</span>
+                    <span class="hidden" data-lang="en">Item Categories</span>
+                </a>
+                <a href="{{ route('categories.party') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('categories.party') ? 'active' : '' }}">
+                    <span data-lang="sw">Party Categories</span>
+                    <span class="hidden" data-lang="en">Party Categories</span>
+                </a>
+                <a href="{{ route('categories.expense') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('categories.expense') ? 'active' : '' }}">
+                    <span data-lang="sw">Expense Categories</span>
+                    <span class="hidden" data-lang="en">Expense Categories</span>
+                </a>
+                <a href="{{ route('categories.income') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('categories.income') ? 'active' : '' }}">
+                    <span data-lang="sw">Income Categories</span>
+                    <span class="hidden" data-lang="en">Income Categories</span>
+                </a>
+            </div>
 
             @if(auth()->user()->isBusinessAdmin() || auth()->user()->isAdmin() || auth()->user()->isManager())
             {{-- Branches --}}
@@ -245,6 +264,61 @@
                 <a href="{{ route('cards.business') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('cards.business') ? 'active' : '' }}">
                     <span data-lang="sw">Business Cards</span>
                     <span class="hidden" data-lang="en">Business Cards</span>
+                </a>
+            </div>
+
+            {{-- Utilities --}}
+            @php
+                $utilRoutes = ['settings.*', 'calculators.*', 'notebook.*', 'bill-gallery.*', 'import.*'];
+                $utilActive = request()->routeIs($utilRoutes);
+            @endphp
+            <button onclick="toggleMenu('menu-utilities')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ $utilActive ? 'active' : '' }}">
+                <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span data-lang="sw">Utilities</span>
+                <span class="hidden" data-lang="en">Utilities</span>
+                <svg id="arrow-utilities" class="w-4 h-4 ml-auto transition-transform {{ $utilActive ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="menu-utilities" class="sidebar-submenu {{ $utilActive ? 'open' : '' }}">
+                <p class="pl-10 pr-3 pt-2 pb-1 text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">Settings</p>
+                <a href="{{ route('settings.app') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('settings.app') ? 'active' : '' }}">
+                    <span data-lang="sw">App Settings</span>
+                    <span class="hidden" data-lang="en">App Settings</span>
+                </a>
+                <a href="{{ route('settings.invoice') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('settings.invoice') ? 'active' : '' }}">
+                    <span data-lang="sw">Invoice Print Settings</span>
+                    <span class="hidden" data-lang="en">Invoice Print Settings</span>
+                </a>
+                <a href="{{ route('settings.transaction') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('settings.transaction') ? 'active' : '' }}">
+                    <span data-lang="sw">Transaction Settings</span>
+                    <span class="hidden" data-lang="en">Transaction Settings</span>
+                </a>
+
+                <p class="pl-10 pr-3 pt-2 pb-1 text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">Calculators</p>
+                <a href="{{ route('calculators.emi') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('calculators.emi') ? 'active' : '' }}">
+                    <span data-lang="sw">EMI Calculator</span>
+                    <span class="hidden" data-lang="en">EMI Calculator</span>
+                </a>
+                <a href="{{ route('calculators.interest') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('calculators.interest') ? 'active' : '' }}">
+                    <span data-lang="sw">Interest Calculator</span>
+                    <span class="hidden" data-lang="en">Interest Calculator</span>
+                </a>
+                <a href="{{ route('calculators.tax') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('calculators.tax') ? 'active' : '' }}">
+                    <span data-lang="sw">Tax Calculator</span>
+                    <span class="hidden" data-lang="en">Tax Calculator</span>
+                </a>
+
+                <p class="pl-10 pr-3 pt-2 pb-1 text-[10px] font-bold text-emerald-400/60 uppercase tracking-wide">Tools</p>
+                <a href="{{ route('notebook.index') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('notebook.*') ? 'active' : '' }}">
+                    <span data-lang="sw">Notebook</span>
+                    <span class="hidden" data-lang="en">Notebook</span>
+                </a>
+                <a href="{{ route('bill-gallery.index') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('bill-gallery.*') ? 'active' : '' }}">
+                    <span data-lang="sw">Bill Gallery</span>
+                    <span class="hidden" data-lang="en">Bill Gallery</span>
+                </a>
+                <a href="{{ route('import.index') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('import.*') ? 'active' : '' }}">
+                    <span data-lang="sw">Import Data</span>
+                    <span class="hidden" data-lang="en">Import Data</span>
                 </a>
             </div>
 

@@ -10,9 +10,9 @@ class Business extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'type', 'region', 'phone', 'email', 'logo', 'plan', 'status', 'vat_rate', 'currency', 'language', 'trial_ends_at', 'owner_name', 'address', 'tax_number', 'registration_number', 'website', 'social_media', 'dark_mode'];
+    protected $fillable = ['name', 'type', 'region', 'phone', 'email', 'logo', 'plan', 'status', 'vat_rate', 'currency', 'language', 'trial_ends_at', 'owner_name', 'address', 'tax_number', 'registration_number', 'website', 'social_media', 'dark_mode', 'settings'];
 
-    protected $casts = ['trial_ends_at' => 'datetime', 'social_media' => 'array', 'dark_mode' => 'boolean'];
+    protected $casts = ['trial_ends_at' => 'datetime', 'social_media' => 'array', 'dark_mode' => 'boolean', 'settings' => 'array'];
 
     public function branches()
     {
@@ -107,5 +107,15 @@ class Business extends Model
     public function printerSetting()
     {
         return $this->hasOne(PrinterSetting::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(Bill::class);
     }
 }
