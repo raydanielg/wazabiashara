@@ -18,7 +18,7 @@ class CustomerController extends Controller
             ->withCount(['debts', 'sales'])
             ->when($request->query('search'), fn ($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         $summary = [
             'totalCustomers' => Customer::where('business_id', $businessId)->count(),
@@ -29,7 +29,7 @@ class CustomerController extends Controller
 
         return response()->json([
             'success' => true,
-            'customers' => $customers,
+            'data' => $customers,
             'summary' => $summary,
         ]);
     }

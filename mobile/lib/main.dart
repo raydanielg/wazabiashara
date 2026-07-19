@@ -6,6 +6,7 @@ import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/dashboard_provider.dart';
 import 'services/storage_service.dart';
+import 'services/notification_service.dart';
 import 'routes/app_routes.dart';
 import 'screens/splash_screen.dart';
 
@@ -15,6 +16,10 @@ void main() async {
   final storage = StorageService();
   final isDark = await storage.getDarkMode();
   final language = await storage.getLanguage();
+
+  // Sets up notification channels; safe before sign-in. Permission is
+  // requested later, once the user actually reaches the dashboard.
+  await NotificationService.instance.init();
 
   runApp(WazabiasharaApp(initialDarkMode: isDark, initialLanguage: language));
 }

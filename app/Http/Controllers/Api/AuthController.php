@@ -118,6 +118,73 @@ class AuthController extends Controller
     }
 
     /**
+     * Update the signed-in user's own account details (name/email/phone).
+     * Distinct from BusinessProfileController — that edits the business,
+     * this edits the person signed in.
+     */
+    public function updateMe(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'phone' => ['sometimes', 'required', 'string', 'regex:/^255[67]\d{8}$/', 'unique:users,phone,' . $user->id],
+            'email' => ['sometimes', 'nullable', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Taarifa si sahihi.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user->update($validator->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Taarifa zako zimesasishwa.',
+            'user' => $user->fresh()->load('business', 'branch'),
+        ]);
+    }
+
+    /**
+     * Change the signed-in user's password (requires the current password).
+     */
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Taarifa si sahihi.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nenosiri la sasa si sahihi.',
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nenosiri limebadilishwa kikamilifu.',
+        ]);
+    }
+
+    /**
      * Send a password reset link to the user's email.
      */
     public function forgotPassword(Request $request)

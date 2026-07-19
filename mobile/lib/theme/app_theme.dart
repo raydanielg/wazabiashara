@@ -48,6 +48,33 @@ class AppColors {
   static const List<Color> errorGradient = [error, Color(0xFFDC2626)];
 }
 
+/// Theme-aware color lookups for widgets that need to look right in both
+/// light and dark mode. AppColors.* fields stay `static const` (they're used
+/// inside hundreds of `const` widgets across the app), so they can't switch
+/// with the theme. This extension is the non-const, context-aware companion
+/// — screens being upgraded for proper dark-mode support should replace
+/// `AppColors.surface`/`divider`/`textPrimary`/`textSecondary`/`background`
+/// with `context.cardBg`/`context.borderColor`/etc, dropping the `const`
+/// keyword on that specific widget.
+extension AppColorsContext on BuildContext {
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
+
+  /// Screen background.
+  Color get screenBg => isDark ? AppColors.darkBackground : AppColors.background;
+
+  /// Card / surface background (the white boxes on light mode).
+  Color get cardBg => isDark ? AppColors.darkSurface : AppColors.surface;
+
+  /// Hairline borders around cards and list dividers.
+  Color get borderColor => isDark ? AppColors.darkDivider : AppColors.divider;
+
+  /// Primary body text.
+  Color get textPrimaryColor => isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+
+  /// Secondary / muted text.
+  Color get textSecondaryColor => isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+}
+
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(

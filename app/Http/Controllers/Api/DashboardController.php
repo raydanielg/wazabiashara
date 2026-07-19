@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
-use App\Models\Branch;
 use App\Models\BranchStock;
 use App\Models\Customer;
 use App\Models\CustomerDebt;
@@ -16,14 +15,15 @@ use App\Models\Purchase;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Supplier;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     /**
-     * Return the same stats HomeController computes, scoped to the
-     * authenticated user's business/branch, as JSON.
+     * Home-screen data for the mobile app. The response shape here is a
+     * flat, snake_case object matching mobile/lib/models/dashboard_data.dart
+     * exactly (DashboardData.fromJson) — this is NOT the same shape as the
+     * web dashboard's HomeController, which has its own view-model.
      */
     public function index(Request $request)
     {
@@ -38,179 +38,102 @@ class DashboardController extends Controller
         }
 
         $branchId = $request->query('branch_id') ?? $user->branch_id;
-
         $today = today();
-        $startOfWeek = now()->startOfWeek();
         $startOfMonth = now()->startOfMonth();
-        $startOfYear = now()->startOfYear();
 
         $salesQuery = Sale::where('business_id', $businessId)->where('status', 'completed');
         if ($branchId && !$user->isBusinessAdmin() && !$user->isAdmin()) {
             $salesQuery->where('branch_id', $branchId);
         }
 
-        // Financial Overview
-        $totalSales = (clone $salesQuery)->sum('total');
-        $todaySales = (clone $salesQuery)->whereDate('created_at', $today)->sum('total');
-        $todayCount = (clone $salesQuery)->whereDate('created_at', $today)->count();
-        $todayProfit = SaleItem::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('status', 'completed')->whereDate('created_at', $today))->sum('profit');
-        $weekSales = (clone $salesQuery)->whereBetween('created_at', [$startOfWeek, now()])->sum('total');
-        $monthSales = (clone $salesQuery)->whereBetween('created_at', [$startOfMonth, now()])->sum('total');
-        $yearSales = (clone $salesQuery)->whereBetween('created_at', [$startOfYear, now()])->sum('total');
+        $todaySales = (float) (clone $salesQuery)->whereDate('created_at', $today)->sum('total');
+        $monthSales = (float) (clone $salesQuery)->whereBetween('created_at', [$startOfMonth, now()])->sum('total');
+        $monthPurchases = (float) Purchase::where('business_id', $businessId)->whereBetween('created_at', [$startOfMonth, now()])->sum('total');
+        $monthExpenses = (float) Expense::where('business_id', $businessId)->whereBetween('expense_date', [$startOfMonth, now()])->sum('amount');
 
-        // Purchases
-        $totalPurchases = Purchase::where('business_id', $businessId)->sum('total');
-        $monthPurchases = Purchase::where('business_id', $businessId)->whereMonth('created_at', now()->month)->sum('total');
-
-        // Income
-        $totalIncome = Income::where('business_id', $businessId)->sum('amount');
-        $monthIncome = Income::where('business_id', $businessId)->whereMonth('income_date', now()->month)->sum('amount');
-
-        // Expenses
-        $totalExpenses = Expense::where('business_id', $businessId)->sum('amount');
-        $todayExpenses = Expense::where('business_id', $businessId)->whereDate('expense_date', $today)->sum('amount');
-        $monthExpenses = Expense::where('business_id', $businessId)->whereBetween('expense_date', [$startOfMonth, now()])->sum('amount');
-
-        // Payments
-        $totalPaymentsIn = Payment::where('business_id', $businessId)->where('type', 'in')->sum('amount');
-        $totalPaymentsOut = Payment::where('business_id', $businessId)->where('type', 'out')->sum('amount');
-
-        // Profit/Loss
-        $totalProfit = SaleItem::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('status', 'completed'))->sum('profit');
-        $netProfit = $totalProfit + $totalIncome - $totalExpenses;
-        $totalLoss = max(0, -$netProfit);
-
-        // Balances
         $accounts = Account::where('business_id', $businessId)->where('is_active', true)->get();
-        $cashBalance = $accounts->where('type', 'cash')->sum('current_balance');
-        $bankBalance = $accounts->where('type', 'bank')->sum('current_balance');
-        $mobileBalance = $accounts->where('type', 'mobile_money')->sum('current_balance');
+        $cashBalance = (float) $accounts->where('type', 'cash')->sum('current_balance');
+        $bankBalance = (float) $accounts->where('type', 'bank')->sum('current_balance');
+        $mobileBalance = (float) $accounts->where('type', 'mobile_money')->sum('current_balance');
 
-        // Receivables & Payables
-        $totalReceivables = CustomerDebt::where('business_id', $businessId)->whereIn('status', ['pending', 'partial', 'overdue'])->sum('balance');
-        $totalPayables = Supplier::where('business_id', $businessId)->sum('balance');
+        $totalReceivables = (float) CustomerDebt::where('business_id', $businessId)->whereIn('status', ['pending', 'partial', 'overdue'])->sum('balance');
+        $totalPayables = (float) Supplier::where('business_id', $businessId)->sum('balance');
 
-        // Stats
         $totalProducts = Product::where('business_id', $businessId)->where('status', 'active')->count();
         $lowStockCount = BranchStock::whereHas('product', fn ($q) => $q->where('business_id', $businessId))
             ->whereColumn('qty', '<=', 'reorder_level')->count();
         $totalCustomers = Customer::where('business_id', $businessId)->count();
-        $totalSuppliers = Supplier::where('business_id', $businessId)->count();
-        $branchCount = Branch::where('business_id', $businessId)->count();
-        $staffCount = User::where('business_id', $businessId)->count();
 
-        $stats = [
-            'totalSales' => $totalSales,
-            'todaySales' => $todaySales,
-            'todayCount' => $todayCount,
-            'todayProfit' => $todayProfit,
-            'weekSales' => $weekSales,
-            'monthSales' => $monthSales,
-            'yearSales' => $yearSales,
-            'totalPurchases' => $totalPurchases,
-            'monthPurchases' => $monthPurchases,
-            'totalIncome' => $totalIncome,
-            'monthIncome' => $monthIncome,
-            'totalExpenses' => $totalExpenses,
-            'todayExpenses' => $todayExpenses,
-            'monthExpenses' => $monthExpenses,
-            'totalPaymentsIn' => $totalPaymentsIn,
-            'totalPaymentsOut' => $totalPaymentsOut,
-            'totalProfit' => $totalProfit,
-            'netProfit' => $netProfit,
-            'totalLoss' => $totalLoss,
-            'cashBalance' => $cashBalance,
-            'bankBalance' => $bankBalance,
-            'mobileBalance' => $mobileBalance,
-            'totalReceivables' => $totalReceivables,
-            'totalPayables' => $totalPayables,
-            'totalProducts' => $totalProducts,
-            'lowStockCount' => $lowStockCount,
-            'totalCustomers' => $totalCustomers,
-            'totalSuppliers' => $totalSuppliers,
-            'branchCount' => $branchCount,
-            'staffCount' => $staffCount,
-        ];
-
-        // 14-day revenue chart
-        $dailyRevenue = [];
-        $dailyLabels = [];
-        for ($i = 13; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $dailyLabels[] = $date->format('d');
-            $dailyRevenue[] = (float) (clone $salesQuery)->whereDate('created_at', $date)->sum('total');
-        }
-
-        // 7-day expense vs income chart
-        $dailyExpenses = [];
-        $dailyIncome = [];
+        // 7-day per-metric trend series, all sharing the same weekday labels
+        // so they line up on the mobile Home tab's KPI-detail charts.
+        $salesChart = [];
+        $purchasesChart = [];
+        $expensesChart = [];
+        $cashflowIn = [];
+        $cashflowOut = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $dailyExpenses[] = (float) Expense::where('business_id', $businessId)->whereDate('expense_date', $date)->sum('amount');
-            $dailyIncome[] = (float) Income::where('business_id', $businessId)->whereDate('income_date', $date)->sum('amount');
+            $label = $date->format('D');
+
+            $daySales = (float) (clone $salesQuery)->whereDate('created_at', $date)->sum('total');
+            $dayPurchases = (float) Purchase::where('business_id', $businessId)->whereDate('created_at', $date)->sum('total');
+            $dayExpenses = (float) Expense::where('business_id', $businessId)->whereDate('expense_date', $date)->sum('amount');
+            $dayIncome = (float) Income::where('business_id', $businessId)->whereDate('income_date', $date)->sum('amount');
+            $dayPaymentsIn = (float) Payment::where('business_id', $businessId)->where('type', 'in')->whereDate('payment_date', $date)->sum('amount');
+            $dayPaymentsOut = (float) Payment::where('business_id', $businessId)->where('type', 'out')->whereDate('payment_date', $date)->sum('amount');
+
+            $salesChart[] = ['label' => $label, 'value' => $daySales];
+            $purchasesChart[] = ['label' => $label, 'value' => $dayPurchases];
+            $expensesChart[] = ['label' => $label, 'value' => $dayExpenses];
+            $cashflowIn[] = ['label' => $label, 'value' => $daySales + $dayIncome + $dayPaymentsIn];
+            $cashflowOut[] = ['label' => $label, 'value' => $dayPurchases + $dayExpenses + $dayPaymentsOut];
         }
 
-        // Monthly sales vs purchases (12 months)
-        $monthlySales = [];
-        $monthlyPurchases = [];
-        $monthlyLabels = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
-            $monthlyLabels[] = $date->format('M');
-            $monthlySales[] = (float) (clone $salesQuery)->whereMonth('created_at', $date->month)->whereYear('created_at', $date->year)->sum('total');
-            $monthlyPurchases[] = (float) Purchase::where('business_id', $businessId)->whereMonth('created_at', $date->month)->whereYear('created_at', $date->year)->sum('total');
-        }
+        $recentSales = (clone $salesQuery)->orderByDesc('id')->take(8)->get()->map(fn ($sale) => [
+            'id' => $sale->id,
+            'receipt_no' => $sale->receipt_no,
+            'total' => (float) $sale->total,
+            'payment_method' => $sale->payment_method,
+            'date' => optional($sale->created_at)->toIso8601String(),
+        ]);
 
-        // Recent sales
-        $recentSales = (clone $salesQuery)->with(['customer', 'user', 'branch'])->orderByDesc('id')->take(8)->get();
-
-        // Low stock items
-        $lowStockItems = BranchStock::whereHas('product', fn ($q) => $q->where('business_id', $businessId))
-            ->whereColumn('qty', '<=', 'reorder_level')
-            ->with('product', 'branch')
-            ->limit(5)
-            ->get();
-
-        // Top products this month
-        $topProducts = SaleItem::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('status', 'completed')->whereMonth('created_at', now()->month))
+        $topProducts = SaleItem::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('status', 'completed')->whereBetween('created_at', [$startOfMonth, now()]))
             ->select('product_id', \DB::raw('SUM(qty) as total_qty'), \DB::raw('SUM(subtotal) as total_revenue'))
             ->with('product')
             ->groupBy('product_id')
             ->orderByDesc('total_qty')
             ->limit(5)
-            ->get();
-
-        // Top customers
-        $topCustomers = Sale::where('business_id', $businessId)->where('status', 'completed')
-            ->whereMonth('created_at', now()->month)
-            ->whereNotNull('customer_id')
-            ->select('customer_id', \DB::raw('SUM(total) as total_spent'), \DB::raw('COUNT(*) as orders'))
-            ->with('customer')
-            ->groupBy('customer_id')
-            ->orderByDesc('total_spent')
-            ->limit(5)
-            ->get();
-
-        $branches = $user->business?->branches ?? collect();
+            ->get()
+            ->map(fn ($row) => [
+                'id' => $row->product_id,
+                'name' => $row->product?->name ?? 'Unknown',
+                'qty_sold' => (int) $row->total_qty,
+                'revenue' => (float) $row->total_revenue,
+            ]);
 
         return response()->json([
             'success' => true,
-            'stats' => $stats,
-            'charts' => [
-                'dailyRevenue' => $dailyRevenue,
-                'dailyLabels' => $dailyLabels,
-                'dailyExpenses' => $dailyExpenses,
-                'dailyIncome' => $dailyIncome,
-                'monthlySales' => $monthlySales,
-                'monthlyPurchases' => $monthlyPurchases,
-                'monthlyLabels' => $monthlyLabels,
+            'data' => [
+                'today_sales' => $todaySales,
+                'month_sales' => $monthSales,
+                'total_products' => $totalProducts,
+                'low_stock_count' => $lowStockCount,
+                'total_customers' => $totalCustomers,
+                'cash_balance' => $cashBalance,
+                'bank_balance' => $bankBalance,
+                'mobile_balance' => $mobileBalance,
+                'recent_sales' => $recentSales,
+                'top_products' => $topProducts,
+                'sales_chart' => $salesChart,
+                'total_receivables' => $totalReceivables,
+                'total_payables' => $totalPayables,
+                'month_purchases' => $monthPurchases,
+                'month_expenses' => $monthExpenses,
+                'cashflow_in' => $cashflowIn,
+                'cashflow_out' => $cashflowOut,
+                'purchases_chart' => $purchasesChart,
+                'expenses_chart' => $expensesChart,
             ],
-            'recentSales' => $recentSales,
-            'lowStockItems' => $lowStockItems,
-            'topProducts' => $topProducts,
-            'topCustomers' => $topCustomers,
-            'branches' => $branches,
-            'branchId' => $branchId,
         ]);
     }
 }

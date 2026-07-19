@@ -110,8 +110,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             child: ListView(
                               scrollDirection: Axis.horizontal,
                               children: [
-                                _categoryChip(null, 'All'),
-                                ..._categories.map((c) => _categoryChip(c, c)),
+                                _categoryChip(context, null, 'All'),
+                                ..._categories.map((c) => _categoryChip(context, c, c)),
                               ],
                             ),
                           ),
@@ -136,7 +136,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _categoryChip(String? value, String label) {
+  Widget _categoryChip(BuildContext context, String? value, String label) {
     final selected = _selectedCategory == value;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -145,8 +145,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : AppColors.surface,
-            border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
+            color: selected ? AppColors.primary : context.cardBg,
+            border: Border.all(color: selected ? AppColors.primary : context.borderColor),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(label, style: TextStyle(
@@ -199,9 +199,9 @@ class _ProductListTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.borderColor),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

@@ -79,7 +79,11 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
 
     if (success) {
       ToastHelper.success(context, 'Welcome to Wazabiashara!');
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      // Freshly-registered accounts have no business yet — that's a
+      // required one-time step before anything else in the app can store
+      // real data (see BusinessSetupScreen).
+      final needsSetup = auth.user?.businessId == null;
+      Navigator.pushReplacementNamed(context, needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard);
     } else {
       ToastHelper.error(context, auth.errorMessage ?? 'Registration failed. Please try again.');
     }

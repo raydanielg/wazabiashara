@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/format_utils.dart';
+import '../../services/api_service.dart';
+import '../../widgets/loading_widget.dart';
+import 'sales_report_screen.dart';
 
+class _Point {
+  final String label;
+  final double value;
+  _Point(this.label, this.value);
+  factory _Point.fromJson(Map<String, dynamic> j) => _Point(j['label'] as String? ?? '', (j['value'] as num?)?.toDouble() ?? 0);
+}
+
+/// Reports screen — pulls real numbers from /reports/chart-data
+/// (ReportController::chartData) instead of hardcoded sample data, so what's
+/// shown here always reflects the signed-in business's actual sales.
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
@@ -10,48 +23,96 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class _ReportsScreenState extends State<ReportsScreen> {
+  final _api = ApiService();
   String _period = 'week';
+  bool _isLoading = true;
 
-  final Map<String, List<double>> _salesData = {
-    'week': [320000, 450000, 380000, 520000, 680000, 750000, 420000],
-    'month': [1200000, 1800000, 1500000, 2100000],
-    'year': [9500000, 11200000, 10800000, 13500000, 12200000, 14000000, 11800000, 13200000, 12500000, 15000000, 13800000, 16500000],
-  };
+  List<_Point> _series = [];
+  double _total = 0;
+  double _avg = 0;
+  double _max = 0;
+  List<_Point> _paymentMethods = [];
+  List<_Point> _topCategories = [];
 
-  final Map<String, List<String>> _labelsData = {
-    'week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    'month': ['W1', 'W2', 'W3', 'W4'],
-    'year': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
 
-  List<double> get _data => _salesData[_period]!;
-  List<String> get _labels => _labelsData[_period]!;
-
-  double get _total => _data.fold(0, (a, b) => a + b);
-  double get _avg => _total / _data.length;
-  double get _max => _data.fold(0, (a, b) => b > a ? b : a);
+  Future<void> _load() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getReports(period: _period);
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final d = res.data['data'] as Map<String, dynamic>;
+        final series = (d['series'] as List?) ?? [];
+        final summary = (d['summary'] as Map<String, dynamic>?) ?? {};
+        final methods = (d['paymentMethods'] as List?) ?? [];
+        final categories = (d['topCategories'] as List?) ?? [];
+        setState(() {
+          _series = series.map((e) => _Point.fromJson(e)).toList();
+          _total = (summary['total'] as num?)?.toDouble() ?? 0;
+          _avg = (summary['average'] as num?)?.toDouble() ?? 0;
+          _max = (summary['peak'] as num?)?.toDouble() ?? 0;
+          _paymentMethods = methods.map((e) => _Point.fromJson(e)).toList();
+          _topCategories = categories.map((e) => _Point.fromJson(e)).toList();
+        });
+      } else {
+        setState(() {
+          _series = [];
+          _total = 0;
+          _avg = 0;
+          _max = 0;
+          _paymentMethods = [];
+          _topCategories = [];
+        });
+      }
+    } catch (_) {
+      // No connectivity — show a genuine empty state rather than fake numbers.
+      setState(() {
+        _series = [];
+        _total = 0;
+        _avg = 0;
+        _max = 0;
+        _paymentMethods = [];
+        _topCategories = [];
+      });
+    }
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Reports')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _periodSelector(),
-            const SizedBox(height: 24),
-            _summaryRow(),
-            const SizedBox(height: 24),
-            _chartCard(),
-            const SizedBox(height: 24),
-            _paymentBreakdown(),
-            const SizedBox(height: 24),
-            _topCategories(),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? const LoadingWidget(message: 'Loading report...')
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _periodSelector(),
+                    const SizedBox(height: 24),
+                    _summaryRow(),
+                    const SizedBox(height: 24),
+                    _chartCard(),
+                    if (_paymentMethods.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _paymentBreakdown(),
+                    ],
+                    if (_topCategories.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      _topCategoriesCard(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
@@ -77,7 +138,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final selected = _period == value;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _period = value),
+        onTap: () {
+          if (_period == value) return;
+          setState(() => _period = value);
+          _load();
+        },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
@@ -98,7 +163,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _summaryRow() {
     return Row(
       children: [
-        Expanded(child: _kpiCard('Total Sales', FormatUtils.currencyShort(_total), AppColors.primary, Icons.trending_up)),
+        Expanded(child: _kpiCard('Total Sales', FormatUtils.currencyShort(_total), AppColors.primary, Icons.trending_up, onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const SalesReportScreen()));
+        })),
         const SizedBox(width: 12),
         Expanded(child: _kpiCard('Average', FormatUtils.currencyShort(_avg), AppColors.info, Icons.bar_chart)),
         const SizedBox(width: 12),
@@ -107,27 +174,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  Widget _kpiCard(String title, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32, height: 32,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(height: 10),
-          Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: color)),
-          const SizedBox(height: 2),
-          Text(title, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-        ],
+  Widget _kpiCard(String title, String value, Color color, IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: color)),
+            const SizedBox(height: 2),
+            Text(title, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          ],
+        ),
       ),
     );
   }
@@ -147,37 +218,42 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const SizedBox(height: 20),
           SizedBox(
             height: 200,
-            child: LayoutBuilder(
-              builder: (ctx, constraints) {
-                final w = (constraints.maxWidth - (_data.length - 1) * 8) / _data.length;
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(_data.length, (i) {
-                    final h = (_data[i] / _max) * (constraints.maxHeight - 28);
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: w.clamp(12, 40),
-                          height: h.clamp(6, constraints.maxHeight - 28),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [AppColors.primaryLight, AppColors.primary],
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(_labels[i], style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                      ],
-                    );
-                  }),
-                );
-              },
-            ),
+            child: _series.isEmpty
+                ? const Center(
+                    child: Text('No sales recorded for this period yet', style: TextStyle(color: AppColors.textHint, fontSize: 12)),
+                  )
+                : LayoutBuilder(
+                    builder: (ctx, constraints) {
+                      final safeMax = _max <= 0 ? 1.0 : _max;
+                      final w = (constraints.maxWidth - (_series.length - 1) * 8) / _series.length;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: _series.map((point) {
+                          final h = (point.value / safeMax) * (constraints.maxHeight - 28);
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                width: w.clamp(12, 40),
+                                height: h.clamp(4, constraints.maxHeight - 28),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [AppColors.primaryLight, AppColors.primary],
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(point.label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -185,9 +261,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _paymentBreakdown() {
-    final cash = _total * 0.45;
-    final mpesa = _total * 0.40;
-    final bank = _total * 0.15;
+    final total = _paymentMethods.fold<double>(0, (p, e) => p + e.value);
+    final colors = [AppColors.success, AppColors.info, const Color(0xFF8B5CF6), AppColors.gold, AppColors.error];
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -200,18 +275,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
         children: [
           const Text('Payment Methods', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
           const SizedBox(height: 16),
-          _paymentBar('Cash', cash, _total, AppColors.success),
-          const SizedBox(height: 12),
-          _paymentBar('M-Pesa', mpesa, _total, AppColors.info),
-          const SizedBox(height: 12),
-          _paymentBar('Bank', bank, _total, const Color(0xFF8B5CF6)),
+          ..._paymentMethods.asMap().entries.map((entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _paymentBar(entry.value.label, entry.value.value, total, colors[entry.key % colors.length]),
+              )),
         ],
       ),
     );
   }
 
   Widget _paymentBar(String label, double value, double total, Color color) {
-    final pct = (value / total) * 100;
+    final pct = total > 0 ? (value / total) * 100 : 0.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +300,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: LinearProgressIndicator(
-            value: value / total,
+            value: total > 0 ? value / total : 0,
             minHeight: 8,
             backgroundColor: AppColors.divider,
             valueColor: AlwaysStoppedAnimation(color),
@@ -238,15 +312,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  Widget _topCategories() {
-    final cats = [
-      ('Food', 4500000, AppColors.primary),
-      ('Drinks', 2800000, AppColors.info),
-      ('Dairy', 1500000, AppColors.success),
-      ('Bakery', 900000, AppColors.gold),
-      ('Household', 600000, const Color(0xFF8B5CF6)),
-    ];
-    final maxVal = cats.map((c) => c.$2).reduce((a, b) => a > b ? a : b);
+  Widget _topCategoriesCard() {
+    final colors = [AppColors.primary, AppColors.info, AppColors.success, AppColors.gold, const Color(0xFF8B5CF6), AppColors.error];
+    final maxVal = _topCategories.fold<double>(0, (p, e) => e.value > p ? e.value : p);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -260,30 +328,30 @@ class _ReportsScreenState extends State<ReportsScreen> {
         children: [
           const Text('Sales by Category', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
           const SizedBox(height: 16),
-          ...cats.map((c) => Padding(
+          ..._topCategories.asMap().entries.map((entry) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Row(
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text(c.$1, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  child: Text(entry.value.label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), overflow: TextOverflow.ellipsis),
                 ),
                 Expanded(
                   flex: 5,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: c.$2 / maxVal,
+                      value: maxVal > 0 ? entry.value.value / maxVal : 0,
                       minHeight: 8,
                       backgroundColor: AppColors.divider,
-                      valueColor: AlwaysStoppedAnimation(c.$3),
+                      valueColor: AlwaysStoppedAnimation(colors[entry.key % colors.length]),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 70,
-                  child: Text(FormatUtils.currencyShort(c.$2), textAlign: TextAlign.end, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  child: Text(FormatUtils.currencyShort(entry.value.value), textAlign: TextAlign.end, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 ),
               ],
             ),

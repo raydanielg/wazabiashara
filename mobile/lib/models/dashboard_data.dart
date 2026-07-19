@@ -20,6 +20,11 @@ class DashboardData {
   final List<ChartData> cashflowIn;
   final List<ChartData> cashflowOut;
 
+  // Per-metric 7-day trend series, used by the tappable KPI detail view
+  // (kpi_detail_screen.dart) to draw a proper line chart per card.
+  final List<ChartData> purchasesChart;
+  final List<ChartData> expensesChart;
+
   double get totalBalance => cashBalance + bankBalance + mobileBalance;
 
   DashboardData({
@@ -40,6 +45,8 @@ class DashboardData {
     this.monthExpenses = 0,
     this.cashflowIn = const [],
     this.cashflowOut = const [],
+    this.purchasesChart = const [],
+    this.expensesChart = const [],
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
@@ -73,6 +80,14 @@ class DashboardData {
               .toList() ??
           [],
       cashflowOut: (json['cashflow_out'] as List?)
+              ?.map((e) => ChartData.fromJson(e))
+              .toList() ??
+          [],
+      purchasesChart: (json['purchases_chart'] as List?)
+              ?.map((e) => ChartData.fromJson(e))
+              .toList() ??
+          [],
+      expensesChart: (json['expenses_chart'] as List?)
               ?.map((e) => ChartData.fromJson(e))
               .toList() ??
           [],

@@ -51,6 +51,25 @@ class CashFlowController extends Controller
     }
 
     /**
+     * Flat list of active accounts — used by the mobile "Cash & Bank" screen
+     * (a dedicated GET, distinct from index() which also bundles the
+     * monthly cash-flow summary and ledger entries).
+     */
+    public function accounts(Request $request)
+    {
+        $accounts = Account::where('business_id', $request->user()->business_id)
+            ->where('is_active', true)
+            ->orderBy('type')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $accounts,
+        ]);
+    }
+
+    /**
      * Create a new account (cash / bank / mobile_money).
      */
     public function storeAccount(Request $request)

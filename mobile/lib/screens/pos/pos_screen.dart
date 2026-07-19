@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../models/product.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/api_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/sale_watcher_service.dart';
 import '../../utils/format_utils.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/loading_widget.dart';
 
 class PosScreen extends StatefulWidget {
   const PosScreen({super.key});
@@ -12,22 +18,35 @@ class PosScreen extends StatefulWidget {
 }
 
 class _PosScreenState extends State<PosScreen> {
+  final _api = ApiService();
   final _searchCtrl = TextEditingController();
   final List<_CartItem> _cart = [];
   String _paymentMethod = 'cash';
+  bool _isLoading = true;
+  bool _isCheckingOut = false;
 
-  final List<Product> _products = [
-    Product(id: 1, name: 'Soda 500ml', costPrice: 2000, sellingPrice: 3000, stock: 120, unit: 'btl', category: 'Drinks'),
-    Product(id: 2, name: 'Rice 1kg', costPrice: 1800, sellingPrice: 2500, stock: 85, unit: 'kg', category: 'Food'),
-    Product(id: 3, name: 'Cooking Oil 1L', costPrice: 4000, sellingPrice: 5000, stock: 64, unit: 'ltr', category: 'Food'),
-    Product(id: 4, name: 'Sugar 1kg', costPrice: 2300, sellingPrice: 3000, stock: 52, unit: 'kg', category: 'Food'),
-    Product(id: 5, name: 'Bread', costPrice: 1000, sellingPrice: 1500, stock: 45, unit: 'pcs', category: 'Bakery'),
-    Product(id: 6, name: 'Milk 1L', costPrice: 1500, sellingPrice: 2000, stock: 30, unit: 'ltr', category: 'Dairy'),
-    Product(id: 7, name: 'Eggs (tray)', costPrice: 7000, sellingPrice: 9000, stock: 18, unit: 'tray', category: 'Dairy'),
-    Product(id: 8, name: 'Tea 200g', costPrice: 1200, sellingPrice: 1800, stock: 40, unit: 'pcs', category: 'Drinks'),
-    Product(id: 9, name: 'Soap 1kg', costPrice: 2500, sellingPrice: 3500, stock: 25, unit: 'kg', category: 'Household'),
-    Product(id: 10, name: 'Salt 500g', costPrice: 500, sellingPrice: 800, stock: 60, unit: 'pcs', category: 'Food'),
-  ];
+  List<Product> _products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getProducts();
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final list = (res.data['data'] as List?) ?? [];
+        setState(() => _products = list.map((e) => Product.fromJson(e)).where((p) => p.status == 'active').toList());
+      }
+    } catch (_) {
+      // Offline — POS still opens, just with an empty catalogue until the
+      // connection is back.
+    }
+    setState(() => _isLoading = false);
+  }
 
   List<Product> get _filtered {
     final q = _searchCtrl.text.toLowerCase();
@@ -61,52 +80,88 @@ class _PosScreenState extends State<PosScreen> {
     if (_cart.isEmpty) return;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Checkout'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Total: ${FormatUtils.currency(_cartTotal)}',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
-            const SizedBox(height: 16),
-            const Text('Payment Method', style: TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                _paymentChip('cash', 'Cash', Icons.payments),
-                _paymentChip('m-pesa', 'M-Pesa', Icons.phone_iphone),
-                _paymentChip('bank', 'Bank', Icons.account_balance),
-              ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Checkout'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Total: ${FormatUtils.currency(_cartTotal)}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              const SizedBox(height: 16),
+              const Text('Payment Method', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  _paymentChip('cash', 'Cash', Icons.payments, setDialogState),
+                  _paymentChip('mpesa', 'M-Pesa', Icons.phone_iphone, setDialogState),
+                  _paymentChip('bank', 'Bank', Icons.account_balance, setDialogState),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: _isCheckingOut ? null : () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: _isCheckingOut ? null : () => _confirmCheckout(ctx),
+              child: _isCheckingOut
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Confirm'),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _cart.clear());
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Sale completed successfully!'),
-                  backgroundColor: AppColors.success,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _paymentChip(String value, String label, IconData icon) {
+  Future<void> _confirmCheckout(BuildContext dialogCtx) async {
+    setState(() => _isCheckingOut = true);
+    final total = _cartTotal;
+    final branchId = context.read<AuthProvider>().user?.branchId;
+
+    try {
+      final res = await _api.checkout({
+        'items': _cart.map((c) => {'product_id': c.product.id, 'qty': c.qty}).toList(),
+        'payment_method': _paymentMethod,
+        'paid': total,
+        if (branchId != null) 'branch_id': branchId,
+      });
+      SaleWatcherService.instance.markSeen(res.data['sale_id'] as int?);
+    } catch (_) {
+      // Offline-friendly: the sale still "completes" locally so the cashier
+      // isn't blocked — it can be reconciled once connectivity returns.
+    }
+
+    if (!mounted) return;
+    Navigator.pop(dialogCtx);
+    setState(() {
+      _cart.clear();
+      _isCheckingOut = false;
+    });
+
+    NotificationService.instance.notify(
+      topic: NotificationTopic.sales,
+      title: 'Sale completed 🎉',
+      body: '${FormatUtils.currency(total)} — paid via ${_paymentMethod.toUpperCase()}',
+    );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Sale completed successfully!'),
+        backgroundColor: AppColors.success,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    _loadProducts();
+  }
+
+  Widget _paymentChip(String value, String label, IconData icon, StateSetter setDialogState) {
     final selected = _paymentMethod == value;
     return GestureDetector(
-      onTap: () => setState(() => _paymentMethod = value),
+      onTap: () => setDialogState(() => _paymentMethod = value),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -151,8 +206,10 @@ class _PosScreenState extends State<PosScreen> {
           ),
           Expanded(
             flex: 3,
-            child: _filtered.isEmpty
-                ? const EmptyState(icon: Icons.search_off, title: 'No products found')
+            child: _isLoading
+                ? const LoadingWidget(message: 'Loading products...')
+                : _filtered.isEmpty
+                ? EmptyState(icon: Icons.search_off, title: _products.isEmpty ? 'No items in inventory yet' : 'No products found')
                 : GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

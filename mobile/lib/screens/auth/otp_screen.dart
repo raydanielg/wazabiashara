@@ -78,7 +78,8 @@ class _OtpScreenState extends State<OtpScreen> with TickerProviderStateMixin {
 
       if (res) {
         ToastHelper.success(context, 'Phone verified successfully!');
-        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        final needsSetup = auth.user?.businessId == null;
+        Navigator.pushReplacementNamed(context, needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard);
       } else {
         ToastHelper.error(context, 'Invalid verification code');
       }

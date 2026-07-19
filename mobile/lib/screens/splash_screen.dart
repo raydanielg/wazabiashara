@@ -5,6 +5,8 @@ import '../config/app_config.dart';
 import '../theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
+import '../services/storage_service.dart';
+import 'auth/pin_lock_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -187,7 +189,15 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (auth.isAuthenticated) {
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      final needsSetup = auth.user?.businessId == null;
+      final targetRoute = needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard;
+      final lockEnabled = await StorageService().getAppLockEnabled();
+      if (!mounted) return;
+      if (lockEnabled) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PinLockScreen(targetRoute: targetRoute)));
+      } else {
+        Navigator.pushReplacementNamed(context, targetRoute);
+      }
     } else if (!onboardingDone) {
       Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
     } else {

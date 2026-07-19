@@ -35,8 +35,43 @@ class SaleController extends Controller
 
         return response()->json([
             'success' => true,
-            'sales' => $sales,
+            'data' => collect($sales->items())->map(fn ($sale) => $this->flattenSale($sale)),
+            'meta' => [
+                'current_page' => $sales->currentPage(),
+                'last_page' => $sales->lastPage(),
+                'total' => $sales->total(),
+            ],
         ]);
+    }
+
+    /**
+     * Mobile's Sale model (lib/models/sale.dart) expects a flat object —
+     * "date" instead of created_at, "customer_name" instead of a nested
+     * customer relation, and items with a flat product "name" — rather than
+     * raw Eloquent relation objects.
+     */
+    private function flattenSale(Sale $sale): array
+    {
+        return [
+            'id' => $sale->id,
+            'receipt_no' => $sale->receipt_no,
+            'subtotal' => (float) $sale->subtotal,
+            'discount' => (float) $sale->discount,
+            'total' => (float) $sale->total,
+            'paid' => (float) $sale->paid,
+            'change' => (float) $sale->change,
+            'payment_method' => $sale->payment_method,
+            'status' => $sale->status,
+            'customer_name' => $sale->customer?->name,
+            'date' => optional($sale->created_at)->toIso8601String(),
+            'items' => $sale->items->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'name' => $item->product?->name ?? 'Unknown',
+                'qty' => (int) $item->qty,
+                'price' => (float) $item->price,
+                'subtotal' => (float) $item->subtotal,
+            ])->values(),
+        ];
     }
 
     public function show(Request $request, $id)
@@ -47,7 +82,7 @@ class SaleController extends Controller
 
         return response()->json([
             'success' => true,
-            'sale' => $sale,
+            'data' => $this->flattenSale($sale),
         ]);
     }
 
@@ -56,15 +91,23 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
+        // Two shapes are accepted: the full POS checkout (real "items" array,
+        // used by the Quick POS screen) and a simplified quick-invoice (just
+        // a "total", used by the "Add Sale" / "Sales Invoice" shortcut which
+        // doesn't have an item picker yet).
+        $isQuickInvoice = !$request->filled('items');
+
         $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.qty' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|in:cash,mpesa,tigo_pesa,airtel_money,halopesa,bank,credit,split',
+            'items' => $isQuickInvoice ? 'nullable|array' : 'required|array|min:1',
+            'items.*.product_id' => 'required_with:items|exists:products,id',
+            'items.*.qty' => 'required_with:items|numeric|min:0.01',
+            'total' => $isQuickInvoice ? 'required|numeric|min:0' : 'nullable|numeric|min:0',
+            'payment_method' => $isQuickInvoice ? 'nullable|in:cash,mpesa,tigo_pesa,airtel_money,halopesa,bank,credit,split' : 'required|in:cash,mpesa,tigo_pesa,airtel_money,halopesa,bank,credit,split',
             'customer_id' => 'nullable|exists:customers,id',
             'discount' => 'nullable|numeric|min:0',
-            'paid' => 'required|numeric|min:0',
+            'paid' => $isQuickInvoice ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
             'payment_ref' => 'nullable|string',
+            'notes' => 'nullable|string',
             'branch_id' => 'nullable|exists:branches,id',
         ]);
 
@@ -78,6 +121,8 @@ class SaleController extends Controller
                 'message' => 'Hakuna tawi lililochaguliwa (branch_id required).',
             ], 422);
         }
+
+        $paymentMethod = $request->payment_method ?? 'cash';
 
         DB::beginTransaction();
         try {
@@ -93,11 +138,12 @@ class SaleController extends Controller
                 'customer_id' => $request->customer_id,
                 'shift_id' => Shift::where('user_id', $user->id)->where('status', 'open')->value('id'),
                 'receipt_no' => $receiptNo,
-                'payment_method' => $request->payment_method,
+                'payment_method' => $paymentMethod,
+                'note' => $request->notes,
                 'status' => 'completed',
             ]);
 
-            foreach ($request->items as $item) {
+            foreach ($request->items ?? [] as $item) {
                 $product = Product::find($item['product_id']);
                 $stock = BranchStock::where('product_id', $item['product_id'])->where('branch_id', $branchId)->first();
 
@@ -133,28 +179,35 @@ class SaleController extends Controller
                 $subtotal += $itemSubtotal;
             }
 
+            // Quick-invoice mode has no line items — the entered total *is*
+            // the sale's subtotal.
+            if ($isQuickInvoice) {
+                $subtotal = (float) $request->total;
+            }
+
             $discount = $request->discount ?? 0;
             $vat = $vatRate > 0 ? ($subtotal - $discount) * ($vatRate / 100) : 0;
             $total = $subtotal - $discount + $vat;
-            $change = max(0, $request->paid - $total);
+            $paid = $request->filled('paid') ? (float) $request->paid : $total;
+            $change = max(0, $paid - $total);
 
             $sale->update([
                 'subtotal' => $subtotal,
                 'discount' => $discount,
                 'vat' => $vat,
                 'total' => $total,
-                'paid' => $request->paid,
+                'paid' => $paid,
                 'change' => $change,
             ]);
 
             SalePayment::create([
                 'sale_id' => $sale->id,
-                'method' => $request->payment_method,
-                'amount' => $request->paid,
+                'method' => $paymentMethod,
+                'amount' => $paid,
                 'reference' => $request->payment_ref,
             ]);
 
-            if ($request->payment_method === 'credit' && $request->customer_id) {
+            if ($paymentMethod === 'credit' && $request->customer_id) {
                 $customer = Customer::find($request->customer_id);
                 CustomerDebt::create([
                     'customer_id' => $request->customer_id,

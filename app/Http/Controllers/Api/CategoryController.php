@@ -12,13 +12,14 @@ class CategoryController extends Controller
     {
         $categories = Category::where('business_id', $request->user()->business_id)
             ->with('parent', 'products')
+            ->when($request->query('type'), fn ($q, $t) => $q->where('type', $t))
             ->when($request->query('search'), fn ($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->orderBy('name')
-            ->paginate(20);
+            ->get();
 
         return response()->json([
             'success' => true,
-            'categories' => $categories,
+            'data' => $categories,
         ]);
     }
 
@@ -26,6 +27,7 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'nullable|string|in:item,party,expense,income',
             'parent_id' => 'nullable|exists:categories,id',
             'icon' => 'nullable|string|max:50',
             'description' => 'nullable|string',
@@ -35,6 +37,7 @@ class CategoryController extends Controller
             'business_id' => $request->user()->business_id,
             'parent_id' => $request->parent_id,
             'name' => $request->name,
+            'type' => $request->type ?? 'item',
             'icon' => $request->icon,
             'description' => $request->description,
         ]);
@@ -51,7 +54,7 @@ class CategoryController extends Controller
         if ($category->business_id !== $request->user()->business_id) abort(403);
 
         $request->validate(['name' => 'required|string|max:255']);
-        $category->update($request->only(['name', 'parent_id', 'icon', 'description']));
+        $category->update($request->only(['name', 'type', 'parent_id', 'icon', 'description']));
 
         return response()->json([
             'success' => true,

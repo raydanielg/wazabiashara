@@ -22,7 +22,7 @@ class SupplierController extends Controller
             ->withCount('purchases')
             ->when($request->query('search'), fn ($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         $summary = [
             'totalSuppliers' => Supplier::where('business_id', $businessId)->count(),
@@ -33,7 +33,7 @@ class SupplierController extends Controller
 
         return response()->json([
             'success' => true,
-            'suppliers' => $suppliers,
+            'data' => $suppliers,
             'summary' => $summary,
         ]);
     }

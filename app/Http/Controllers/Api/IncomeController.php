@@ -16,7 +16,7 @@ class IncomeController extends Controller
             ->with(['branch', 'user'])
             ->when($request->query('search'), fn ($q, $s) => $q->where('category', 'like', "%{$s}%")->orWhere('description', 'like', "%{$s}%"))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         $summary = [
             'todayIncome' => Income::where('business_id', $businessId)->whereDate('income_date', today())->sum('amount'),
@@ -26,7 +26,7 @@ class IncomeController extends Controller
 
         return response()->json([
             'success' => true,
-            'incomes' => $incomes,
+            'data' => $incomes,
             'summary' => $summary,
         ]);
     }

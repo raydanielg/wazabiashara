@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../models/sale.dart';
+import '../../services/api_service.dart';
 import '../../utils/format_utils.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/loading_widget.dart';
 
 class SalesScreen extends StatefulWidget {
   const SalesScreen({super.key});
@@ -12,19 +14,39 @@ class SalesScreen extends StatefulWidget {
 }
 
 class _SalesScreenState extends State<SalesScreen> {
+  final _api = ApiService();
   final _searchCtrl = TextEditingController();
   String _filter = 'all';
+  bool _isLoading = true;
+  List<Sale> _sales = [];
 
-  final List<Sale> _sales = [
-    Sale(id: 1, receiptNo: 'RCP-1001', subtotal: 15000, discount: 0, total: 15000, paid: 15000, change: 0, paymentMethod: 'cash', date: DateTime.now().subtract(const Duration(hours: 1)), customerName: 'Walk-in'),
-    Sale(id: 2, receiptNo: 'RCP-1002', subtotal: 22500, discount: 500, total: 22000, paid: 22000, change: 0, paymentMethod: 'm-pesa', date: DateTime.now().subtract(const Duration(hours: 2)), customerName: 'John D.'),
-    Sale(id: 3, receiptNo: 'RCP-1003', subtotal: 8500, discount: 0, total: 8500, paid: 10000, change: 1500, paymentMethod: 'cash', date: DateTime.now().subtract(const Duration(hours: 3))),
-    Sale(id: 4, receiptNo: 'RCP-1004', subtotal: 42000, discount: 2000, total: 40000, paid: 40000, change: 0, paymentMethod: 'm-pesa', date: DateTime.now().subtract(const Duration(hours: 5)), customerName: 'Mama Asha'),
-    Sale(id: 5, receiptNo: 'RCP-1005', subtotal: 18000, discount: 0, total: 18000, paid: 18000, change: 0, paymentMethod: 'cash', date: DateTime.now().subtract(const Duration(hours: 8))),
-    Sale(id: 6, receiptNo: 'RCP-1006', subtotal: 65000, discount: 5000, total: 60000, paid: 60000, change: 0, paymentMethod: 'bank', date: DateTime.now().subtract(const Duration(days: 1)), customerName: 'Juma M.'),
-    Sale(id: 7, receiptNo: 'RCP-1007', subtotal: 12000, discount: 0, total: 12000, paid: 12000, change: 0, paymentMethod: 'cash', date: DateTime.now().subtract(const Duration(days: 1))),
-    Sale(id: 8, receiptNo: 'RCP-1008', subtotal: 33000, discount: 0, total: 33000, paid: 33000, change: 0, paymentMethod: 'm-pesa', date: DateTime.now().subtract(const Duration(days: 2)), customerName: 'Bi. Salama'),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getSales();
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final list = (res.data['data'] as List?) ?? [];
+        setState(() => _sales = list.map((e) => Sale.fromJson(e)).toList());
+      } else {
+        setState(() => _sales = []);
+      }
+    } catch (_) {
+      setState(() => _sales = []);
+    }
+    setState(() => _isLoading = false);
+  }
 
   List<Sale> get _filtered {
     final q = _searchCtrl.text.toLowerCase();
@@ -33,12 +55,6 @@ class _SalesScreenState extends State<SalesScreen> {
       final matchesFilter = _filter == 'all' || s.paymentMethod == _filter;
       return matchesSearch && matchesFilter;
     }).toList();
-  }
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
   }
 
   @override
@@ -68,10 +84,11 @@ class _SalesScreenState extends State<SalesScreen> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      _filterChip('all', 'All'),
-                      _filterChip('cash', 'Cash'),
-                      _filterChip('m-pesa', 'M-Pesa'),
-                      _filterChip('bank', 'Bank'),
+                      _filterChip(context, 'all', 'All'),
+                      _filterChip(context, 'cash', 'Cash'),
+                      _filterChip(context, 'mpesa', 'M-Pesa'),
+                      _filterChip(context, 'bank', 'Bank'),
+                      _filterChip(context, 'credit', 'Credit'),
                     ],
                   ),
                 ),
@@ -79,15 +96,26 @@ class _SalesScreenState extends State<SalesScreen> {
             ),
           ),
           Expanded(
-            child: _filtered.isEmpty
-                ? const EmptyState(icon: Icons.receipt_long_outlined, title: 'No sales found')
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filtered.length,
-                    itemBuilder: (ctx, i) => _SaleListTile(
-                      sale: _filtered[i],
-                      onTap: () => _showDetail(context, _filtered[i]),
-                    ),
+            child: _isLoading
+                ? const LoadingWidget(message: 'Loading sales...')
+                : RefreshIndicator(
+                    onRefresh: _load,
+                    child: _filtered.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              SizedBox(height: 80),
+                              EmptyState(icon: Icons.receipt_long_outlined, title: 'No sales found'),
+                            ],
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: _filtered.length,
+                            itemBuilder: (ctx, i) => _SaleListTile(
+                              sale: _filtered[i],
+                              onTap: () => _showDetail(context, _filtered[i]),
+                            ),
+                          ),
                   ),
           ),
         ],
@@ -95,7 +123,7 @@ class _SalesScreenState extends State<SalesScreen> {
     );
   }
 
-  Widget _filterChip(String value, String label) {
+  Widget _filterChip(BuildContext context, String value, String label) {
     final selected = _filter == value;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -104,8 +132,8 @@ class _SalesScreenState extends State<SalesScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primary : AppColors.surface,
-            border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
+            color: selected ? AppColors.primary : context.cardBg,
+            border: Border.all(color: selected ? AppColors.primary : context.borderColor),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(label, style: TextStyle(
@@ -146,6 +174,19 @@ class _SalesScreenState extends State<SalesScreen> {
             if (sale.customerName != null) ...[
               const SizedBox(height: 4),
               Text('Customer: ${sale.customerName}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            ],
+            if (sale.items != null && sale.items!.isNotEmpty) ...[
+              const Divider(height: 32),
+              ...sale.items!.map((it) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(child: Text('${it.qty} x ${it.name}', style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)),
+                        Text(FormatUtils.currency(it.subtotal), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  )),
             ],
             const Divider(height: 32),
             _detailRow('Subtotal', FormatUtils.currency(sale.subtotal)),
@@ -215,9 +256,9 @@ class _SaleListTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           children: [

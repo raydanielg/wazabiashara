@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import '../../models/customer.dart';
 import '../../utils/format_utils.dart';
@@ -6,6 +7,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/loading_widget.dart';
 import '../../services/api_service.dart';
 import '../parties/add_party_screen.dart';
+import '../settings/party_settings_screen.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
@@ -71,6 +73,29 @@ class _CustomersScreenState extends State<CustomersScreen> {
   double get _totalDebt => _customers.fold(0, (sum, c) => sum + c.currentDebt);
   int get _debtors => _customers.where((c) => c.hasDebt).length;
 
+  /// Real CSV export of the currently-filtered party list — copied to the
+  /// clipboard so it can be pasted into any spreadsheet or messaging app.
+  /// (No file-sharing package is set up yet, so a downloadable .csv file
+  /// isn't available — this covers the same need without adding one.)
+  void _exportCsv(BuildContext context) {
+    final rows = _filtered;
+    if (rows.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No parties to export'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+    final buffer = StringBuffer('Name,Phone,Email,Current Debt\n');
+    for (final c in rows) {
+      String esc(String? v) => '"${(v ?? '').replaceAll('"', '""')}"';
+      buffer.writeln('${esc(c.name)},${esc(c.phone)},${esc(c.email)},${c.currentDebt.toStringAsFixed(0)}');
+    }
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${rows.length} parties copied as CSV — paste into Sheets, Excel or a chat'), backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating),
+    );
+  }
+
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -84,6 +109,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
         title: const Text('Parties'),
         actions: [
           IconButton(onPressed: _addParty, icon: const Icon(Icons.person_add_outlined)),
+          IconButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PartySettingsScreen())),
+            icon: const Icon(Icons.settings_outlined),
+          ),
         ],
       ),
       body: _isLoading
@@ -130,23 +159,19 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              _iconBtn(Icons.filter_list, _showPaymentFilterSheet),
+                              _iconBtn(context, Icons.filter_list, _showPaymentFilterSheet),
                               const SizedBox(width: 8),
-                              _iconBtn(Icons.filter_none, () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Export parties — coming soon'), behavior: SnackBarBehavior.floating),
-                                );
-                              }),
+                              _iconBtn(context, Icons.filter_none, () => _exportCsv(context)),
                             ],
                           ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              _typeChip('Customer'),
+                              _typeChip(context, 'Customer'),
                               const SizedBox(width: 8),
-                              _typeChip('Supplier'),
+                              _typeChip(context, 'Supplier'),
                               const SizedBox(width: 8),
-                              _paymentChip(),
+                              _paymentChip(context),
                             ],
                           ),
                         ],
@@ -173,20 +198,20 @@ class _CustomersScreenState extends State<CustomersScreen> {
     );
   }
 
-  Widget _iconBtn(IconData icon, VoidCallback onTap) {
+  Widget _iconBtn(BuildContext context, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         width: 44,
         height: 44,
-        decoration: BoxDecoration(border: Border.all(color: AppColors.divider), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(border: Border.all(color: context.borderColor), borderRadius: BorderRadius.circular(10)),
         child: Icon(icon, color: AppColors.textSecondary, size: 20),
       ),
     );
   }
 
-  Widget _typeChip(String label) {
+  Widget _typeChip(BuildContext context, String label) {
     final selected = _partyTypes.contains(label);
     return GestureDetector(
       onTap: () => setState(() {
@@ -199,8 +224,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.surface,
-          border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
+          color: selected ? AppColors.primary : context.cardBg,
+          border: Border.all(color: selected ? AppColors.primary : context.borderColor),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -217,15 +242,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
     );
   }
 
-  Widget _paymentChip() {
+  Widget _paymentChip(BuildContext context) {
     final active = _paymentFilter != 'All Payment';
     return GestureDetector(
       onTap: _showPaymentFilterSheet,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary : AppColors.surface,
-          border: Border.all(color: active ? AppColors.primary : AppColors.divider),
+          color: active ? AppColors.primary : context.cardBg,
+          border: Border.all(color: active ? AppColors.primary : context.borderColor),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -371,9 +396,9 @@ class _CustomerTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           children: [

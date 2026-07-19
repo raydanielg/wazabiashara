@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import '../../theme/app_theme.dart';
 import '../../models/customer.dart';
 import '../../services/api_service.dart';
+import '../../services/contacts_helper.dart';
 
 /// Matches the reference "Add New Party" screen: a circular photo picker,
 /// a Party Name field, and an "Add New Party" action. Pops with the newly
@@ -23,6 +26,9 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
   final _emailCtrl = TextEditingController();
   bool _isSaving = false;
 
+  List<Contact> _suggestions = [];
+  Timer? _debounce;
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +40,35 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
     _emailCtrl.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onNameChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () async {
+      final results = await ContactsHelper.instance.search(value);
+      if (mounted) setState(() => _suggestions = results);
+    });
+  }
+
+  void _applyContact(Contact contact) {
+    setState(() {
+      _nameCtrl.text = contact.displayName;
+      if (contact.phones.isNotEmpty) _phoneCtrl.text = contact.phones.first.number;
+      if (contact.emails.isNotEmpty) _emailCtrl.text = contact.emails.first.address;
+      _suggestions = [];
+    });
+  }
+
+  Future<void> _pickFromContacts() async {
+    final contact = await ContactsHelper.instance.pickOne();
+    if (contact == null) return;
+    // openExternalPick often returns a contact without properties loaded —
+    // fetch the full record so we actually get phone/email.
+    final full = await FlutterContacts.getContact(contact.id, withProperties: true) ?? contact;
+    if (!mounted) return;
+    _applyContact(full);
   }
 
   Future<void> _save() async {
@@ -107,13 +141,74 @@ class _AddPartyScreenState extends State<AddPartyScreen> {
               ),
             ),
             const SizedBox(height: 28),
-            const Text('Party Name', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Party Name', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                TextButton.icon(
+                  onPressed: _pickFromContacts,
+                  icon: const Icon(Icons.contacts_outlined, size: 16),
+                  label: const Text('From Contacts', style: TextStyle(fontSize: 12)),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.primary, padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
+                ),
+              ],
+            ),
             const SizedBox(height: 6),
-            TextField(controller: _nameCtrl, autofocus: widget.initialName == null, decoration: const InputDecoration(hintText: 'e.g. John Doe')),
+            TextField(
+              controller: _nameCtrl,
+              autofocus: widget.initialName == null,
+              onChanged: _onNameChanged,
+              decoration: const InputDecoration(hintText: 'e.g. John Doe'),
+            ),
+            if (_suggestions.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.divider),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _suggestions.map((c) => InkWell(
+                        onTap: () => _applyContact(c),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.person_outline, size: 18, color: AppColors.primary),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(c.displayName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                                    if (c.phones.isNotEmpty)
+                                      Text(c.phones.first.number, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )).toList(),
+                ),
+              ),
             const SizedBox(height: 16),
             const Text('Phone Number', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             const SizedBox(height: 6),
-            TextField(controller: _phoneCtrl, keyboardType: TextInputType.phone, decoration: const InputDecoration(hintText: '+255 7XX XXX XXX')),
+            TextField(
+              controller: _phoneCtrl,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: '+255 7XX XXX XXX',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.contact_phone_outlined, size: 20, color: AppColors.textHint),
+                  onPressed: _pickFromContacts,
+                  tooltip: 'Pick from contacts',
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             const Text('Email (optional)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
             const SizedBox(height: 6),

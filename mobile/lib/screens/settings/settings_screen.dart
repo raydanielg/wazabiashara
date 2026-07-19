@@ -8,7 +8,11 @@ import 'app_settings_screen.dart';
 import 'invoice_settings_screen.dart';
 import 'transaction_settings_screen.dart';
 import 'quick_entry_settings_screen.dart';
-import '../support/tickets_screen.dart';
+import 'notification_settings_screen.dart';
+import 'business_profile_screen.dart';
+import 'security_pin_screen.dart';
+import '../more/about_screen.dart';
+import '../support/help_support_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 24),
             _sectionTitle('Preferences'),
             const SizedBox(height: 12),
-            _settingsCard([
+            _settingsCard(context, [
               _toggleItem(
                 icon: Icons.dark_mode_outlined,
                 iconColor: AppColors.primary,
@@ -57,13 +61,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 iconColor: AppColors.warning,
                 title: 'Notifications',
                 subtitle: 'Manage your notification preferences',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()));
+                },
               ),
             ]),
             const SizedBox(height: 24),
             _sectionTitle('App Preferences'),
             const SizedBox(height: 12),
-            _settingsCard([
+            _settingsCard(context, [
               _navItem(icon: Icons.tune_outlined, iconColor: AppColors.primary, title: 'App Settings', subtitle: 'Appearance, currency, formats', onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const AppSettingsScreen()));
               }),
@@ -83,23 +89,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 24),
             _sectionTitle('Business'),
             const SizedBox(height: 12),
-            _settingsCard([
-              _navItem(icon: Icons.store_outlined, iconColor: AppColors.primary, title: 'Business Profile', subtitle: 'Edit business details', onTap: () {}),
+            _settingsCard(context, [
+              _navItem(icon: Icons.store_outlined, iconColor: AppColors.primary, title: 'Business Profile', subtitle: 'Edit business details', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessProfileScreen()));
+              }),
               _divider(),
-              _navItem(icon: Icons.fingerprint_outlined, iconColor: AppColors.success, title: 'Security & PIN', subtitle: 'App lock and security', onTap: () {}),
+              _navItem(icon: Icons.fingerprint_outlined, iconColor: AppColors.success, title: 'Security & PIN', subtitle: 'App lock and security', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SecurityPinScreen()));
+              }),
             ]),
             const SizedBox(height: 24),
             _sectionTitle('Support'),
             const SizedBox(height: 12),
-            _settingsCard([
+            _settingsCard(context, [
               _navItem(icon: Icons.help_outline, iconColor: AppColors.info, title: 'Help & FAQ', subtitle: 'Get help using the app', onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketsScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()));
               }),
               _divider(),
-              _navItem(icon: Icons.info_outline, iconColor: AppColors.primary, title: 'About', subtitle: 'Version 1.0.0', onTap: () {}),
+              _navItem(icon: Icons.info_outline, iconColor: AppColors.primary, title: 'About', subtitle: 'Version 1.0.0', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+              }),
             ]),
             const SizedBox(height: 24),
-            _settingsCard([
+            _settingsCard(context, [
               _navItem(
                 icon: Icons.logout,
                 iconColor: AppColors.error,
@@ -161,12 +173,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _settingsCard(List<Widget> children) {
+  Widget _settingsCard(BuildContext context, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(children: children),
     );

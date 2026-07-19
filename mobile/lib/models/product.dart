@@ -54,4 +54,14 @@ class Product {
   bool get isOutOfStock => stock <= 0;
   double get profit => sellingPrice - costPrice;
   double get profitMargin => costPrice > 0 ? (profit / costPrice) * 100 : 0;
+
+  // Two Product instances represent the same product whenever their ids
+  // match, even if they came from separate API calls (e.g. reopening a
+  // picker re-fetches fresh instances). Needed so Product can safely be
+  // used as a Map key (see AddSaleScreen's item picker).
+  @override
+  bool operator ==(Object other) => identical(this, other) || (other is Product && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
 }

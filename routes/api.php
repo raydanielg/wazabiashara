@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\CashFlowController;
 use App\Http\Controllers\Api\BusinessProfileController;
 use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\NoteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,8 @@ Route::middleware('auth.token')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
     Route::get('/me', [AuthController::class, 'me'])->name('api.me');
+    Route::put('/me', [AuthController::class, 'updateMe'])->name('api.me.update');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('api.change-password');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('api.dashboard');
@@ -105,10 +108,13 @@ Route::middleware('auth.token')->group(function () {
 
     // Cash Flow & Accounts
     Route::get('/cash-flow', [CashFlowController::class, 'index'])->name('api.cash-flow.index');
+    Route::get('/cash-flow/accounts', [CashFlowController::class, 'accounts'])->name('api.cash-flow.accounts.index');
     Route::post('/cash-flow/accounts', [CashFlowController::class, 'storeAccount'])->name('api.cash-flow.accounts.store');
     Route::delete('/cash-flow/accounts/{account}', [CashFlowController::class, 'destroyAccount'])->name('api.cash-flow.accounts.destroy');
 
-    // Business Profile
+    // Business Profile / Setup
+    Route::get('/business/types', [BusinessProfileController::class, 'types'])->name('api.business.types');
+    Route::post('/business/register', [BusinessProfileController::class, 'register'])->name('api.business.register');
     Route::get('/business/profile', [BusinessProfileController::class, 'show'])->name('api.business.profile');
     Route::put('/business/profile', [BusinessProfileController::class, 'update'])->name('api.business.profile.update');
 
@@ -116,6 +122,12 @@ Route::middleware('auth.token')->group(function () {
     Route::get('/reminders', [ReminderController::class, 'index'])->name('api.reminders.index');
     Route::post('/reminders', [ReminderController::class, 'store'])->name('api.reminders.store');
     Route::delete('/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('api.reminders.destroy');
+
+    // Notebook
+    Route::get('/notebook', [NoteController::class, 'index'])->name('api.notebook.index');
+    Route::post('/notebook', [NoteController::class, 'store'])->name('api.notebook.store');
+    Route::put('/notebook/{note}', [NoteController::class, 'update'])->name('api.notebook.update');
+    Route::delete('/notebook/{note}', [NoteController::class, 'destroy'])->name('api.notebook.destroy');
 
     // Reports
     Route::get('/reports/sales', [ReportController::class, 'sales'])->name('api.reports.sales');

@@ -55,7 +55,8 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
     if (success) {
       ToastHelper.success(context, 'Welcome back!');
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      final needsSetup = auth.user?.businessId == null;
+      Navigator.pushReplacementNamed(context, needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard);
     } else {
       ToastHelper.error(context, auth.errorMessage ?? 'Invalid email or password');
     }

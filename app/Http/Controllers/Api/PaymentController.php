@@ -19,7 +19,7 @@ class PaymentController extends Controller
             ->when($request->query('type'), fn ($q, $t) => $q->where('type', $t))
             ->when($request->query('search'), fn ($q, $s) => $q->where('category', 'like', "%{$s}%")->orWhere('description', 'like', "%{$s}%"))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         $summary = [
             'todayIn' => Payment::where('business_id', $businessId)->where('type', 'in')->whereDate('payment_date', today())->sum('amount'),
@@ -30,7 +30,7 @@ class PaymentController extends Controller
 
         return response()->json([
             'success' => true,
-            'payments' => $payments,
+            'data' => $payments,
             'summary' => $summary,
         ]);
     }

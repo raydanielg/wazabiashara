@@ -4,6 +4,7 @@ import '../models/user.dart';
 import '../models/business.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
+import '../services/sale_watcher_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _api = ApiService();
@@ -77,6 +78,14 @@ class AuthProvider extends ChangeNotifier {
     try {
       final res = await _api.register(data);
       if (res.statusCode == 201 && res.data['success'] == true) {
+        final token = res.data['token'] as String?;
+        final userData = res.data['user'] as Map<String, dynamic>?;
+        if (token != null && userData != null) {
+          await _storage.saveToken(token);
+          await _storage.saveUser(userData);
+          _user = User.fromJson(userData);
+          _isAuthenticated = true;
+        }
         _isLoading = false;
         notifyListeners();
         return true;
@@ -132,10 +141,35 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Re-syncs [_user] from the backend (via /me) — used right after Business
+  /// Setup completes so `user.businessId` reflects the newly-created business
+  /// without forcing a full re-login.
+  Future<void> refreshUser() async {
+    try {
+      final res = await _api.dio.get('/me');
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final userData = res.data['user'] as Map<String, dynamic>;
+        await _storage.saveUser(userData);
+        _user = User.fromJson(userData);
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  /// Locally patches the signed-in user's business/branch id right after
+  /// Business Setup — avoids a network round trip when we already have the
+  /// fresh user object from the setup response.
+  void setUser(Map<String, dynamic> userData) {
+    _storage.saveUser(userData);
+    _user = User.fromJson(userData);
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     try {
       await _api.logout();
     } catch (_) {}
+    SaleWatcherService.instance.stop();
     _user = null;
     _business = null;
     _isAuthenticated = false;

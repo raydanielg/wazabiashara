@@ -17,7 +17,7 @@ class ExpenseController extends Controller
             ->when($request->query('search'), fn ($q, $s) => $q->where('category', 'like', "%{$s}%")->orWhere('description', 'like', "%{$s}%"))
             ->when($request->query('branch_id'), fn ($q, $b) => $q->where('branch_id', $b))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         $summary = [
             'todayExpenses' => Expense::where('business_id', $businessId)->whereDate('expense_date', today())->sum('amount'),
@@ -27,7 +27,7 @@ class ExpenseController extends Controller
 
         return response()->json([
             'success' => true,
-            'expenses' => $expenses,
+            'data' => $expenses,
             'summary' => $summary,
         ]);
     }

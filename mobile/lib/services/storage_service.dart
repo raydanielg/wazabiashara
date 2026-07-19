@@ -94,4 +94,19 @@ class StorageService {
   Future<bool> getDarkMode() async {
     return await getBool(AppConfig.themeKey) ?? false;
   }
+
+  // App Lock (Security & PIN)
+  static const _appLockEnabledKey = 'app_lock_enabled';
+  static const _appLockPinKey = 'app_lock_pin';
+  static const _appLockBiometricKey = 'app_lock_biometric';
+
+  Future<void> setAppLockEnabled(bool enabled) async => setBool(_appLockEnabledKey, enabled);
+  Future<bool> getAppLockEnabled() async => await getBool(_appLockEnabledKey) ?? false;
+
+  Future<void> setAppLockPin(String pin) async => setSecure(_appLockPinKey, pin);
+  Future<String?> getAppLockPin() async => getSecure(_appLockPinKey);
+  Future<void> clearAppLockPin() async => deleteSecure(_appLockPinKey);
+
+  Future<void> setAppLockBiometric(bool enabled) async => setBool(_appLockBiometricKey, enabled);
+  Future<bool> getAppLockBiometric() async => await getBool(_appLockBiometricKey) ?? false;
 }

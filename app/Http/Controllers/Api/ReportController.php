@@ -34,7 +34,12 @@ class ReportController extends Controller
 
         return response()->json([
             'success' => true,
-            'sales' => $sales,
+            'data' => $sales->items(),
+            'meta' => [
+                'current_page' => $sales->currentPage(),
+                'last_page' => $sales->lastPage(),
+                'total' => $sales->total(),
+            ],
         ]);
     }
 
@@ -93,35 +98,83 @@ class ReportController extends Controller
     }
 
     /**
-     * Chart data (last 7 days sales + sales by method) — mirrors ReportController::chartData.
+     * Chart data for the mobile "Reports" screen — bucketed by the
+     * requested period (week / month / year), plus a summary, payment-method
+     * split, and top categories by revenue. Kept under generic {label,value}
+     * pairs so it maps directly onto the mobile ChartData model.
      */
     public function chartData(Request $request)
     {
         $user = $request->user();
         $businessId = $user->business_id;
         $branchId = $request->query('branch_id') ?? $user->branch_id;
+        $period = $request->query('period', 'week');
 
         $salesQuery = Sale::where('business_id', $businessId)->where('status', 'completed');
         if ($branchId && !$user->isBusinessAdmin()) {
             $salesQuery->where('branch_id', $branchId);
         }
 
-        $last7Days = collect();
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $total = (clone $salesQuery)->whereDate('created_at', $date)->sum('total');
-            $last7Days->push(['date' => $date->format('D d'), 'total' => (float) $total]);
+        $series = collect();
+        $rangeStart = now();
+
+        if ($period === 'year') {
+            for ($i = 11; $i >= 0; $i--) {
+                $date = now()->subMonths($i);
+                $total = (clone $salesQuery)->whereMonth('created_at', $date->month)->whereYear('created_at', $date->year)->sum('total');
+                $series->push(['label' => $date->format('M'), 'value' => (float) $total]);
+            }
+            $rangeStart = now()->subMonths(11)->startOfMonth();
+        } elseif ($period === 'month') {
+            for ($i = 3; $i >= 0; $i--) {
+                $weekStart = now()->subWeeks($i)->startOfWeek();
+                $weekEnd = now()->subWeeks($i)->endOfWeek();
+                $total = (clone $salesQuery)->whereBetween('created_at', [$weekStart, $weekEnd])->sum('total');
+                $series->push(['label' => 'W' . (4 - $i), 'value' => (float) $total]);
+            }
+            $rangeStart = now()->subWeeks(3)->startOfWeek();
+        } else {
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $total = (clone $salesQuery)->whereDate('created_at', $date)->sum('total');
+                $series->push(['label' => $date->format('D'), 'value' => (float) $total]);
+            }
+            $rangeStart = now()->subDays(6)->startOfDay();
         }
 
-        $salesByMethod = (clone $salesQuery)->whereMonth('created_at', now()->month)
+        $periodQuery = (clone $salesQuery)->where('created_at', '>=', $rangeStart);
+
+        $paymentMethods = (clone $periodQuery)
             ->select('payment_method', \DB::raw('SUM(total) as total'))
             ->groupBy('payment_method')
-            ->get();
+            ->get()
+            ->map(fn ($r) => ['label' => ucfirst(str_replace('_', ' ', $r->payment_method)), 'value' => (float) $r->total]);
+
+        $topCategories = SaleItem::whereHas('sale', fn ($q) => $q->where('business_id', $businessId)->where('status', 'completed')->where('created_at', '>=', $rangeStart))
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->select(\DB::raw('COALESCE(categories.name, "Uncategorized") as label'), \DB::raw('SUM(sale_items.subtotal) as value'))
+            ->groupBy('label')
+            ->orderByDesc('value')
+            ->limit(6)
+            ->get()
+            ->map(fn ($r) => ['label' => $r->label, 'value' => (float) $r->value]);
+
+        $values = $series->pluck('value');
+        $summary = [
+            'total' => (float) $values->sum(),
+            'average' => $values->isNotEmpty() ? (float) $values->avg() : 0,
+            'peak' => (float) $values->max(),
+        ];
 
         return response()->json([
             'success' => true,
-            'last7Days' => $last7Days,
-            'salesByMethod' => $salesByMethod,
+            'data' => [
+                'series' => $series,
+                'summary' => $summary,
+                'paymentMethods' => $paymentMethods,
+                'topCategories' => $topCategories,
+            ],
         ]);
     }
 }

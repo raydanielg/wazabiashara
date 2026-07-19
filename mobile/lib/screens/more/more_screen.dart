@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
@@ -7,7 +8,18 @@ import '../reports/reports_screen.dart';
 import '../settings/settings_screen.dart';
 import '../categories/category_list_screen.dart';
 import '../accounts/cash_bank_screen.dart';
-import '../support/tickets_screen.dart';
+import '../support/help_support_screen.dart';
+import '../calculators/emi_calculator_screen.dart';
+import '../calculators/interest_calculator_screen.dart';
+import '../calculators/tax_calculator_screen.dart';
+import '../notebook/notebook_screen.dart';
+import '../import/import_hub_screen.dart';
+import '../settings/business_profile_screen.dart';
+import '../settings/my_account_screen.dart';
+import 'bill_gallery_screen.dart';
+import 'backup_info_screen.dart';
+import 'about_screen.dart';
+import 'reminders_screen.dart';
 
 /// The "More" tab — mirrors the menu structure of the reference app:
 /// quick shortcuts, My Account, a Management section, a Utilities section
@@ -24,11 +36,19 @@ class MoreScreen extends StatelessWidget {
   void _comingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature — coming soon'),
+        content: Text('$feature is on our roadmap — not built yet.'),
         backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
+    );
+  }
+
+  void _shareApp(BuildContext context) {
+    const link = 'https://wazabiashara.co.tz';
+    Clipboard.setData(const ClipboardData(text: 'Try Wazabiashara — manage your business from your phone: $link'));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link copied — paste it anywhere to share'), backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -77,20 +97,26 @@ class MoreScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(child: _quickTile(context, Icons.badge_outlined, 'Business\nCard', () => _comingSoon(context, 'Business Card'))),
                 const SizedBox(width: 12),
-                Expanded(child: _quickTile(context, Icons.notifications_active_outlined, 'Reminders', () => _comingSoon(context, 'Reminders'))),
+                Expanded(child: _quickTile(context, Icons.notifications_active_outlined, 'Reminders', () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RemindersScreen()));
+                })),
               ],
             ),
             const SizedBox(height: 20),
 
-            _card([
-              _item(context, Icons.person_outline, AppColors.primary, 'My Account', onTap: () => _comingSoon(context, 'My Account')),
+            _card(context, [
+              _item(context, Icons.person_outline, AppColors.primary, 'My Account', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const MyAccountScreen()));
+              }),
             ]),
 
             const SizedBox(height: 20),
             _sectionTitle('Management'),
             const SizedBox(height: 10),
-            _card([
-              _item(context, Icons.store_outlined, AppColors.primary, 'Business Profile', onTap: () => _comingSoon(context, 'Business Profile')),
+            _card(context, [
+              _item(context, Icons.store_outlined, AppColors.primary, 'Business Profile', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessProfileScreen()));
+              }),
               _divider(),
               _item(context, Icons.account_balance_outlined, AppColors.info, 'Cash & Bank Accounts', onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const CashBankScreen()));
@@ -120,21 +146,27 @@ class MoreScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _sectionTitle('Utilities'),
             const SizedBox(height: 10),
-            _card([
-              _item(context, Icons.upload_file_outlined, AppColors.info, 'Import Data', onTap: () => _comingSoon(context, 'Import Data')),
+            _card(context, [
+              _item(context, Icons.upload_file_outlined, AppColors.info, 'Import Data', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportHubScreen()));
+              }),
               _divider(),
-              _item(context, Icons.photo_library_outlined, AppColors.gold, 'Bill Gallery', badge: 'New', onTap: () => _comingSoon(context, 'Bill Gallery')),
+              _item(context, Icons.photo_library_outlined, AppColors.gold, 'Bill Gallery', badge: 'New', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const BillGalleryScreen()));
+              }),
               _divider(),
-              _item(context, Icons.note_alt_outlined, AppColors.gold, 'Notebook', badge: 'New', onTap: () => _comingSoon(context, 'Notebook')),
+              _item(context, Icons.note_alt_outlined, AppColors.gold, 'Notebook', badge: 'New', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const NotebookScreen()));
+              }),
               _divider(),
               _expandable(
                 icon: Icons.calculate_outlined,
                 iconColor: AppColors.warning,
                 title: 'Calculators',
                 children: [
-                  _subItem(context, 'EMI Calculator', () => _comingSoon(context, 'EMI Calculator')),
-                  _subItem(context, 'Interest Calculator', () => _comingSoon(context, 'Interest Calculator')),
-                  _subItem(context, 'Tax Calculator', () => _comingSoon(context, 'Tax Calculator')),
+                  _subItem(context, 'EMI Calculator', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EmiCalculatorScreen()))),
+                  _subItem(context, 'Interest Calculator', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InterestCalculatorScreen()))),
+                  _subItem(context, 'Tax Calculator', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TaxCalculatorScreen()))),
                 ],
               ),
             ]),
@@ -142,20 +174,24 @@ class MoreScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _sectionTitle('Others'),
             const SizedBox(height: 10),
-            _card([
+            _card(context, [
               _item(context, Icons.support_agent_outlined, AppColors.info, 'Help and Support', onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketsScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()));
               }),
               _divider(),
-              _item(context, Icons.cloud_outlined, AppColors.success, 'Backup Information', onTap: () => _comingSoon(context, 'Backup Information')),
+              _item(context, Icons.cloud_outlined, AppColors.success, 'Backup Information', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const BackupInfoScreen()));
+              }),
               _divider(),
-              _item(context, Icons.info_outline, AppColors.primary, 'About this App', onTap: () => _comingSoon(context, 'About this App')),
+              _item(context, Icons.info_outline, AppColors.primary, 'About this App', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+              }),
               _divider(),
-              _item(context, Icons.share_outlined, AppColors.primary, 'Share this App', onTap: () => _comingSoon(context, 'Share this App')),
+              _item(context, Icons.share_outlined, AppColors.primary, 'Share this App', onTap: () => _shareApp(context)),
             ]),
 
             const SizedBox(height: 20),
-            _card([
+            _card(context, [
               _item(context, Icons.logout, AppColors.error, 'Logout', isDestructive: true, onTap: () => _confirmLogout(context, auth)),
             ]),
             const SizedBox(height: 32),
@@ -172,9 +208,9 @@ class MoreScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.borderColor),
         ),
         child: Column(
           children: [
@@ -201,11 +237,11 @@ class MoreScreen extends StatelessWidget {
         child: Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary, letterSpacing: 0.5)),
       );
 
-  Widget _card(List<Widget> children) => Container(
+  Widget _card(BuildContext context, List<Widget> children) => Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: context.borderColor),
         ),
         child: Column(children: children),
       );

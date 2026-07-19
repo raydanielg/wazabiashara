@@ -4,6 +4,7 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/otp_screen.dart';
+import '../screens/auth/business_setup_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/sales/sales_screen.dart';
 import '../screens/customers/customers_screen.dart';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String otp = '/otp';
+  static const String businessSetup = '/business-setup';
   static const String dashboard = '/dashboard';
   static const String pos = '/pos';
   static const String products = '/products';
@@ -39,6 +41,8 @@ class AppRoutes {
       case otp:
         final phone = args is String ? args : null;
         return _page(OtpScreen(phone: phone));
+      case businessSetup:
+        return _page(const BusinessSetupScreen());
       case dashboard:
         return _page(const DashboardScreen());
       case sales:

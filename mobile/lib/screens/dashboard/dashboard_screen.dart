@@ -13,7 +13,22 @@ import '../customers/customers_screen.dart';
 import '../more/more_screen.dart';
 import '../parties/add_party_screen.dart';
 import '../sales/add_sale_screen.dart';
+import '../products/add_item_screen.dart';
 import '../quick_entry/quick_entry_screen.dart';
+import '../notebook/notebook_screen.dart';
+import '../transactions/add_payment_screen.dart';
+import '../transactions/add_purchase_screen.dart';
+import '../transactions/add_expense_screen.dart';
+import '../transactions/add_income_screen.dart';
+import '../transactions/add_reminder_screen.dart';
+import '../transactions/stock_adjustment_screen.dart';
+import 'edit_shortcuts_screen.dart';
+import 'kpi_detail_screen.dart';
+import '../../services/shortcuts_store.dart';
+import '../../services/notification_service.dart';
+import '../../services/sale_watcher_service.dart';
+import '../auth/business_setup_screen.dart';
+import '../settings/notification_settings_screen.dart';
 
 /// Root shell for the signed-in app. Bottom navigation mirrors the
 /// reference design: Home, Transactions, Parties, Inventory, More.
@@ -82,8 +97,13 @@ class _HomeTabState extends State<_HomeTab> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<DashboardProvider>().fetchDashboard();
+      // Ask for notification permission once the user is actually looking
+      // at something useful, then start watching for sales made on other
+      // devices/by other staff.
+      await NotificationService.instance.requestPermission();
+      SaleWatcherService.instance.start();
     });
   }
 
@@ -124,13 +144,18 @@ class _HomeTabState extends State<_HomeTab> {
           ],
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_outlined)),
+          IconButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsScreen())),
+            icon: const Icon(Icons.notifications_outlined),
+          ),
           const SizedBox(width: 8),
         ],
       ),
       body: dash.isLoading
           ? const LoadingWidget(message: 'Loading dashboard...')
-          : RefreshIndicator(
+          : dash.data == null
+              ? _DashboardErrorState(dash: dash)
+              : RefreshIndicator(
               onRefresh: () => dash.refresh(),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -148,7 +173,7 @@ class _HomeTabState extends State<_HomeTab> {
                       children: [
                         const _SectionHeading(title: 'Shortcuts'),
                         TextButton.icon(
-                          onPressed: () {},
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditShortcutsScreen())),
                           icon: const Icon(Icons.edit_outlined, size: 16),
                           label: const Text('Edit Menu'),
                           style: TextButton.styleFrom(foregroundColor: AppColors.primary, padding: EdgeInsets.zero),
@@ -175,6 +200,71 @@ class _HomeTabState extends State<_HomeTab> {
                 ),
               ),
             ),
+    );
+  }
+}
+
+/// Shown instead of the dashboard body when [DashboardProvider] couldn't
+/// load real data — never falls back to fake numbers. Two distinct cases:
+/// the user has no business yet (route to setup), or a genuine load
+/// failure (offer retry).
+class _DashboardErrorState extends StatelessWidget {
+  final DashboardProvider dash;
+  const _DashboardErrorState({required this.dash});
+
+  @override
+  Widget build(BuildContext context) {
+    final needsSetup = dash.needsBusinessSetup;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: (needsSetup ? AppColors.gold : AppColors.error).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                needsSetup ? Icons.store_outlined : Icons.cloud_off_outlined,
+                color: needsSetup ? AppColors.gold : AppColors.error,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              needsSetup ? 'Set up your business to continue' : 'Couldn\'t load your dashboard',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              needsSetup
+                  ? 'You\'re signed in, but there\'s no business linked to your account yet. Finish setup to start seeing your real sales, stock and reports.'
+                  : (dash.error ?? 'Something went wrong. Please try again.'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () async {
+                if (needsSetup) {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessSetupScreen()));
+                  if (context.mounted) context.read<DashboardProvider>().fetchDashboard();
+                } else {
+                  context.read<DashboardProvider>().fetchDashboard();
+                }
+              },
+              icon: Icon(needsSetup ? Icons.arrow_forward : Icons.refresh),
+              label: Text(needsSetup ? 'Set Up Business' : 'Try Again'),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -213,6 +303,13 @@ class _KpiSection extends StatelessWidget {
                 icon: Icons.arrow_downward,
                 bg: AppColors.successLight,
                 fg: const Color(0xFF047857),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'To Receive',
+                  valueLabel: FormatUtils.currency(d.toReceive),
+                  color: const Color(0xFF047857),
+                  icon: Icons.arrow_downward,
+                  emptyHint: 'This is the total your customers currently owe you. Open the Parties tab and filter "To Receive" to see who owes what.',
+                ))),
               ),
             ),
             const SizedBox(width: 10),
@@ -223,6 +320,13 @@ class _KpiSection extends StatelessWidget {
                 icon: Icons.arrow_upward,
                 bg: AppColors.errorLight,
                 fg: const Color(0xFFB91C1C),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'To Give',
+                  valueLabel: FormatUtils.currency(d.toGive),
+                  color: const Color(0xFFB91C1C),
+                  icon: Icons.arrow_upward,
+                  emptyHint: 'This is the total you currently owe your suppliers. Open the Parties tab and filter "To Give" to see the full list.',
+                ))),
               ),
             ),
           ],
@@ -235,9 +339,17 @@ class _KpiSection extends StatelessWidget {
                 label: 'Sales ($monthLabel)',
                 value: FormatUtils.currencyShort(d.monthSales),
                 icon: Icons.point_of_sale_outlined,
-                bg: AppColors.surface,
+                bg: context.cardBg,
                 fg: AppColors.primary,
                 bordered: true,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'Sales ($monthLabel)',
+                  valueLabel: FormatUtils.currency(d.monthSales),
+                  color: AppColors.primary,
+                  icon: Icons.point_of_sale_outlined,
+                  series: d.salesChart,
+                  seriesCaption: 'Sales — Last 7 Days',
+                ))),
               ),
             ),
             const SizedBox(width: 10),
@@ -246,9 +358,17 @@ class _KpiSection extends StatelessWidget {
                 label: 'Purchase ($monthLabel)',
                 value: FormatUtils.currencyShort(d.monthPurchases),
                 icon: Icons.shopping_bag_outlined,
-                bg: AppColors.surface,
+                bg: context.cardBg,
                 fg: AppColors.info,
                 bordered: true,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'Purchase ($monthLabel)',
+                  valueLabel: FormatUtils.currency(d.monthPurchases),
+                  color: AppColors.info,
+                  icon: Icons.shopping_bag_outlined,
+                  series: d.purchasesChart,
+                  seriesCaption: 'Purchases — Last 7 Days',
+                ))),
               ),
             ),
           ],
@@ -261,9 +381,17 @@ class _KpiSection extends StatelessWidget {
                 label: 'Expense ($monthLabel)',
                 value: FormatUtils.currencyShort(d.monthExpenses),
                 icon: Icons.receipt_outlined,
-                bg: AppColors.surface,
+                bg: context.cardBg,
                 fg: AppColors.error,
                 bordered: true,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'Expense ($monthLabel)',
+                  valueLabel: FormatUtils.currency(d.monthExpenses),
+                  color: AppColors.error,
+                  icon: Icons.receipt_outlined,
+                  series: d.expensesChart,
+                  seriesCaption: 'Expenses — Last 7 Days',
+                ))),
               ),
             ),
             const SizedBox(width: 10),
@@ -273,9 +401,20 @@ class _KpiSection extends StatelessWidget {
                 value: FormatUtils.currencyShort(d.totalBalance),
                 sub: 'Cash & Bank',
                 icon: Icons.account_balance_wallet_outlined,
-                bg: AppColors.surface,
+                bg: context.cardBg,
                 fg: AppColors.gold,
                 bordered: true,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => KpiDetailScreen(
+                  title: 'Total Balance',
+                  valueLabel: FormatUtils.currency(d.totalBalance),
+                  color: AppColors.goldDark,
+                  icon: Icons.account_balance_wallet_outlined,
+                  breakdown: [
+                    ('Cash', d.cashBalance, AppColors.success),
+                    ('Bank', d.bankBalance, AppColors.info),
+                    ('Mobile Money', d.mobileBalance, AppColors.gold),
+                  ],
+                ))),
               ),
             ),
           ],
@@ -293,6 +432,7 @@ class _FlatKpiCard extends StatelessWidget {
   final Color bg;
   final Color fg;
   final bool bordered;
+  final VoidCallback? onTap;
 
   const _FlatKpiCard({
     required this.label,
@@ -302,32 +442,44 @@ class _FlatKpiCard extends StatelessWidget {
     required this.bg,
     required this.fg,
     this.bordered = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: bordered ? Border.all(color: AppColors.divider) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: fg)),
-              Icon(icon, size: 16, color: fg),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-          if (sub != null)
-            Text(sub!, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textHint)),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          border: bordered ? Border.all(color: context.borderColor) : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: fg), overflow: TextOverflow.ellipsis)),
+                Icon(icon, size: 16, color: fg),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                ),
+                Icon(Icons.chevron_right, size: 14, color: fg.withValues(alpha: 0.5)),
+              ],
+            ),
+            if (sub != null)
+              Text(sub!, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textHint)),
+          ],
+        ),
       ),
     );
   }
@@ -338,42 +490,73 @@ class _ExploreAppRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _exploreTile(context, Icons.flash_on_outlined, 'Quick Entry', () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickEntryScreen()));
-        })),
+        Expanded(
+          child: _exploreTile(
+            context,
+            icon: Icons.flash_on_rounded,
+            label: 'Quick Entry',
+            colors: const [Color(0xFFF9AC00), Color(0xFFFFC64D)],
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickEntryScreen())),
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _exploreTile(context, Icons.point_of_sale, 'Quick POS', () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const PosScreen()));
-        })),
+        Expanded(
+          child: _exploreTile(
+            context,
+            icon: Icons.point_of_sale_rounded,
+            label: 'Quick POS',
+            colors: const [AppColors.primary, AppColors.primaryLight],
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PosScreen())),
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _exploreTile(context, Icons.bar_chart_outlined, 'View Reports', () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
-        })),
+        Expanded(
+          child: _exploreTile(
+            context,
+            icon: Icons.bar_chart_rounded,
+            label: 'View Reports',
+            colors: const [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen())),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _exploreTile(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+  Widget _exploreTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required List<Color> colors,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider),
+          color: context.cardBg,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: context.borderColor),
+          boxShadow: [
+            BoxShadow(color: colors.first.withValues(alpha: 0.10), blurRadius: 14, offset: const Offset(0, 6)),
+          ],
         ),
         child: Column(
           children: [
             Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-              child: Icon(icon, color: AppColors.goldDark, size: 20),
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [BoxShadow(color: colors.first.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: Icon(icon, color: Colors.white, size: 22),
             ),
-            const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
           ],
         ),
       ),
@@ -384,17 +567,6 @@ class _ExploreAppRow extends StatelessWidget {
 class _ShortcutsGrid extends StatelessWidget {
   const _ShortcutsGrid();
 
-  static const _items = [
-    (Icons.person_add_alt_outlined, 'Add Party'),
-    (Icons.receipt_long_outlined, 'Sales Invoice'),
-    (Icons.arrow_downward, 'Payment In'),
-    (Icons.arrow_upward, 'Payment Out'),
-    (Icons.shopping_cart_outlined, 'Purchase'),
-    (Icons.add_box_outlined, 'Add Item'),
-    (Icons.money_off_outlined, 'Expense'),
-    (Icons.note_add_outlined, 'Add Note'),
-  ];
-
   void _handleTap(BuildContext context, String label) {
     switch (label) {
       case 'Add Party':
@@ -402,6 +574,40 @@ class _ShortcutsGrid extends StatelessWidget {
         break;
       case 'Sales Invoice':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const AddSaleScreen()));
+        break;
+      case 'Payment In':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddPaymentScreen(isIn: true)));
+        break;
+      case 'Payment Out':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddPaymentScreen(isIn: false)));
+        break;
+      case 'Purchase':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddPurchaseScreen()));
+        break;
+      case 'Add Item':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddItemScreen()));
+        break;
+      case 'Expense':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
+        break;
+      case 'Other Income':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddIncomeScreen()));
+        break;
+      case 'Add Note':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotebookScreen(autoAdd: true)));
+        break;
+      case 'Stock Adjustment':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const StockAdjustmentScreen()));
+        break;
+      case 'Add Reminder':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddReminderScreen()));
+        break;
+      case 'Sales Return':
+      case 'Purchase Return':
+      case 'Quotation':
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$label is on our roadmap — not wired up yet.'), behavior: SnackBarBehavior.floating),
+        );
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -412,44 +618,50 @@ class _ShortcutsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: GridView.count(
-        crossAxisCount: 4,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 8,
-        childAspectRatio: 0.8,
-        children: _items.map((item) {
-          return InkWell(
-            onTap: () => _handleTap(context, item.$2),
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
-                  child: Icon(item.$1, color: AppColors.primary, size: 20),
+    return ListenableBuilder(
+      listenable: ShortcutsStore.instance,
+      builder: (context, _) {
+        final items = ShortcutsStore.instance.visible;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.borderColor),
+          ),
+          child: GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 8,
+            childAspectRatio: 0.8,
+            children: items.map((item) {
+              return InkWell(
+                onTap: () => _handleTap(context, item.label),
+                borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
+                      child: Icon(item.icon, color: AppColors.primary, size: 20),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.label,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.2),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  item.$2,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary, height: 1.2),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 }
@@ -480,9 +692,9 @@ class _CashflowCardState extends State<_CashflowCard> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,9 +827,9 @@ class _TopProductsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -707,9 +919,9 @@ class _SaleTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         children: [

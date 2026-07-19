@@ -14,11 +14,11 @@ class ReminderController extends Controller
 
         $reminders = Reminder::where('business_id', $businessId)
             ->orderBy('remind_at')
-            ->paginate(20);
+            ->get();
 
         return response()->json([
             'success' => true,
-            'reminders' => $reminders,
+            'data' => $reminders,
         ]);
     }
 

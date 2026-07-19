@@ -21,11 +21,18 @@ class ProductController extends Controller
             ->when($request->query('search'), fn ($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('barcode', 'like', "%{$s}%"))
             ->when($request->query('category'), fn ($q, $c) => $q->where('category_id', $c))
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get()
+            ->map(function ($product) use ($branchId) {
+                $product->stock = (int) ($product->branchStock->first()?->qty ?? 0);
+                // Mobile's Product model expects a plain category name string,
+                // not the full relation object.
+                $product->category = $product->category?->name;
+                return $product;
+            });
 
         return response()->json([
             'success' => true,
-            'products' => $products,
+            'data' => $products,
         ]);
     }
 
@@ -36,24 +43,28 @@ class ProductController extends Controller
             'barcode' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
-            'unit' => 'required|string|max:50',
+            'category' => 'nullable|string|max:255',
+            'unit' => 'nullable|string|max:50',
             'cost_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'reorder_level' => 'nullable|integer|min:0',
             'expiry_date' => 'nullable|date',
+            'stock' => 'nullable|numeric|min:0',
+            'branch_id' => 'nullable|exists:branches,id',
             'initial_stock' => 'nullable|array',
             'initial_stock.*' => 'nullable|numeric|min:0',
         ]);
 
         $user = $request->user();
+        $categoryId = $request->category_id ?? $this->resolveCategoryId($request->category, $user->business_id);
 
         $product = Product::create([
             'business_id' => $user->business_id,
-            'category_id' => $request->category_id,
+            'category_id' => $categoryId,
             'name' => $request->name,
             'barcode' => $request->barcode,
             'sku' => $request->sku,
-            'unit' => $request->unit,
+            'unit' => $request->unit ?? 'piece',
             'cost_price' => $request->cost_price,
             'selling_price' => $request->selling_price,
             'reorder_level' => $request->reorder_level ?? 5,
@@ -61,33 +72,64 @@ class ProductController extends Controller
             'status' => 'active',
         ]);
 
+        // Mobile's Add Item screen (single-branch, no branch picker yet) sends
+        // a flat "stock" number for the user's own branch.
+        $branchId = $request->branch_id ?? $user->branch_id;
+        if ($branchId && $request->filled('stock') && $request->stock > 0) {
+            $this->applyInitialStock($product, $branchId, (float) $request->stock, $user->id, $request->reorder_level ?? 5);
+        }
+
         if ($request->initial_stock) {
-            foreach ($request->initial_stock as $branchId => $qty) {
+            foreach ($request->initial_stock as $bId => $qty) {
                 if ($qty > 0) {
-                    BranchStock::create([
-                        'product_id' => $product->id,
-                        'branch_id' => $branchId,
-                        'qty' => $qty,
-                        'reorder_level' => $request->reorder_level ?? 5,
-                    ]);
-                    StockMovement::create([
-                        'product_id' => $product->id,
-                        'branch_id' => $branchId,
-                        'type' => 'in',
-                        'qty' => $qty,
-                        'reference' => 'INITIAL',
-                        'user_id' => $user->id,
-                        'note' => 'Stoo ya mwanzo',
-                    ]);
+                    $this->applyInitialStock($product, $bId, (float) $qty, $user->id, $request->reorder_level ?? 5);
                 }
             }
         }
+
+        $product->load('category');
+        $product->stock = (int) $product->branchStock()->where('branch_id', $branchId)->value('qty') ?? 0;
+        $product->category = $product->category?->name;
 
         return response()->json([
             'success' => true,
             'message' => 'Bidhaa imeongezwa kikamilifu!',
             'product' => $product,
         ], 201);
+    }
+
+    private function applyInitialStock(Product $product, $branchId, float $qty, int $userId, int $reorderLevel): void
+    {
+        BranchStock::create([
+            'product_id' => $product->id,
+            'branch_id' => $branchId,
+            'qty' => $qty,
+            'reorder_level' => $reorderLevel,
+        ]);
+        StockMovement::create([
+            'product_id' => $product->id,
+            'branch_id' => $branchId,
+            'type' => 'in',
+            'qty' => $qty,
+            'reference' => 'INITIAL',
+            'user_id' => $userId,
+            'note' => 'Stoo ya mwanzo',
+        ]);
+    }
+
+    /**
+     * Resolve a free-text category name (as sent by the mobile Add Item
+     * screen) into a category_id, creating an "item"-type category on the
+     * fly if it doesn't exist yet for this business.
+     */
+    private function resolveCategoryId(?string $name, int $businessId): ?int
+    {
+        $name = trim((string) $name);
+        if ($name === '' || strtolower($name) === 'general') return null;
+
+        return Category::firstOrCreate(
+            ['business_id' => $businessId, 'type' => 'item', 'name' => $name],
+        )->id;
     }
 
     public function show(Request $request, Product $product)
@@ -112,15 +154,38 @@ class ProductController extends Controller
             'barcode' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
-            'unit' => 'required|string|max:50',
+            'category' => 'nullable|string|max:255',
+            'unit' => 'nullable|string|max:50',
             'cost_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'reorder_level' => 'nullable|integer|min:0',
             'expiry_date' => 'nullable|date',
-            'status' => 'required|in:active,inactive',
+            'stock' => 'nullable|numeric|min:0',
+            'branch_id' => 'nullable|exists:branches,id',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
-        $product->update($request->only(['name', 'barcode', 'sku', 'category_id', 'unit', 'cost_price', 'selling_price', 'reorder_level', 'expiry_date', 'status']));
+        $user = $request->user();
+        $categoryId = $request->category_id ?? ($request->filled('category') ? $this->resolveCategoryId($request->category, $user->business_id) : $product->category_id);
+
+        $product->update([
+            ...$request->only(['name', 'barcode', 'sku', 'unit', 'cost_price', 'selling_price', 'reorder_level', 'expiry_date']),
+            'category_id' => $categoryId,
+            'status' => $request->status ?? $product->status,
+        ]);
+
+        $branchId = $request->branch_id ?? $user->branch_id;
+        if ($branchId && $request->filled('stock')) {
+            $stock = BranchStock::firstOrCreate(
+                ['product_id' => $product->id, 'branch_id' => $branchId],
+                ['qty' => 0, 'reorder_level' => $request->reorder_level ?? 5]
+            );
+            $stock->update(['qty' => (float) $request->stock]);
+        }
+
+        $product->load('category');
+        $product->stock = (int) ($product->branchStock()->where('branch_id', $branchId)->value('qty') ?? 0);
+        $product->category = $product->category?->name;
 
         return response()->json([
             'success' => true,
