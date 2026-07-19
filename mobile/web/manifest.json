@@ -1,11 +1,11 @@
 {
-    "name": "mobile",
-    "short_name": "mobile",
+    "name": "Wazabiashara",
+    "short_name": "Wazabiashara",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#024938",
+    "theme_color": "#024938",
+    "description": "Wazabiashara — Your Business, In Your Hands. Manage sales, inventory, branches, debts and reports from your phone.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

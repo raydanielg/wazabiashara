@@ -4,4 +4,5 @@
     <color name="brand_primary_light">#017359</color>
     <color name="brand_gold">#D4A437</color>
     <color name="brand_background">#F9FAFB</color>
+	<color name="ic_launcher_background">#024938</color>
 </resources>

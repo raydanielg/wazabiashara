@@ -6,10 +6,12 @@ class AppColors {
   static const Color primaryLight = Color(0xFF017359);
   static const Color primaryDark = Color(0xFF013527);
 
-  // Accent / Gold
-  static const Color gold = Color(0xFFD4A437);
-  static const Color goldLight = Color(0xFFE8C25A);
-  static const Color goldDark = Color(0xFFB8902E);
+  // Accent / Gold (matches web auth.blade.php)
+  static const Color gold = Color(0xFFF9AC00);
+  static const Color goldLight = Color(0xFFFFC64D);
+  static const Color goldDark = Color(0xFFD49700);
+  static const Color goldGradientStart = Color(0xFFFFC64D);
+  static const Color goldGradientEnd = Color(0xFFF9AC00);
 
   // Semantic Colors
   static const Color success = Color(0xFF10B981);
