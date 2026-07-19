@@ -4,7 +4,7 @@ class AppConfig {
 
   // API Configuration
   static const String baseUrl = 'https://app.wazaelimuforum.com';
-  static const String apiVersion = '/api/v1';
+  static const String apiVersion = '/api';
   static const Duration apiTimeout = Duration(seconds: 30);
 
   // Storage Keys

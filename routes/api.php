@@ -32,6 +32,8 @@ use App\Http\Controllers\Api\ReportController;
 // Public
 Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('api.forgot-password');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('api.reset-password');
 
 // Authenticated (Bearer token)
 Route::middleware('auth.token')->group(function () {

@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
 {
@@ -111,6 +114,107 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'user' => $user,
+        ]);
+    }
+
+    /**
+     * Send a password reset link to the user's email.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tafadhali ingiza barua pepe sahihi.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        // Always return success to avoid email enumeration
+        if (!$user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tumekutumia kiungo cha kubadilisha nenosiri kwenye barua pepe yako.',
+            ]);
+        }
+
+        // Generate reset token
+        $token = Str::random(64);
+
+        // Store token in cache for 60 minutes
+        cache()->put('password_reset_' . $token, [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'created_at' => Carbon::now(),
+        ], now()->addMinutes(60));
+
+        // Send reset email
+        Mail::send('emails.password-reset', ['token' => $token, 'user' => $user], function ($message) use ($user) {
+            $message->to($user->email, $user->name);
+            $message->subject('Wazabiashara - Badilisha Nenosiri');
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tumekutumia kiungo cha kubadilisha nenosiri kwenye barua pepe yako.',
+        ]);
+    }
+
+    /**
+     * Reset password using token.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Taarifa si sahihi.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $resetData = cache()->get('password_reset_' . $request->token);
+
+        if (!$resetData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kiungo cha kubadilisha nenosiri halihalali au kimekwisha muda wake.',
+            ], 400);
+        }
+
+        $user = User::find($resetData['user_id']);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mtumiaji hakupatikana.',
+            ], 404);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Delete used token
+        cache()->forget('password_reset_' . $request->token);
+
+        // Revoke all existing tokens
+        $user->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nenosiri limebadilishwa kikamilifu. Unaweza kuingia sasa.',
         ]);
     }
 }

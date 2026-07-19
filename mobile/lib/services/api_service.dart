@@ -68,6 +68,18 @@ class ApiService {
     return await _dio.post('/auth/resend-otp', data: {'phone': phone});
   }
 
+  Future<Response> forgotPassword(String email) async {
+    return await _dio.post('/forgot-password', data: {'email': email});
+  }
+
+  Future<Response> resetPassword(String token, String password, String passwordConfirmation) async {
+    return await _dio.post('/reset-password', data: {
+      'token': token,
+      'password': password,
+      'password_confirmation': passwordConfirmation,
+    });
+  }
+
   Future<void> logout() async {
     try {
       await _dio.post('/auth/logout');

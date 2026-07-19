@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
+import '../../services/api_service.dart';
 import '../../utils/toast_helper.dart';
 import '../../widgets/auth_widgets.dart';
 
@@ -44,15 +46,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
     setState(() => _isSending = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final api = ApiService();
+      final res = await api.forgotPassword(_emailController.text.trim());
 
-    if (!mounted) return;
-    setState(() {
-      _isSending = false;
-      _emailSent = true;
-    });
+      if (!mounted) return;
 
-    ToastHelper.success(context, 'Reset link sent to ${_emailController.text}');
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        setState(() {
+          _isSending = false;
+          _emailSent = true;
+        });
+        ToastHelper.success(context, res.data['message'] ?? 'Reset link sent to ${_emailController.text}');
+      } else {
+        setState(() => _isSending = false);
+        final msg = res.data['message'] ?? 'Failed to send reset link';
+        ToastHelper.error(context, msg);
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      final msg = e.response?.data['message'] ?? 'Network error. Try again.';
+      ToastHelper.error(context, msg);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      ToastHelper.error(context, 'Something went wrong. Try again.');
+    }
   }
 
   @override
