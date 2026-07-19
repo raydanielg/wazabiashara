@@ -47,11 +47,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   Future<void> _navigateAfterDelay() async {
-    await Future.delayed(const Duration(milliseconds: 2500));
+    final auth = context.read<AuthProvider>();
+    await auth.init();
+
+    await Future.delayed(const Duration(milliseconds: 2000));
 
     if (!mounted) return;
 
-    final auth = context.read<AuthProvider>();
     if (auth.isAuthenticated) {
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     } else {

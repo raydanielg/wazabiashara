@@ -30,12 +30,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String phone, String password) async {
+  Future<bool> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final res = await _api.login(phone, password);
+      final res = await _api.login(email, password);
       if (res.statusCode == 200 && res.data['success'] == true) {
         final token = res.data['token'] as String;
         final userData = res.data['user'] as Map<String, dynamic>;
@@ -66,6 +66,35 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return res.statusCode == 201 && res.data['success'] == true;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> verifyOtp(String phone, String otp) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final res = await _api.verifyOtp(phone, otp);
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final token = res.data['token'] as String?;
+        final userData = res.data['user'] as Map<String, dynamic>?;
+        if (token != null && userData != null) {
+          await _storage.saveToken(token);
+          await _storage.saveUser(userData);
+          _user = User.fromJson(userData);
+          _isAuthenticated = true;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       _isLoading = false;
       notifyListeners();

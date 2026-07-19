@@ -46,9 +46,9 @@ class ApiService {
   }
 
   // Auth endpoints
-  Future<Response> login(String phone, String password) async {
+  Future<Response> login(String email, String password) async {
     return await _dio.post('/auth/login', data: {
-      'phone': phone,
+      'email': email,
       'password': password,
     });
   }
