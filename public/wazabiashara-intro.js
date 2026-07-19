@@ -128,22 +128,7 @@
     return stage;
   }
 
-  var SESSION_KEY = "wz-intro-played";
   var ANIM_DURATION = 4200;
-
-  function shouldPlay() {
-    try {
-      return sessionStorage.getItem(SESSION_KEY) !== "1";
-    } catch (e) {
-      return true;
-    }
-  }
-
-  function markPlayed() {
-    try {
-      sessionStorage.setItem(SESSION_KEY, "1");
-    } catch (e) {}
-  }
 
   var WazabiasharaIntro = {
     /**
@@ -153,7 +138,6 @@
      * @param {boolean} [opts.showReplay=true] - show a "Cheza Tena" replay button.
      * @param {boolean} [opts.autoDismiss=true] - auto fade out after animation completes.
      * @param {number} [opts.duration=4200] - ms before auto dismiss.
-     * @param {boolean} [opts.oncePerSession=true] - only play once per browser session.
      * @returns {{replay: Function, el: HTMLElement, dismiss: Function}}
      */
     mount: function (target, opts) {
@@ -161,11 +145,6 @@
       var showReplay = opts.showReplay !== false;
       var autoDismiss = opts.autoDismiss !== false;
       var duration = opts.duration || ANIM_DURATION;
-      var oncePerSession = opts.oncePerSession !== false;
-
-      if (oncePerSession && !shouldPlay()) {
-        return { replay: function(){}, el: null, dismiss: function(){} };
-      }
 
       injectFont();
       injectCSS();
@@ -184,8 +163,6 @@
 
       var stage = buildStage();
       container.appendChild(stage);
-
-      markPlayed();
 
       function dismiss() {
         stage.classList.add("wz-hide");
@@ -239,10 +216,10 @@
   if (auto) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
-        WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true, oncePerSession: true });
+        WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true });
       });
     } else {
-      WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true, oncePerSession: true });
+      WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true });
     }
   }
 })(window);
