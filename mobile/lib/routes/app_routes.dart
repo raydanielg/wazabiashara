@@ -4,6 +4,8 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/sales/sales_screen.dart';
+import '../screens/customers/customers_screen.dart';
 
 class AppRoutes {
   static const String splash = '/splash';
@@ -35,62 +37,18 @@ class AppRoutes {
         return _page(OtpScreen(phone: phone));
       case dashboard:
         return _page(const DashboardScreen());
-      case pos:
-        return _page(const _Placeholder(title: 'POS', icon: Icons.point_of_sale));
-      case products:
-        return _page(const _Placeholder(title: 'Products', icon: Icons.inventory_2_outlined));
       case sales:
-        return _page(const _Placeholder(title: 'Sales', icon: Icons.receipt_long_outlined));
+        return _page(const SalesScreen());
       case customers:
-        return _page(const _Placeholder(title: 'Customers', icon: Icons.people_outline));
-      case reports:
-        return _page(const _Placeholder(title: 'Reports', icon: Icons.bar_chart_outlined));
-      case AppRoutes.settings:
-        return _page(const _Placeholder(title: 'Settings', icon: Icons.settings_outlined));
-      case profile:
-        return _page(const _Placeholder(title: 'Profile', icon: Icons.person_outline));
+        return _page(const CustomersScreen());
       default:
-        return _page(const _Placeholder(title: 'Not Found', icon: Icons.error_outline));
+        return _page(const Scaffold(
+          body: Center(child: Text('Page not found')),
+        ));
     }
   }
 
   static PageRoute _page(Widget widget) {
     return MaterialPageRoute(builder: (_) => widget);
-  }
-}
-
-class _Placeholder extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _Placeholder({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              '$title - Coming Soon',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[500],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This screen is under construction',
-              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

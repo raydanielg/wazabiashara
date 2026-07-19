@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/dashboard_provider.dart';
 import 'services/storage_service.dart';
 import 'routes/app_routes.dart';
 import 'screens/splash_screen.dart';
@@ -34,6 +35,7 @@ class WazabiasharaApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
