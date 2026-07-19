@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="w-full">
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-xl border-0 sm:border border-gray-100 overflow-hidden min-h-screen sm:min-h-0">
         {{-- Header --}}
-        <div class="px-8 py-8 text-center border-b border-gray-100">
+        <div class="px-6 sm:px-8 py-8 text-center border-b border-gray-100">
             <img src="{{ asset('logo.png') }}" alt="Wazabiashara" class="w-16 h-16 mx-auto object-contain mb-3">
             <h2 class="text-2xl font-extrabold text-gray-800">Reset Password</h2>
             <p class="text-gray-400 text-sm mt-1">We'll send you a reset link</p>
@@ -14,7 +14,7 @@
         </div>
 
         {{-- Form --}}
-        <div class="p-8">
+        <div class="p-6 sm:p-8">
             @if (session('status'))
                 <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm flex items-center gap-2">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -61,6 +61,6 @@
         </div>
     </div>
 
-    <p class="mt-6 text-center text-xs text-gray-400">&copy; {{ date('Y') }} Wazabiashara. All rights reserved.</p>
+    <p class="mt-6 text-center text-xs text-gray-400 hidden sm:block">&copy; {{ date('Y') }} Wazabiashara. All rights reserved.</p>
 </div>
 @endsection
