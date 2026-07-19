@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../routes/app_routes.dart';
@@ -56,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       ToastHelper.success(context, 'Welcome back!');
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     } else {
-      ToastHelper.error(context, 'Invalid email or password');
+      ToastHelper.error(context, auth.errorMessage ?? 'Invalid email or password');
     }
   }
 

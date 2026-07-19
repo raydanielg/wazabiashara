@@ -36,6 +36,39 @@ Auth::routes();
 Route::post('/ajax/login', [App\Http\Controllers\Auth\LoginController::class, 'ajaxLogin'])->name('ajax.login');
 Route::post('/ajax/register', [App\Http\Controllers\Auth\RegisterController::class, 'ajaxRegister'])->name('ajax.register');
 
+// Password Reset (via email link from API)
+Route::get('/reset-password', function (\Illuminate\Http\Request $request) {
+    $token = $request->query('token');
+    if (!$token) {
+        return redirect('/')->with('error', 'Kiungo batili.');
+    }
+    return view('auth.passwords.api-reset', ['token' => $token]);
+})->name('password.reset.web');
+
+Route::post('/reset-password', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'token' => ['required', 'string'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    $resetData = cache()->get('password_reset_' . $request->token);
+
+    if (!$resetData) {
+        return back()->withErrors(['token' => 'Kiungo cha kubadilisha nenosiri halihalali au kimekwisha muda wake.']);
+    }
+
+    $user = \App\Models\User::find($resetData['user_id']);
+    if (!$user) {
+        return back()->withErrors(['token' => 'Mtumiaji hakupatikana.']);
+    }
+
+    $user->update(['password' => \Illuminate\Support\Facades\Hash::make($request->password)]);
+    cache()->forget('password_reset_' . $request->token);
+    $user->tokens()->delete();
+
+    return redirect('/login')->with('status', 'Nenosiri limebadilishwa kikamilifu. Unaweza kuingia sasa.');
+})->name('password.reset.submit');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 

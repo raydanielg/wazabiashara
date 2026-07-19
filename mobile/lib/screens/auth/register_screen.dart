@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       ToastHelper.success(context, 'Welcome to Wazabiashara!');
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     } else {
-      ToastHelper.error(context, 'Registration failed. Please try again.');
+      ToastHelper.error(context, auth.errorMessage ?? 'Registration failed. Please try again.');
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../models/user.dart';
 import '../models/business.dart';
 import '../services/api_service.dart';
@@ -30,8 +31,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   Future<bool> login(String email, String password) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -47,10 +52,17 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       }
+      _errorMessage = res.data['message'] as String? ?? 'Login failed';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } on DioException catch (e) {
+      _errorMessage = e.response?.data['message'] as String? ?? 'Network error. Try again.';
       _isLoading = false;
       notifyListeners();
       return false;
     } catch (e) {
+      _errorMessage = 'Something went wrong. Try again.';
       _isLoading = false;
       notifyListeners();
       return false;
@@ -59,14 +71,32 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> register(Map<String, dynamic> data) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       final res = await _api.register(data);
+      if (res.statusCode == 201 && res.data['success'] == true) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      _errorMessage = res.data['message'] as String? ?? 'Registration failed';
       _isLoading = false;
       notifyListeners();
-      return res.statusCode == 201 && res.data['success'] == true;
+      return false;
+    } on DioException catch (e) {
+      final errors = e.response?.data['errors'] as Map<String, dynamic>?;
+      if (errors != null && errors.isNotEmpty) {
+        _errorMessage = errors.values.first as String?;
+      } else {
+        _errorMessage = e.response?.data['message'] as String? ?? 'Network error. Try again.';
+      }
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
+      _errorMessage = 'Something went wrong. Try again.';
       _isLoading = false;
       notifyListeners();
       return false;
