@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_config.dart';
 import '../theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../routes/app_routes.dart';
@@ -50,12 +52,17 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     final auth = context.read<AuthProvider>();
     await auth.init();
 
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingDone = prefs.getBool(AppConfig.onboardingKey) ?? false;
+
     await Future.delayed(const Duration(milliseconds: 2000));
 
     if (!mounted) return;
 
     if (auth.isAuthenticated) {
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+    } else if (!onboardingDone) {
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
     }

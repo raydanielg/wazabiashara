@@ -14,6 +14,7 @@ class AppConfig {
   static const String languageKey = 'app_language';
   static const String themeKey = 'app_theme';
   static const String pinKey = 'user_pin';
+  static const String onboardingKey = 'onboarding_completed';
 
   // Currency
   static const String currency = 'TZS';

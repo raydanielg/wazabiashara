@@ -171,6 +171,9 @@ tailwind.config = {
 
 <body class="font-['Nunito',sans-serif] antialiased text-slate-800 min-h-screen bg-white overflow-x-hidden">
 
+<!-- Wazabiashara Logo Intro Animation (auto-dismiss, once per session) -->
+<script src="{{ asset('wazabiashara-intro.js') }}"></script>
+
 @php
 /* ==================================================================
    SVG ICON HELPERS — flat + bold outline style (hakuna emoji popote)

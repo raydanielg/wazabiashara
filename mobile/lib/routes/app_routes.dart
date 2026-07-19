@@ -1,11 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 
 class AppRoutes {
   static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String register = '/register';
   static const String otp = '/otp';
@@ -22,6 +24,8 @@ class AppRoutes {
     final args = settings.arguments;
 
     switch (settings.name) {
+      case onboarding:
+        return _page(const OnboardingScreen());
       case login:
         return _page(const LoginScreen());
       case register:
