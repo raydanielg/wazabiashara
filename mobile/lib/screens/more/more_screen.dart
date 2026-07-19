@@ -7,6 +7,7 @@ import '../reports/reports_screen.dart';
 import '../settings/settings_screen.dart';
 import '../categories/category_list_screen.dart';
 import '../accounts/cash_bank_screen.dart';
+import '../support/tickets_screen.dart';
 
 /// The "More" tab — mirrors the menu structure of the reference app:
 /// quick shortcuts, My Account, a Management section, a Utilities section
@@ -142,7 +143,9 @@ class MoreScreen extends StatelessWidget {
             _sectionTitle('Others'),
             const SizedBox(height: 10),
             _card([
-              _item(context, Icons.support_agent_outlined, AppColors.info, 'Help and Support', onTap: () => _comingSoon(context, 'Help and Support')),
+              _item(context, Icons.support_agent_outlined, AppColors.info, 'Help and Support', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketsScreen()));
+              }),
               _divider(),
               _item(context, Icons.cloud_outlined, AppColors.success, 'Backup Information', onTap: () => _comingSoon(context, 'Backup Information')),
               _divider(),

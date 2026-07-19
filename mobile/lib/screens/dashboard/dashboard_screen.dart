@@ -13,6 +13,7 @@ import '../customers/customers_screen.dart';
 import '../more/more_screen.dart';
 import '../parties/add_party_screen.dart';
 import '../sales/add_sale_screen.dart';
+import '../quick_entry/quick_entry_screen.dart';
 
 /// Root shell for the signed-in app. Bottom navigation mirrors the
 /// reference design: Home, Transactions, Parties, Inventory, More.
@@ -337,7 +338,9 @@ class _ExploreAppRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _exploreTile(context, Icons.flash_on_outlined, 'Quick Entry', () {})),
+        Expanded(child: _exploreTile(context, Icons.flash_on_outlined, 'Quick Entry', () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickEntryScreen()));
+        })),
         const SizedBox(width: 12),
         Expanded(child: _exploreTile(context, Icons.point_of_sale, 'Quick POS', () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const PosScreen()));

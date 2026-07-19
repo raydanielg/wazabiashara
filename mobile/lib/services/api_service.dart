@@ -47,25 +47,25 @@ class ApiService {
 
   // Auth endpoints
   Future<Response> login(String email, String password) async {
-    return await _dio.post('/auth/login', data: {
+    return await _dio.post('/login', data: {
       'email': email,
       'password': password,
     });
   }
 
   Future<Response> register(Map<String, dynamic> data) async {
-    return await _dio.post('/auth/register', data: data);
+    return await _dio.post('/register', data: data);
   }
 
   Future<Response> verifyOtp(String phone, String otp) async {
-    return await _dio.post('/auth/verify-otp', data: {
+    return await _dio.post('/verify-otp', data: {
       'phone': phone,
       'otp': otp,
     });
   }
 
   Future<Response> resendOtp(String phone) async {
-    return await _dio.post('/auth/resend-otp', data: {'phone': phone});
+    return await _dio.post('/resend-otp', data: {'phone': phone});
   }
 
   Future<Response> forgotPassword(String email) async {
@@ -82,7 +82,7 @@ class ApiService {
 
   Future<void> logout() async {
     try {
-      await _dio.post('/auth/logout');
+      await _dio.post('/logout');
     } finally {
       await _storage.delete(key: AppConfig.tokenKey);
       await _storage.delete(key: AppConfig.userKey);

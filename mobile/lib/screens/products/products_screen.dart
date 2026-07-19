@@ -3,6 +3,9 @@ import '../../theme/app_theme.dart';
 import '../../models/product.dart';
 import '../../utils/format_utils.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/loading_widget.dart';
+import '../../services/api_service.dart';
+import 'add_item_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -12,24 +15,37 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
+  final _api = ApiService();
   final _searchCtrl = TextEditingController();
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _selectedCategory;
 
-  final List<Product> _products = [
-    Product(id: 1, name: 'Soda 500ml', sellingPrice: 3000, costPrice: 2000, stock: 120, unit: 'btl', category: 'Drinks', reorderLevel: 10),
-    Product(id: 2, name: 'Rice 1kg', sellingPrice: 2500, costPrice: 1800, stock: 85, unit: 'kg', category: 'Food', reorderLevel: 10),
-    Product(id: 3, name: 'Cooking Oil 1L', sellingPrice: 5000, costPrice: 3800, stock: 64, unit: 'ltr', category: 'Food', reorderLevel: 8),
-    Product(id: 4, name: 'Sugar 1kg', sellingPrice: 3000, costPrice: 2200, stock: 52, unit: 'kg', category: 'Food', reorderLevel: 10),
-    Product(id: 5, name: 'Bread', sellingPrice: 1500, costPrice: 900, stock: 3, unit: 'pcs', category: 'Bakery', reorderLevel: 10),
-    Product(id: 6, name: 'Milk 1L', sellingPrice: 2000, costPrice: 1400, stock: 30, unit: 'ltr', category: 'Dairy', reorderLevel: 8),
-    Product(id: 7, name: 'Eggs (tray)', sellingPrice: 9000, costPrice: 7000, stock: 18, unit: 'tray', category: 'Dairy', reorderLevel: 5),
-    Product(id: 8, name: 'Tea 200g', sellingPrice: 1800, costPrice: 1100, stock: 40, unit: 'pcs', category: 'Drinks', reorderLevel: 10),
-    Product(id: 9, name: 'Soap 1kg', sellingPrice: 3500, costPrice: 2500, stock: 2, unit: 'kg', category: 'Household', reorderLevel: 5),
-    Product(id: 10, name: 'Salt 500g', sellingPrice: 800, costPrice: 500, stock: 60, unit: 'pcs', category: 'Food', reorderLevel: 10),
-    Product(id: 11, name: 'Water 500ml', sellingPrice: 500, costPrice: 300, stock: 100, unit: 'btl', category: 'Drinks', reorderLevel: 20),
-    Product(id: 12, name: 'Biscuits', sellingPrice: 1000, costPrice: 600, stock: 0, unit: 'pcs', category: 'Bakery', reorderLevel: 10),
-  ];
+  List<Product> _products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getProducts();
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final list = (res.data['data'] as List?) ?? [];
+        setState(() => _products = list.map((e) => Product.fromJson(e)).toList());
+      }
+    } catch (_) {
+      // No connectivity yet — show the genuine empty state.
+    }
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _openAddItem({Product? existing}) async {
+    final saved = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => AddItemScreen(existing: existing)));
+    if (saved == true) _load();
+  }
 
   List<String> get _categories {
     final cats = _products.map((p) => p.category ?? 'Other').toSet().toList();
@@ -56,57 +72,67 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: const Text('Inventory'),
         actions: [
-          IconButton(onPressed: () => _showAddSheet(context), icon: const Icon(Icons.add_circle_outline)),
+          IconButton(onPressed: () => _openAddItem(), icon: const Icon(Icons.add_circle_outline)),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _searchCtrl,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchCtrl.text.isNotEmpty
-                        ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
-                        : null,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 36,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _categoryChip(null, 'All'),
-                      ..._categories.map((c) => _categoryChip(c, c)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _filtered.isEmpty
-                ? const EmptyState(icon: Icons.inventory_2_outlined, title: 'No products found', subtitle: 'Try adjusting your search')
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filtered.length,
-                    itemBuilder: (ctx, i) => _ProductListTile(
-                      product: _filtered[i],
-                      onEdit: () => _showEditSheet(context, _filtered[i]),
-                      onDelete: () => _confirmDelete(context, _filtered[i]),
+      body: _isLoading
+          ? const LoadingWidget()
+          : _products.isEmpty
+              ? EmptyState(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'No Items in Inventory',
+                  subtitle: 'Your inventory is currently empty. Start by creating a item to manage it.',
+                  actionLabel: 'Add New Item',
+                  onAction: () => _openAddItem(),
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _searchCtrl,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              hintText: 'Search products...',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchCtrl.text.isNotEmpty
+                                  ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 36,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                _categoryChip(null, 'All'),
+                                ..._categories.map((c) => _categoryChip(c, c)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-          ),
-        ],
-      ),
+                    Expanded(
+                      child: _filtered.isEmpty
+                          ? const EmptyState(icon: Icons.search_off, title: 'No products found', subtitle: 'Try adjusting your search')
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: _filtered.length,
+                              itemBuilder: (ctx, i) => _ProductListTile(
+                                product: _filtered[i],
+                                onEdit: () => _openAddItem(existing: _filtered[i]),
+                                onDelete: () => _confirmDelete(context, _filtered[i]),
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
     );
   }
 
@@ -133,67 +159,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  void _showAddSheet(BuildContext context) {
-    _showProductSheet(context, product: null);
-  }
-
-  void _showEditSheet(BuildContext context, Product product) {
-    _showProductSheet(context, product: product);
-  }
-
-  void _showProductSheet(BuildContext context, {Product? product}) {
-    final isEdit = product != null;
-    final nameCtrl = TextEditingController(text: product?.name ?? '');
-    final priceCtrl = TextEditingController(text: product != null ? product.sellingPrice.toString() : '');
-    final stockCtrl = TextEditingController(text: product != null ? product.stock.toString() : '');
-    final costCtrl = TextEditingController(text: product != null ? product.costPrice.toString() : '');
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(isEdit ? 'Edit Product' : 'Add Product',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 20),
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name')),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Selling Price'))),
-                  const SizedBox(width: 12),
-                  Expanded(child: TextField(controller: costCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Cost Price'))),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Quantity')),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isEdit ? 'Product updated' : 'Product added'),
-                      backgroundColor: AppColors.success,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                child: Text(isEdit ? 'Save Changes' : 'Add Product'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _confirmDelete(BuildContext context, Product product) {
     showDialog(
       context: context,
@@ -203,8 +168,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
+              try {
+                await _api.deleteProduct(product.id);
+              } catch (_) {}
               setState(() => _products.removeWhere((p) => p.id == product.id));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${product.name} deleted'), backgroundColor: AppColors.error, behavior: SnackBarBehavior.floating),

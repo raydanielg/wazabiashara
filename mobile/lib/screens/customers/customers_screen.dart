@@ -20,6 +20,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   List<Customer> _customers = [];
   bool _isLoading = true;
+  final Set<String> _partyTypes = {'Customer'};
+  String _paymentFilter = 'All Payment';
 
   @override
   void initState() {
@@ -49,11 +51,21 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   List<Customer> get _filtered {
     final q = _searchCtrl.text.toLowerCase();
-    if (q.isEmpty) return _customers;
-    return _customers.where((c) =>
-      c.name.toLowerCase().contains(q) ||
-      (c.phone?.toLowerCase().contains(q) ?? false)
-    ).toList();
+    // This screen currently sources "parties" from the Customers API only —
+    // the Supplier chip is shown for parity with the reference design but
+    // suppliers live in a separate list until the two are merged server-side.
+    if (!_partyTypes.contains('Customer')) return [];
+
+    return _customers.where((c) {
+      final matchesSearch = q.isEmpty || c.name.toLowerCase().contains(q) || (c.phone?.toLowerCase().contains(q) ?? false);
+      final matchesPayment = switch (_paymentFilter) {
+        'To Receive' => c.currentDebt > 0,
+        'Settled' => c.currentDebt == 0,
+        'To Give' => false,
+        _ => true,
+      };
+      return matchesSearch && matchesPayment;
+    }).toList();
   }
 
   double get _totalDebt => _customers.fold(0, (sum, c) => sum + c.currentDebt);
@@ -102,23 +114,51 @@ class _CustomersScreenState extends State<CustomersScreen> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          TextField(
-                            controller: _searchCtrl,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              hintText: 'Search parties...',
-                              prefixIcon: const Icon(Icons.search),
-                              suffixIcon: _searchCtrl.text.isNotEmpty
-                                  ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
-                                  : null,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _searchCtrl,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search parties...',
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: _searchCtrl.text.isNotEmpty
+                                        ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              _iconBtn(Icons.filter_list, _showPaymentFilterSheet),
+                              const SizedBox(width: 8),
+                              _iconBtn(Icons.filter_none, () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Export parties — coming soon'), behavior: SnackBarBehavior.floating),
+                                );
+                              }),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              _typeChip('Customer'),
+                              const SizedBox(width: 8),
+                              _typeChip('Supplier'),
+                              const SizedBox(width: 8),
+                              _paymentChip(),
+                            ],
                           ),
                         ],
                       ),
                     ),
                     Expanded(
                       child: _filtered.isEmpty
-                          ? const EmptyState(icon: Icons.search_off, title: 'No matching parties')
+                          ? EmptyState(
+                              icon: Icons.folder_open_outlined,
+                              title: 'No Parties Data Found',
+                              subtitle: 'Please search different party name or create new party.',
+                            )
                           : ListView.builder(
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               itemCount: _filtered.length,
@@ -130,6 +170,100 @@ class _CustomersScreenState extends State<CustomersScreen> {
                     ),
                   ],
                 ),
+    );
+  }
+
+  Widget _iconBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(border: Border.all(color: AppColors.divider), borderRadius: BorderRadius.circular(10)),
+        child: Icon(icon, color: AppColors.textSecondary, size: 20),
+      ),
+    );
+  }
+
+  Widget _typeChip(String label) {
+    final selected = _partyTypes.contains(label);
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (selected) {
+          _partyTypes.remove(label);
+        } else {
+          _partyTypes.add(label);
+        }
+      }),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surface,
+          border: Border.all(color: selected ? AppColors.primary : AppColors.divider),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: selected ? Colors.white : AppColors.textSecondary)),
+            if (selected) ...[
+              const SizedBox(width: 6),
+              const Icon(Icons.close, size: 14, color: Colors.white),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _paymentChip() {
+    final active = _paymentFilter != 'All Payment';
+    return GestureDetector(
+      onTap: _showPaymentFilterSheet,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? AppColors.primary : AppColors.surface,
+          border: Border.all(color: active ? AppColors.primary : AppColors.divider),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(_paymentFilter, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: active ? Colors.white : AppColors.textSecondary)),
+            const SizedBox(width: 4),
+            Icon(Icons.expand_more, size: 16, color: active ? Colors.white : AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPaymentFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: Text('Filter by Payment Type', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          ),
+          ...['All Payment', 'To Give', 'To Receive', 'Settled'].map((option) => RadioListTile<String>(
+                value: option,
+                groupValue: _paymentFilter,
+                activeColor: AppColors.primary,
+                title: Text(option, style: const TextStyle(fontWeight: FontWeight.w600)),
+                onChanged: (v) {
+                  setState(() => _paymentFilter = v ?? 'All Payment');
+                  Navigator.pop(ctx);
+                },
+              )),
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 

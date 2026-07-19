@@ -4,6 +4,11 @@ import '../../theme/app_theme.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../routes/app_routes.dart';
+import 'app_settings_screen.dart';
+import 'invoice_settings_screen.dart';
+import 'transaction_settings_screen.dart';
+import 'quick_entry_settings_screen.dart';
+import '../support/tickets_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -56,12 +61,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ]),
             const SizedBox(height: 24),
+            _sectionTitle('App Preferences'),
+            const SizedBox(height: 12),
+            _settingsCard([
+              _navItem(icon: Icons.tune_outlined, iconColor: AppColors.primary, title: 'App Settings', subtitle: 'Appearance, currency, formats', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AppSettingsScreen()));
+              }),
+              _divider(),
+              _navItem(icon: Icons.receipt_long_outlined, iconColor: AppColors.info, title: 'Invoice Print Settings', subtitle: 'Print type, page size, customization', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const InvoiceSettingsScreen()));
+              }),
+              _divider(),
+              _navItem(icon: Icons.swap_horiz, iconColor: AppColors.gold, title: 'Transaction Settings', subtitle: 'Defaults for sales & invoices', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const TransactionSettingsScreen()));
+              }),
+              _divider(),
+              _navItem(icon: Icons.flash_on_outlined, iconColor: AppColors.warning, title: 'Quick Entry Settings', subtitle: 'Customize the Quick Entry screen', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickEntrySettingsScreen()));
+              }),
+            ]),
+            const SizedBox(height: 24),
             _sectionTitle('Business'),
             const SizedBox(height: 12),
             _settingsCard([
               _navItem(icon: Icons.store_outlined, iconColor: AppColors.primary, title: 'Business Profile', subtitle: 'Edit business details', onTap: () {}),
-              _divider(),
-              _navItem(icon: Icons.receipt_long_outlined, iconColor: AppColors.info, title: 'Receipt Settings', subtitle: 'Customize your receipts', onTap: () {}),
               _divider(),
               _navItem(icon: Icons.fingerprint_outlined, iconColor: AppColors.success, title: 'Security & PIN', subtitle: 'App lock and security', onTap: () {}),
             ]),
@@ -69,7 +92,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _sectionTitle('Support'),
             const SizedBox(height: 12),
             _settingsCard([
-              _navItem(icon: Icons.help_outline, iconColor: AppColors.info, title: 'Help & FAQ', subtitle: 'Get help using the app', onTap: () {}),
+              _navItem(icon: Icons.help_outline, iconColor: AppColors.info, title: 'Help & FAQ', subtitle: 'Get help using the app', onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketsScreen()));
+              }),
               _divider(),
               _navItem(icon: Icons.info_outline, iconColor: AppColors.primary, title: 'About', subtitle: 'Version 1.0.0', onTap: () {}),
             ]),
