@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="w-full">
-    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-none sm:rounded-2xl shadow-none sm:shadow-xl border-0 sm:border border-gray-100 overflow-hidden min-h-screen sm:min-h-0">
         {{-- Header --}}
-        <div class="px-8 py-8 text-center border-b border-gray-100">
+        <div class="px-6 sm:px-8 py-8 text-center border-b border-gray-100">
             <img src="{{ asset('logo.png') }}" alt="Wazabiashara" class="w-16 h-16 mx-auto object-contain mb-3">
             <h2 class="text-2xl font-extrabold text-gray-800">Welcome Back</h2>
             <p class="text-gray-400 text-sm mt-1">Sign in to your Wazabiashara account</p>
@@ -14,7 +14,7 @@
         </div>
 
         {{-- Form --}}
-        <div class="p-8">
+        <div class="p-6 sm:p-8">
             <form id="loginForm" class="space-y-5">
                 @csrf
 
@@ -88,7 +88,7 @@
     </div>
 
     {{-- Footer --}}
-    <p class="mt-6 text-center text-xs text-gray-400">&copy; {{ date('Y') }} Wazabiashara. All rights reserved.</p>
+    <p class="mt-6 text-center text-xs text-gray-400 hidden sm:block">&copy; {{ date('Y') }} Wazabiashara. All rights reserved.</p>
 </div>
 
 {{-- AJAX Login + Password Toggle Script --}}

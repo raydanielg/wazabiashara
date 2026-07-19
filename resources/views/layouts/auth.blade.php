@@ -75,7 +75,7 @@
     {{-- AJAX Progress Bar --}}
     <div id="ajaxLoader" class="ajax-loader"></div>
 
-    <main id="authMain" class="relative z-10 min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <main id="authMain" class="relative z-10 min-h-screen flex items-center justify-center py-0 px-0 sm:py-8 sm:px-6 lg:px-8">
         <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-0 lg:gap-8 items-center">
 
             {{-- Left Column: Image + Animated Business Text (hidden on mobile) --}}
@@ -168,7 +168,7 @@
             </div>
 
             {{-- Right Column: Form --}}
-            <div class="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto" style="animation: simpleFadeIn 0.4s ease-out both;">
+            <div class="w-full lg:max-w-md lg:mx-0 lg:ml-auto" style="animation: simpleFadeIn 0.4s ease-out both;">
                 @yield('content')
             </div>
 
