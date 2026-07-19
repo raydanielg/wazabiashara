@@ -3,6 +3,9 @@ import '../../theme/app_theme.dart';
 import '../../models/customer.dart';
 import '../../utils/format_utils.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/loading_widget.dart';
+import '../../services/api_service.dart';
+import '../parties/add_party_screen.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
@@ -12,18 +15,37 @@ class CustomersScreen extends StatefulWidget {
 }
 
 class _CustomersScreenState extends State<CustomersScreen> {
+  final _api = ApiService();
   final _searchCtrl = TextEditingController();
 
-  final List<Customer> _customers = [
-    Customer(id: 1, name: 'John Doe', phone: '+255712345678', email: 'john@mail.com', currentDebt: 15000, status: 'active'),
-    Customer(id: 2, name: 'Mama Asha', phone: '+255723456789', currentDebt: 0, status: 'active'),
-    Customer(id: 3, name: 'Juma M.', phone: '+255734567890', currentDebt: 45000, creditLimit: 100000, status: 'active'),
-    Customer(id: 4, name: 'Bi. Salama', phone: '+255745678901', email: 'salama@mail.com', currentDebt: 0, status: 'active'),
-    Customer(id: 5, name: 'Hassan A.', phone: '+255756789012', currentDebt: 8000, status: 'active'),
-    Customer(id: 6, name: 'Neema J.', phone: '+255767890123', currentDebt: 0, status: 'inactive'),
-    Customer(id: 7, name: 'Fatma K.', phone: '+255778901234', currentDebt: 32000, creditLimit: 50000, status: 'active'),
-    Customer(id: 8, name: 'Ali Z.', phone: '+255789012345', currentDebt: 0, status: 'active'),
-  ];
+  List<Customer> _customers = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await _api.getCustomers();
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final list = (res.data['data'] as List?) ?? [];
+        setState(() => _customers = list.map((e) => Customer.fromJson(e)).toList());
+      }
+    } catch (_) {
+      // No connectivity yet — show the real empty state rather than fake
+      // demo data, matching a genuinely fresh account.
+    }
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _addParty() async {
+    final created = await Navigator.push<Customer>(context, MaterialPageRoute(builder: (_) => const AddPartyScreen()));
+    if (created != null) setState(() => _customers.add(created));
+  }
 
   List<Customer> get _filtered {
     final q = _searchCtrl.text.toLowerCase();
@@ -47,57 +69,67 @@ class _CustomersScreenState extends State<CustomersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customers'),
+        title: const Text('Parties'),
         actions: [
-          IconButton(onPressed: () => _showAddSheet(context), icon: const Icon(Icons.person_add_outlined)),
+          IconButton(onPressed: _addParty, icon: const Icon(Icons.person_add_outlined)),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
+      body: _isLoading
+          ? const LoadingWidget()
+          : _customers.isEmpty
+              ? EmptyState(
+                  icon: Icons.people_outline,
+                  title: "Let's Add Your First Party",
+                  subtitle: 'Click on the add new party button and manage receivables & payables with them.',
+                  actionLabel: 'Add New Party',
+                  onAction: _addParty,
+                )
+              : Column(
                   children: [
-                    Expanded(
-                      child: _summaryCard('Total Debt', FormatUtils.currencyShort(_totalDebt), AppColors.error, Icons.warning_amber),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _summaryCard('Total Debt', FormatUtils.currencyShort(_totalDebt), AppColors.error, Icons.warning_amber),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _summaryCard('Debtors', '$_debtors', AppColors.warning, Icons.people_outline),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _searchCtrl,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              hintText: 'Search parties...',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchCtrl.text.isNotEmpty
+                                  ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 12),
                     Expanded(
-                      child: _summaryCard('Debtors', '$_debtors', AppColors.warning, Icons.people_outline),
+                      child: _filtered.isEmpty
+                          ? const EmptyState(icon: Icons.search_off, title: 'No matching parties')
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: _filtered.length,
+                              itemBuilder: (ctx, i) => _CustomerTile(
+                                customer: _filtered[i],
+                                onTap: () => _showDetail(context, _filtered[i]),
+                              ),
+                            ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _searchCtrl,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'Search customers...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchCtrl.text.isNotEmpty
-                        ? IconButton(onPressed: () { _searchCtrl.clear(); setState(() {}); }, icon: const Icon(Icons.clear))
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _filtered.isEmpty
-                ? const EmptyState(icon: Icons.people_outline, title: 'No customers found')
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filtered.length,
-                    itemBuilder: (ctx, i) => _CustomerTile(
-                      customer: _filtered[i],
-                      onTap: () => _showDetail(context, _filtered[i]),
-                    ),
-                  ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -189,42 +221,6 @@ class _CustomersScreenState extends State<CustomersScreen> {
     );
   }
 
-  void _showAddSheet(BuildContext context) {
-    final nameCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Add Customer', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 20),
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Customer Name')),
-              const SizedBox(height: 12),
-              TextField(controller: phoneCtrl, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone Number')),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Customer added'), backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating),
-                  );
-                },
-                child: const Text('Add Customer'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _CustomerTile extends StatelessWidget {

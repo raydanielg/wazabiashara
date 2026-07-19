@@ -103,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   subtitle: 'Join Wazabiashara today',
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [

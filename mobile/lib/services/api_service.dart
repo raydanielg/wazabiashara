@@ -84,7 +84,7 @@ class ApiService {
 
   // Products endpoints
   Future<Response> getProducts({int page = 1, String? search}) async {
-    final params = {'page': page, 'per_page': AppConfig.pageSize};
+    final params = <String, dynamic>{'page': page, 'per_page': AppConfig.pageSize};
     if (search != null) params['search'] = search;
     return await _dio.get('/products', queryParameters: params);
   }
@@ -123,7 +123,7 @@ class ApiService {
 
   // Customers endpoints
   Future<Response> getCustomers({int page = 1, String? search}) async {
-    final params = {'page': page, 'per_page': AppConfig.pageSize};
+    final params = <String, dynamic>{'page': page, 'per_page': AppConfig.pageSize};
     if (search != null) params['search'] = search;
     return await _dio.get('/customers', queryParameters: params);
   }
@@ -142,5 +142,45 @@ class ApiService {
 
   Future<Response> updateProfile(Map<String, dynamic> data) async {
     return await _dio.put('/profile', data: data);
+  }
+
+  // Category endpoints (type: item | party | expense | income)
+  Future<Response> getCategories(String type) async {
+    return await _dio.get('/categories', queryParameters: {'type': type});
+  }
+
+  Future<Response> createCategory(Map<String, dynamic> data) async {
+    return await _dio.post('/categories', data: data);
+  }
+
+  Future<Response> updateCategory(int id, Map<String, dynamic> data) async {
+    return await _dio.put('/categories/$id', data: data);
+  }
+
+  Future<Response> deleteCategory(int id) async {
+    return await _dio.delete('/categories/$id');
+  }
+
+  // Cash & Bank account endpoints
+  Future<Response> getAccounts() async {
+    return await _dio.get('/cash-flow/accounts');
+  }
+
+  Future<Response> createAccount(Map<String, dynamic> data) async {
+    return await _dio.post('/cash-flow/accounts', data: data);
+  }
+
+  Future<Response> deleteAccount(int id) async {
+    return await _dio.delete('/cash-flow/accounts/$id');
+  }
+
+  // Customers / parties
+  Future<Response> createCustomer(Map<String, dynamic> data) async {
+    return await _dio.post('/customers', data: data);
+  }
+
+  // Sales (creating an invoice from the "Add Sale" screen)
+  Future<Response> createSale(Map<String, dynamic> data) async {
+    return await _dio.post('/sales', data: data);
   }
 }

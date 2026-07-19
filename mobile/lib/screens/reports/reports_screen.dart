@@ -18,14 +18,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'year': [9500000, 11200000, 10800000, 13500000, 12200000, 14000000, 11800000, 13200000, 12500000, 15000000, 13800000, 16500000],
   };
 
-  final Map<String, List<String>> _labels = {
+  final Map<String, List<String>> _labelsData = {
     'week': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     'month': ['W1', 'W2', 'W3', 'W4'],
     'year': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   };
 
   List<double> get _data => _salesData[_period]!;
-  List<String> get _labels => _labels[_period]!;
+  List<String> get _labels => _labelsData[_period]!;
 
   double get _total => _data.fold(0, (a, b) => a + b);
   double get _avg => _total / _data.length;

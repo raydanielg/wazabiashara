@@ -27,24 +27,24 @@ class _SplashScreenState extends State<SplashScreen>
 
   static const _word = 'wazabiashara';
   static const _tagline = 'Biashara Yako, Mkononi Mwako';
-  static const _totalMs = 5000;
+  static const _totalMs = 2500;
 
   // Timeline (ms)
-  static const _dropStart = 150.0;
-  static const _dropDur = 1050.0;
-  static const _shadowStart = 1050.0;
-  static const _shadowDur = 500.0;
-  static const _squashStart = 1050.0;
-  static const _squashDur = 420.0;
-  static const _slideStart = 1750.0;
-  static const _slideDur = 900.0;
-  static const _letterBase = 1850.0;
-  static const _letterStep = 80.0;
-  static const _letterDur = 500.0;
-  static const _taglineStart = 3050.0;
-  static const _taglineDur = 700.0;
-  static const _fadeoutStart = 4200.0;
-  static const _fadeoutDur = 600.0;
+  static const _dropStart = 100.0;
+  static const _dropDur = 600.0;
+  static const _shadowStart = 600.0;
+  static const _shadowDur = 300.0;
+  static const _squashStart = 600.0;
+  static const _squashDur = 250.0;
+  static const _slideStart = 900.0;
+  static const _slideDur = 500.0;
+  static const _letterBase = 1000.0;
+  static const _letterStep = 50.0;
+  static const _letterDur = 300.0;
+  static const _taglineStart = 1700.0;
+  static const _taglineDur = 400.0;
+  static const _fadeoutStart = 2100.0;
+  static const _fadeoutDur = 300.0;
 
   double _norm(double ms) => (ms / _totalMs).clamp(0.0, 1.0);
 
@@ -204,7 +204,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final logoSize = size.width * 0.32;
+    final logoSize = size.width * 0.18;
     final slideOffset = logoSize * 0.65;
 
     return Scaffold(
@@ -231,7 +231,7 @@ class _SplashScreenState extends State<SplashScreen>
                         width: logoSize * 0.85,
                         height: 16,
                         decoration: BoxDecoration(
-                          shape: BoxShape.ellipse,
+                          shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.16 * _shadowGrow.value),
@@ -250,9 +250,11 @@ class _SplashScreenState extends State<SplashScreen>
                       -_slideLeft.value * slideOffset,
                       _logoDrop.value,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Logo
                         Opacity(
@@ -260,26 +262,11 @@ class _SplashScreenState extends State<SplashScreen>
                           child: Transform.scale(
                             scaleX: _squash.value,
                             scaleY: 2.0 - _squash.value,
-                            child: Container(
+                            child: Image.asset(
+                              'assets/images/logo.png',
                               width: logoSize,
                               height: logoSize,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(logoSize * 0.22),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.18),
-                                    blurRadius: 22,
-                                    offset: const Offset(0, 14),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(logoSize * 0.22),
-                                child: Image.asset(
-                                  'assets/images/logo.png',
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -294,6 +281,7 @@ class _SplashScreenState extends State<SplashScreen>
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
                               children: List.generate(_word.length, (i) {
                                 return _AnimatedLetter(
                                   letter: _word[i],
@@ -323,6 +311,7 @@ class _SplashScreenState extends State<SplashScreen>
                           ],
                         ),
                       ],
+                    ),
                     ),
                   ),
                 ],

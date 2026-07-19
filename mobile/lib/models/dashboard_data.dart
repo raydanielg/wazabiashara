@@ -11,6 +11,17 @@ class DashboardData {
   final List<TopProduct> topProducts;
   final List<ChartData> salesChart;
 
+  // Home-screen summary fields (matches the "To Receive / To Give / Sales /
+  // Purchase / Expense / Total Balance" cards shown on the Home tab).
+  final double toReceive;
+  final double toGive;
+  final double monthPurchases;
+  final double monthExpenses;
+  final List<ChartData> cashflowIn;
+  final List<ChartData> cashflowOut;
+
+  double get totalBalance => cashBalance + bankBalance + mobileBalance;
+
   DashboardData({
     required this.todaySales,
     required this.monthSales,
@@ -23,6 +34,12 @@ class DashboardData {
     required this.recentSales,
     required this.topProducts,
     required this.salesChart,
+    this.toReceive = 0,
+    this.toGive = 0,
+    this.monthPurchases = 0,
+    this.monthExpenses = 0,
+    this.cashflowIn = const [],
+    this.cashflowOut = const [],
   });
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
@@ -44,6 +61,18 @@ class DashboardData {
               .toList() ??
           [],
       salesChart: (json['sales_chart'] as List?)
+              ?.map((e) => ChartData.fromJson(e))
+              .toList() ??
+          [],
+      toReceive: (json['total_receivables'] as num?)?.toDouble() ?? 0,
+      toGive: (json['total_payables'] as num?)?.toDouble() ?? 0,
+      monthPurchases: (json['month_purchases'] as num?)?.toDouble() ?? 0,
+      monthExpenses: (json['month_expenses'] as num?)?.toDouble() ?? 0,
+      cashflowIn: (json['cashflow_in'] as List?)
+              ?.map((e) => ChartData.fromJson(e))
+              .toList() ??
+          [],
+      cashflowOut: (json['cashflow_out'] as List?)
               ?.map((e) => ChartData.fromJson(e))
               .toList() ??
           [],

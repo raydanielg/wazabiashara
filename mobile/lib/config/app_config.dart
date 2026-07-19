@@ -3,7 +3,7 @@ class AppConfig {
   static const String appTagline = 'Your Business, In Your Hands';
 
   // API Configuration
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator -> host machine
+  static const String baseUrl = 'https://app.wazaelimuforum.com';
   static const String apiVersion = '/api/v1';
   static const Duration apiTimeout = Duration(seconds: 30);
 

@@ -4,6 +4,8 @@ import '../../config/app_config.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 
+const _logoPath = 'assets/images/logo.png';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -89,19 +91,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.storefront,
-                      color: AppColors.primary,
-                      size: 24,
-                    ),
+                  Image.asset(
+                    _logoPath,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   const Text(
                     'Wazabiashara',
                     style: TextStyle(
@@ -234,17 +230,11 @@ class _SlideContent extends StatelessWidget {
           const SizedBox(height: 20),
           Expanded(
             child: Center(
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(48),
-                ),
-                child: Icon(
-                  slide.icon,
-                  size: 100,
-                  color: AppColors.primary,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Image.asset(
+                  _logoPath,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -271,21 +261,17 @@ class _SlideContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.successLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                width: 1,
-              ),
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               slide.badge,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
                 color: AppColors.primary,
               ),
             ),

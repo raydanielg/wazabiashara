@@ -83,6 +83,28 @@ class DashboardProvider extends ChangeNotifier {
         ChartData(label: 'Sat', value: 750000),
         ChartData(label: 'Sun', value: 420000),
       ],
+      toReceive: 620000,
+      toGive: 245000,
+      monthPurchases: 4200000,
+      monthExpenses: 980000,
+      cashflowIn: [
+        ChartData(label: 'Mon', value: 320000),
+        ChartData(label: 'Tue', value: 450000),
+        ChartData(label: 'Wed', value: 380000),
+        ChartData(label: 'Thu', value: 520000),
+        ChartData(label: 'Fri', value: 680000),
+        ChartData(label: 'Sat', value: 750000),
+        ChartData(label: 'Sun', value: 420000),
+      ],
+      cashflowOut: [
+        ChartData(label: 'Mon', value: 180000),
+        ChartData(label: 'Tue', value: 210000),
+        ChartData(label: 'Wed', value: 150000),
+        ChartData(label: 'Thu', value: 260000),
+        ChartData(label: 'Fri', value: 300000),
+        ChartData(label: 'Sat', value: 340000),
+        ChartData(label: 'Sun', value: 190000),
+      ],
     );
   }
 }

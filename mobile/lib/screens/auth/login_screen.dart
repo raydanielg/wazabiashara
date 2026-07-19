@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   subtitle: 'Sign in to your Wazabiashara account',
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
                             child: const Text(
                               'Forgot password?',
                               style: TextStyle(

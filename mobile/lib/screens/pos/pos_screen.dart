@@ -17,16 +17,16 @@ class _PosScreenState extends State<PosScreen> {
   String _paymentMethod = 'cash';
 
   final List<Product> _products = [
-    Product(id: 1, name: 'Soda 500ml', sellingPrice: 3000, stock: 120, unit: 'btl', category: 'Drinks'),
-    Product(id: 2, name: 'Rice 1kg', sellingPrice: 2500, stock: 85, unit: 'kg', category: 'Food'),
-    Product(id: 3, name: 'Cooking Oil 1L', sellingPrice: 5000, stock: 64, unit: 'ltr', category: 'Food'),
-    Product(id: 4, name: 'Sugar 1kg', sellingPrice: 3000, stock: 52, unit: 'kg', category: 'Food'),
-    Product(id: 5, name: 'Bread', sellingPrice: 1500, stock: 45, unit: 'pcs', category: 'Bakery'),
-    Product(id: 6, name: 'Milk 1L', sellingPrice: 2000, stock: 30, unit: 'ltr', category: 'Dairy'),
-    Product(id: 7, name: 'Eggs (tray)', sellingPrice: 9000, stock: 18, unit: 'tray', category: 'Dairy'),
-    Product(id: 8, name: 'Tea 200g', sellingPrice: 1800, stock: 40, unit: 'pcs', category: 'Drinks'),
-    Product(id: 9, name: 'Soap 1kg', sellingPrice: 3500, stock: 25, unit: 'kg', category: 'Household'),
-    Product(id: 10, name: 'Salt 500g', sellingPrice: 800, stock: 60, unit: 'pcs', category: 'Food'),
+    Product(id: 1, name: 'Soda 500ml', costPrice: 2000, sellingPrice: 3000, stock: 120, unit: 'btl', category: 'Drinks'),
+    Product(id: 2, name: 'Rice 1kg', costPrice: 1800, sellingPrice: 2500, stock: 85, unit: 'kg', category: 'Food'),
+    Product(id: 3, name: 'Cooking Oil 1L', costPrice: 4000, sellingPrice: 5000, stock: 64, unit: 'ltr', category: 'Food'),
+    Product(id: 4, name: 'Sugar 1kg', costPrice: 2300, sellingPrice: 3000, stock: 52, unit: 'kg', category: 'Food'),
+    Product(id: 5, name: 'Bread', costPrice: 1000, sellingPrice: 1500, stock: 45, unit: 'pcs', category: 'Bakery'),
+    Product(id: 6, name: 'Milk 1L', costPrice: 1500, sellingPrice: 2000, stock: 30, unit: 'ltr', category: 'Dairy'),
+    Product(id: 7, name: 'Eggs (tray)', costPrice: 7000, sellingPrice: 9000, stock: 18, unit: 'tray', category: 'Dairy'),
+    Product(id: 8, name: 'Tea 200g', costPrice: 1200, sellingPrice: 1800, stock: 40, unit: 'pcs', category: 'Drinks'),
+    Product(id: 9, name: 'Soap 1kg', costPrice: 2500, sellingPrice: 3500, stock: 25, unit: 'kg', category: 'Household'),
+    Product(id: 10, name: 'Salt 500g', costPrice: 500, sellingPrice: 800, stock: 60, unit: 'pcs', category: 'Food'),
   ];
 
   List<Product> get _filtered {

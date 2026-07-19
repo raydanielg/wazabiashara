@@ -9,61 +9,9 @@ class AuthBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF001816),
-              Color(0xFF013028),
-              Color(0xFF024938),
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Gold blur circle top-right
-            Positioned(
-              top: -80,
-              right: -80,
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.gold.withValues(alpha: 0.08),
-                ),
-                child: BackdropFilter(
-                  filter: ColorFilter.mode(
-                    AppColors.gold.withValues(alpha: 0.05),
-                    BlendMode.srcOver,
-                  ),
-                  child: Container(),
-                ),
-              ),
-            ),
-            // Emerald blur circle bottom-left
-            Positioned(
-              bottom: -100,
-              left: -100,
-              child: Container(
-                width: 320,
-                height: 320,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryLight.withValues(alpha: 0.06),
-                ),
-              ),
-            ),
-            // Content
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                child: child,
-              ),
-            ),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: child,
         ),
       ),
     );
@@ -77,24 +25,7 @@ class AuthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 40,
-            offset: const Offset(0, 16),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: child,
-      ),
-    );
+    return child;
   }
 }
 
@@ -113,29 +44,16 @@ class AuthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF3F4F6)),
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
       child: Column(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: const LinearGradient(
-                colors: AppColors.primaryGradient,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Image.asset('assets/images/logo.png'),
-            ),
+          Image.asset(
+            'assets/images/logo.png',
+            width: 72,
+            height: 72,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             title,
             style: const TextStyle(
