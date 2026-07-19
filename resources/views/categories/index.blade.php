@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Kategoria')
+@section('title', 'Categories')
 
-@section('page_title', 'Kategoria')
+@section('page_title', 'Categories')
 
 @section('content')
 <div class="space-y-5">
@@ -11,13 +11,13 @@
         <div>
             <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                Kategoria
+                Categories
             </h1>
-            <p class="text-sm text-gray-500 mt-0.5">Simamia kategoria za bidhaa zako</p>
+            <p class="text-sm text-gray-500 mt-0.5">Manage your product categories</p>
         </div>
         <button onclick="openCatModal()" class="btn-gold font-bold px-5 py-3 rounded-2xl inline-flex items-center gap-2 text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Ongeza Kategoria
+            Add Category
         </button>
     </div>
 
@@ -25,11 +25,11 @@
     <form method="GET" class="flex gap-2 sm:gap-3 flex-wrap">
         <div class="relative flex-1 min-w-[180px]">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Tafuta kategoria..." class="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search categories..." class="w-full pl-9 pr-3 py-2.5 rounded-2xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
         </div>
         <button type="submit" class="px-5 py-2.5 rounded-2xl bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-600 hover:shadow-md transition-all flex items-center gap-1.5">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            Tafuta
+            Search
         </button>
     </form>
 
@@ -39,10 +39,10 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wide">
                     <tr>
-                        <th class="px-4 py-3 text-left">Jina</th>
+                        <th class="px-4 py-3 text-left">Name</th>
                         <th class="px-4 py-3 text-left hidden sm:table-cell">Parent</th>
-                        <th class="px-4 py-3 text-center">Bidhaa</th>
-                        <th class="px-4 py-3 text-center">Kitendo</th>
+                        <th class="px-4 py-3 text-center">Products</th>
+                        <th class="px-4 py-3 text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="catTableBody">
@@ -65,10 +65,10 @@
                         </td>
                         <td class="px-4 py-3 text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <button onclick="editCat({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->parent_id ?? 'null' }}, '{{ addslashes($cat->icon ?? '') }}', '{{ addslashes($cat->description ?? '') }}')" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-all flex items-center justify-center" title="Hariri">
+                                <button onclick="editCat({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->parent_id ?? 'null' }}, '{{ addslashes($cat->icon ?? '') }}', '{{ addslashes($cat->description ?? '') }}')" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-all flex items-center justify-center" title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                                <button onclick="deleteCat({{ $cat->id }})" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-all flex items-center justify-center" title="Futa">
+                                <button onclick="deleteCat({{ $cat->id }})" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-all flex items-center justify-center" title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </div>
@@ -77,7 +77,7 @@
                     @empty
                     <tr><td colspan="4" class="px-4 py-16 text-center">
                         <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        <p class="text-gray-400 font-medium text-sm">Hakuna kategoria. Ongeza kategoria yako ya kwanza!</p>
+                        <p class="text-gray-400 font-medium text-sm">No categories found. Add your first category!</p>
                     </td></tr>
                     @endforelse
                 </tbody>
@@ -97,7 +97,7 @@
             <div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             </div>
-            Ongeza Kategoria Mpya
+            Add New Category
         </h2>
         <button onclick="closeCatModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -110,14 +110,14 @@
         <input type="hidden" id="catId" value="">
 
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Jina la Kategoria *</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Category Name *</label>
             <input type="text" name="name" id="catName" required class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
         </div>
 
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Parent (chagua kama ni sub-kategoria)</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Parent (select if sub-category)</label>
             <select name="parent_id" id="catParent" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium bg-white appearance-none cursor-pointer transition-all">
-                <option value="">— Hakuna —</option>
+                <option value="">— None —</option>
                 @foreach($parents as $p)<option value="{{ $p->id }}">{{ $p->name }}</option>@endforeach
             </select>
         </div>
@@ -128,7 +128,7 @@
         </div>
 
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Maelezo</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Description</label>
             <textarea name="description" id="catDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all"></textarea>
         </div>
     </form>
@@ -136,7 +136,7 @@
     <div class="p-5 border-t border-gray-100 flex-shrink-0">
         <button id="catSaveBtn" onclick="submitCat()" class="w-full btn-gold font-bold py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Hifadhi Kategoria
+            Save Category
         </button>
     </div>
 </div>
@@ -145,23 +145,23 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
 function openCatModal() {
-    document.getElementById('catModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></div> Ongeza Kategoria Mpya';
+    document.getElementById('catModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></div> Add New Category';
     document.getElementById('catMethod').value = 'POST';
     document.getElementById('catId').value = '';
     document.getElementById('catForm').reset();
-    document.getElementById('catSaveBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi Kategoria';
+    document.getElementById('catSaveBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Category';
     showCatModal();
 }
 
 function editCat(id, name, parentId, icon, desc) {
-    document.getElementById('catModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div> Hariri Kategoria';
+    document.getElementById('catModalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div> Edit Category';
     document.getElementById('catMethod').value = 'PUT';
     document.getElementById('catId').value = id;
     document.getElementById('catName').value = name;
     document.getElementById('catParent').value = parentId || '';
     document.getElementById('catIcon').value = icon || '';
     document.getElementById('catDesc').value = desc || '';
-    document.getElementById('catSaveBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi Mabadiliko';
+    document.getElementById('catSaveBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes';
     showCatModal();
 }
 
@@ -190,7 +190,7 @@ async function submitCat() {
 
     const btn = document.getElementById('catSaveBtn');
     btn.disabled = true;
-    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Inahifadhi...';
+    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Saving...';
 
     try {
         const res = await fetch(url, {
@@ -207,7 +207,7 @@ async function submitCat() {
             closeCatModal();
             Swal.fire({
                 icon: 'success',
-                title: 'Imefanikiwa!',
+                title: 'Success!',
                 text: data.message,
                 timer: 1800,
                 showConfirmButton: false,
@@ -215,27 +215,27 @@ async function submitCat() {
                 position: 'top-end'
             }).then(() => location.reload());
         } else {
-            const errors = data.errors ? Object.values(data.errors).join('\n') : data.message || 'Hitilafu imetokea.';
-            Swal.fire({icon:'error', title:'Hitilafu!', text:errors, confirmButtonColor:'#024938'});
+            const errors = data.errors ? Object.values(data.errors).join('\n') : data.message || 'An error occurred.';
+            Swal.fire({icon:'error', title:'Error!', text:errors, confirmButtonColor:'#024938'});
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Tatizo la Mtandao', text:'Jaribu tena.', confirmButtonColor:'#024938'});
+        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
     } finally {
         btn.disabled = false;
         btn.innerHTML = isEdit
-            ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi Mabadiliko'
-            : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Hifadhi Kategoria';
+            ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes'
+            : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Category';
     }
 }
 
 async function deleteCat(id) {
     const result = await Swal.fire({
         icon: 'warning',
-        title: 'Futa Kategoria?',
-        text: 'Una uhakika unataka kufuta kategoria hii?',
+        title: 'Delete Category?',
+        text: 'Are you sure you want to delete this category?',
         showCancelButton: true,
-        confirmButtonText: 'Ndiyo, Futa',
-        cancelButtonText: 'Ghairi',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel',
         confirmButtonColor: '#dc2626',
         cancelButtonColor: '#6b7280'
     });
@@ -255,12 +255,12 @@ async function deleteCat(id) {
         if (data.success) {
             const row = document.getElementById('catrow-' + id);
             if (row) row.remove();
-            Swal.fire({icon:'success', title:'Imefutwa!', text:data.message, timer:1500, showConfirmButton:false, toast:true, position:'top-end'});
+            Swal.fire({icon:'success', title:'Deleted!', text:data.message, timer:1500, showConfirmButton:false, toast:true, position:'top-end'});
         } else {
-            Swal.fire({icon:'error', title:'Hitilafu!', text:data.message || 'Imeshindwa kufuta.', confirmButtonColor:'#024938'});
+            Swal.fire({icon:'error', title:'Error!', text:data.message || 'Failed to delete.', confirmButtonColor:'#024938'});
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Tatizo la Mtandao', text:'Jaribu tena.', confirmButtonColor:'#024938'});
+        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
     }
 }
 

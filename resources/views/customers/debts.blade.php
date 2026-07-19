@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Madeni ya Mteja')
+@section('title', 'Customer Debts')
 
-@section('page_title', 'Madeni — ' . $customer->name)
+@section('page_title', 'Debts — ' . $customer->name)
 
 @section('content')
 <div class="space-y-5">
@@ -10,8 +10,8 @@
     <div class="flex items-center gap-3">
         <a href="{{ route('customers.index') }}" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 transition-all flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg></a>
         <div>
-            <h1 class="text-xl font-bold text-gray-800">Madeni — {{ $customer->name }}</h1>
-            <p class="text-sm text-gray-500 mt-0.5">Simamia deni la mteja</p>
+            <h1 class="text-xl font-bold text-gray-800">Debts — {{ $customer->name }}</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Manage customer debts</p>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-xl bg-red-50 grid place-items-center"><svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg></div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Deni Jumla</p>
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Debt</p>
             </div>
             <p class="font-bold text-xl text-red-600">TZS {{ number_format($customer->current_debt, 0) }}</p>
         </div>
@@ -34,7 +34,7 @@
         <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-xl bg-gold-50 grid place-items-center"><svg class="w-4 h-4 text-gold-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Akiwa Deni</p>
+                <p class="text-xs font-semibold text-gray-500 uppercase">Outstanding Debts</p>
             </div>
             <p class="font-bold text-xl text-gold-600">{{ $debts->where('status', '!=', 'paid')->count() }}</p>
         </div>
@@ -45,7 +45,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wide">
-                    <tr><th class="px-4 py-3 text-left">Risiti</th><th class="px-4 py-3 text-right">Deni</th><th class="px-4 py-3 text-right">Salio</th><th class="px-4 py-3 text-left hidden sm:table-cell">Due Date</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-center">Lipa</th></tr>
+                    <tr><th class="px-4 py-3 text-left">Receipt</th><th class="px-4 py-3 text-right">Amount</th><th class="px-4 py-3 text-right">Balance</th><th class="px-4 py-3 text-left hidden sm:table-cell">Due Date</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-center">Pay</th></tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($debts as $debt)
@@ -57,14 +57,14 @@
                         <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $debt->status === 'paid' ? 'bg-emerald-50 text-emerald-600' : ($debt->status === 'overdue' ? 'bg-red-50 text-red-500' : ($debt->status === 'partial' ? 'bg-gold-50 text-gold-600' : 'bg-gray-100 text-gray-500')) }}">{{ $debt->status }}</span></td>
                         <td class="px-4 py-3 text-center">
                             @if($debt->balance > 0)
-                            <button onclick="payDebt({{ $debt->id }}, {{ $debt->balance }})" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold transition-all">Lipa</button>
+                            <button onclick="payDebt({{ $debt->id }}, {{ $debt->balance }})" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold transition-all">Pay</button>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr><td colspan="6" class="px-4 py-16 text-center">
                         <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <p class="text-gray-400 font-medium text-sm">Hakuna madeni.</p>
+                        <p class="text-gray-400 font-medium text-sm">No debts found.</p>
                     </td></tr>
                     @endforelse
                 </tbody>
@@ -81,7 +81,7 @@
             <div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
             </div>
-            Lipa Deni
+            Pay Debt
         </h2>
         <button onclick="closePayModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -92,12 +92,12 @@
         @csrf
         <input type="hidden" name="debt_id" id="payDebtId">
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Kiasi (TZS) *</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Amount (TZS) *</label>
             <input type="number" name="amount" id="payAmount" required min="0.01" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-bold transition-all">
         </div>
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Njia ya Malipo</label>
-            <select name="method" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium bg-white appearance-none cursor-pointer transition-all"><option value="cash">Taslimu</option><option value="mpesa">M-Pesa</option><option value="tigo_pesa">Tigo Pesa</option><option value="airtel_money">Airtel Money</option><option value="bank">Benki</option></select>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Payment Method</label>
+            <select name="method" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium bg-white appearance-none cursor-pointer transition-all"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="tigo_pesa">Tigo Pesa</option><option value="airtel_money">Airtel Money</option><option value="bank">Bank</option></select>
         </div>
         <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reference</label>
@@ -108,7 +108,7 @@
     <div class="p-5 border-t border-gray-100 flex-shrink-0">
         <button type="submit" form="payForm" class="w-full btn-gold font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Lipa
+            Pay
         </button>
     </div>
 </div>

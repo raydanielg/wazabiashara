@@ -12,7 +12,7 @@ class Business extends Model
 
     protected $fillable = ['name', 'type', 'region', 'phone', 'email', 'logo', 'plan', 'status', 'vat_rate', 'currency', 'language', 'trial_ends_at', 'owner_name', 'address', 'tax_number', 'registration_number', 'website', 'social_media', 'dark_mode'];
 
-    protected $casts = ['trial_ends_at' => 'datetime', 'social_media' => 'array'];
+    protected $casts = ['trial_ends_at' => 'datetime', 'social_media' => 'array', 'dark_mode' => 'boolean'];
 
     public function branches()
     {

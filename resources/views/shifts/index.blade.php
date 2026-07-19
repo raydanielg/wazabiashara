@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Zamu')
+@section('title', 'Shifts')
 
-@section('page_title', 'Zamu (Shifts)')
+@section('page_title', 'Shifts')
 
 @section('content')
 <div class="space-y-5">
@@ -11,14 +11,14 @@
         <div>
             <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Zamu (Shifts)
+                Shifts
             </h1>
-            <p class="text-sm text-gray-500 mt-0.5">Simamia zamu za wafanyakazi</p>
+            <p class="text-sm text-gray-500 mt-0.5">Manage staff shifts</p>
         </div>
         @if(!$activeShift)
         <button onclick="openShiftModal()" class="btn-gold font-bold px-4 py-2 rounded-lg inline-flex items-center gap-2 text-sm shadow-sm hover:shadow-md transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Fungua Zamu
+            Open Shift
         </button>
         @endif
     </div>
@@ -30,7 +30,7 @@
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 grid place-items-center flex-shrink-0">
                     <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div><p class="text-xs text-gray-500 font-semibold">Jumla ya Zamu</p><p class="text-xl font-bold text-gray-800">{{ $totalShifts }}</p></div>
+                <div><p class="text-xs text-gray-500 font-semibold">Total Shifts</p><p class="text-xl font-bold text-gray-800">{{ $totalShifts }}</p></div>
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -38,7 +38,7 @@
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 grid place-items-center flex-shrink-0">
                     <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div><p class="text-xs text-gray-500 font-semibold">Zamu Wazi</p><p class="text-xl font-bold text-emerald-600">{{ $openShifts }}</p></div>
+                <div><p class="text-xs text-gray-500 font-semibold">Open Shifts</p><p class="text-xl font-bold text-emerald-600">{{ $openShifts }}</p></div>
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -46,7 +46,7 @@
                 <div class="w-10 h-10 rounded-xl bg-gold-50 grid place-items-center flex-shrink-0">
                     <svg class="w-5 h-5 text-gold-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
-                <div><p class="text-xs text-gray-500 font-semibold">Zamu za Leo</p><p class="text-xl font-bold text-gold-600">{{ $todayShifts }}</p></div>
+                <div><p class="text-xs text-gray-500 font-semibold">Today's Shifts</p><p class="text-xl font-bold text-gold-600">{{ $todayShifts }}</p></div>
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
@@ -54,7 +54,7 @@
                 <div class="w-10 h-10 rounded-xl {{ $totalVariance >= 0 ? 'bg-emerald-50' : 'bg-red-50' }} grid place-items-center flex-shrink-0">
                     <svg class="w-5 h-5 {{ $totalVariance >= 0 ? 'text-emerald-600' : 'text-red-500' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14v-3m6 3v-3M9 7v3m6-3v3"/></svg>
                 </div>
-                <div><p class="text-xs text-gray-500 font-semibold">Tofauti Jumla</p><p class="text-xl font-bold {{ $totalVariance >= 0 ? 'text-emerald-600' : 'text-red-600' }}">TZS {{ number_format($totalVariance, 0) }}</p></div>
+                <div><p class="text-xs text-gray-500 font-semibold">Total Variance</p><p class="text-xl font-bold {{ $totalVariance >= 0 ? 'text-emerald-600' : 'text-red-600' }}">TZS {{ number_format($totalVariance, 0) }}</p></div>
             </div>
         </div>
     </div>
@@ -66,11 +66,11 @@
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-                <p class="font-bold text-emerald-700">Zamu Wazi</p>
-                <p class="text-xs text-gray-500 font-medium mt-0.5">Fungu: TZS {{ number_format($activeShift->opening_float, 0) }} • Iliyofunguliwa: {{ $activeShift->opened_at->format('d/m/Y H:i') }}</p>
+                <p class="font-bold text-emerald-700">Shift Open</p>
+                <p class="text-xs text-gray-500 font-medium mt-0.5">Float: TZS {{ number_format($activeShift->opening_float, 0) }} • Opened: {{ $activeShift->opened_at->format('d/m/Y H:i') }}</p>
             </div>
         </div>
-        <button onclick="openCloseModal()" class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all">Funga Zamu</button>
+        <button onclick="openCloseModal()" class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all">Close Shift</button>
     </div>
     @endif
 
@@ -79,7 +79,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wide">
-                    <tr><th class="px-4 py-3 text-left">Muuzaji</th><th class="px-4 py-3 text-left hidden sm:table-cell">Tawi</th><th class="px-4 py-3 text-right">Fungu</th><th class="px-4 py-3 text-right hidden md:table-cell">Hela ya Kufunga</th><th class="px-4 py-3 text-right hidden md:table-cell">Tarajiliwa</th><th class="px-4 py-3 text-right">Tofauti</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-left hidden sm:table-cell">Muda</th></tr>
+                    <tr><th class="px-4 py-3 text-left">Cashier</th><th class="px-4 py-3 text-left hidden sm:table-cell">Branch</th><th class="px-4 py-3 text-right">Float</th><th class="px-4 py-3 text-right hidden md:table-cell">Closing Cash</th><th class="px-4 py-3 text-right hidden md:table-cell">Expected</th><th class="px-4 py-3 text-right">Variance</th><th class="px-4 py-3 text-center">Status</th><th class="px-4 py-3 text-left hidden sm:table-cell">Time</th></tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($shifts as $s)
@@ -96,7 +96,7 @@
                     @empty
                     <tr><td colspan="8" class="px-4 py-16 text-center">
                         <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <p class="text-gray-400 font-medium text-sm">Hakuna zamu.</p>
+                        <p class="text-gray-400 font-medium text-sm">No shifts found.</p>
                     </td></tr>
                     @endforelse
                 </tbody>
@@ -114,7 +114,7 @@
             <div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            Fungua Zamu
+            Open Shift
         </h2>
         <button onclick="closeShiftModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -124,7 +124,7 @@
     <form id="shiftForm" method="POST" action="{{ route('shifts.open') }}" class="flex-1 overflow-y-auto p-5 space-y-4">
         @csrf
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Fungu la Kuanzia (TZS) *</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Opening Float (TZS) *</label>
             <input type="number" name="opening_float" required min="0" value="0" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-bold transition-all">
         </div>
     </form>
@@ -132,7 +132,7 @@
     <div class="p-5 border-t border-gray-100 flex-shrink-0">
         <button type="submit" form="shiftForm" class="w-full btn-gold font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Fungua
+            Open
         </button>
     </div>
 </div>
@@ -146,7 +146,7 @@
             <div class="w-8 h-8 rounded-xl bg-red-50 grid place-items-center">
                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            Funga Zamu
+            Close Shift
         </h2>
         <button onclick="closeCloseModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -156,11 +156,11 @@
     <form id="closeForm" method="POST" action="{{ route('shifts.close', $activeShift) }}" class="flex-1 overflow-y-auto p-5 space-y-4">
         @csrf
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Hela Halisi Mkononi (TZS) *</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Closing Cash (TZS) *</label>
             <input type="number" name="closing_cash" required min="0" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-bold transition-all">
         </div>
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Maoni</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</label>
             <textarea name="note" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all"></textarea>
         </div>
     </form>
@@ -168,7 +168,7 @@
     <div class="p-5 border-t border-gray-100 flex-shrink-0">
         <button type="submit" form="closeForm" class="w-full bg-red-500 text-white font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md hover:bg-red-600 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Funga Zamu
+            Close Shift
         </button>
     </div>
 </div>

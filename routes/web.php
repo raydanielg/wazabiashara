@@ -126,6 +126,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/business/profile', [BusinessProfileController::class, 'show'])->name('business.profile');
     Route::put('/business/profile', [BusinessProfileController::class, 'update'])->name('business.profile.update');
     Route::put('/business/printer-settings', [BusinessProfileController::class, 'updatePrinter'])->name('business.printer.update');
+    Route::post('/business/dark-mode', function () {
+        auth()->user()->business->update(['dark_mode' => request('dark_mode')]);
+        return response()->json(['success' => true]);
+    })->name('business.dark-mode');
 
     // Reminders
     Route::resource('reminders', ReminderController::class)->except(['create', 'show', 'edit', 'update']);

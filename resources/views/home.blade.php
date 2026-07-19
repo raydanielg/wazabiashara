@@ -17,9 +17,9 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
             <div>
                 <h2 class="text-lg font-bold mb-0.5 flex items-center gap-2">
                     <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    Karibu, {{ auth()->user()->name }}!
+                    Welcome, {{ auth()->user()->name }}!
                 </h2>
-                <p class="text-emerald-100 text-xs font-medium">Biashara yako, Mkononi mwako — Muhtasari wa kifedha.</p>
+                <p class="text-emerald-100 text-xs font-medium">Your business, in your hands — Financial overview.</p>
             </div>
             @if(auth()->user()->isBusinessAdmin() || auth()->user()->isAdmin())
             <div class="flex items-center gap-2">
@@ -37,10 +37,10 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         @php
         $finCards = [
-            ['label'=>'Mauzo Jumla','value'=>'TZS '.$fmt($stats['totalSales']),'sub'=>'Leo: TZS '.$fmt($stats['todaySales']),'icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1','from'=>'emerald-600','to'=>'emerald-700','border'=>'emerald-500','text'=>'emerald-100','subc'=>'emerald-200'],
-            ['label'=>'Manunuzi Jumla','value'=>'TZS '.$fmt($stats['totalPurchases']),'sub'=>'Mwezi: TZS '.$fmt($stats['monthPurchases']),'icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2','from'=>'sky-500','to'=>'sky-600','border'=>'sky-400','text'=>'sky-100','subc'=>'sky-200'],
-            ['label'=>'Mapato Jumla','value'=>'TZS '.$fmt($stats['totalIncome']),'sub'=>'Mwezi: TZS '.$fmt($stats['monthIncome']),'icon'=>'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','from'=>'violet-500','to'=>'violet-600','border'=>'violet-400','text'=>'violet-100','subc'=>'violet-200'],
-            ['label'=>'Matumizi Jumla','value'=>'TZS '.$fmt($stats['totalExpenses']),'sub'=>'Mwezi: TZS '.$fmt($stats['monthExpenses']),'icon'=>'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','from'=>'red-500','to'=>'red-600','border'=>'red-400','text'=>'red-100','subc'=>'red-200'],
+            ['label'=>'Total Sales','value'=>'TZS '.$fmt($stats['totalSales']),'sub'=>'Today: TZS '.$fmt($stats['todaySales']),'icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1','from'=>'emerald-600','to'=>'emerald-700','border'=>'emerald-500','text'=>'emerald-100','subc'=>'emerald-200'],
+            ['label'=>'Total Purchases','value'=>'TZS '.$fmt($stats['totalPurchases']),'sub'=>'Month: TZS '.$fmt($stats['monthPurchases']),'icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2','from'=>'sky-500','to'=>'sky-600','border'=>'sky-400','text'=>'sky-100','subc'=>'sky-200'],
+            ['label'=>'Total Income','value'=>'TZS '.$fmt($stats['totalIncome']),'sub'=>'Month: TZS '.$fmt($stats['monthIncome']),'icon'=>'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','from'=>'violet-500','to'=>'violet-600','border'=>'violet-400','text'=>'violet-100','subc'=>'violet-200'],
+            ['label'=>'Total Expenses','value'=>'TZS '.$fmt($stats['totalExpenses']),'sub'=>'Month: TZS '.$fmt($stats['monthExpenses']),'icon'=>'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z','from'=>'red-500','to'=>'red-600','border'=>'red-400','text'=>'red-100','subc'=>'red-200'],
         ];
         @endphp
         @foreach($finCards as $card)
@@ -62,12 +62,12 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         @php
         $secCards = [
-            ['label'=>'Faida Jumla','value'=>'TZS '.$fmt($stats['totalProfit']),'color'=>'emerald','icon'=>'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
-            ['label'=>'Faida Safi','value'=>'TZS '.$fmt($stats['netProfit']),'color'=>$stats['netProfit'] >= 0 ? 'emerald' : 'red','icon'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label'=>'Total Profit','value'=>'TZS '.$fmt($stats['totalProfit']),'color'=>'emerald','icon'=>'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
+            ['label'=>'Net Profit','value'=>'TZS '.$fmt($stats['netProfit']),'color'=>$stats['netProfit'] >= 0 ? 'emerald' : 'red','icon'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
             ['label'=>'Malipo In','value'=>'TZS '.$fmt($stats['totalPaymentsIn']),'color'=>'sky','icon'=>'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
             ['label'=>'Malipo Out','value'=>'TZS '.$fmt($stats['totalPaymentsOut']),'color'=>'amber','icon'=>'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
-            ['label'=>'Madeni Wateja','value'=>'TZS '.$fmt($stats['totalReceivables']),'color'=>$stats['totalReceivables'] > 0 ? 'amber' : 'emerald','icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
-            ['label'=>'Madeni Supplier','value'=>'TZS '.$fmt($stats['totalPayables']),'color'=>$stats['totalPayables'] > 0 ? 'red' : 'emerald','icon'=>'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z'],
+            ['label'=>'Customer Debts','value'=>'TZS '.$fmt($stats['totalReceivables']),'color'=>$stats['totalReceivables'] > 0 ? 'amber' : 'emerald','icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+            ['label'=>'Supplier Debts','value'=>'TZS '.$fmt($stats['totalPayables']),'color'=>$stats['totalPayables'] > 0 ? 'red' : 'emerald','icon'=>'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z'],
         ];
         @endphp
         @foreach($secCards as $card)
@@ -109,7 +109,7 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
     <div class="bg-white rounded-xl border p-5">
         <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            Vitendo vya Haraka (Quick Entry)
+            Quick Actions
         </h3>
         <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
             <a href="{{ route('pos.index') }}" class="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-gray-50 hover:bg-emerald-50 transition-colors group">
@@ -174,10 +174,10 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
         <div class="bg-white rounded-xl border p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900">Mauzo ya Siku 14 Zilizopita</h3>
-                    <p class="text-xs text-gray-400">Revenue trend overview</p>
+                    <h3 class="text-sm font-semibold text-gray-900">Sales (Last 14 Days)</h3>
+                    <p class="text-xs text-gray-400">Daily revenue trend</p>
                 </div>
-                <a href="{{ route('reports.index') }}" class="text-xs font-medium text-emerald-600 hover:text-emerald-700">Ripoti Kamili →</a>
+                <a href="{{ route('reports.index') }}" class="text-xs font-medium text-emerald-600 hover:text-emerald-700">Full Report →</a>
             </div>
             <canvas id="salesChart" height="200"></canvas>
         </div>
@@ -185,8 +185,8 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
         <div class="bg-white rounded-xl border p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900">Mapato vs Matumizi (Siku 7)</h3>
-                    <p class="text-xs text-gray-400">Income vs Expense comparison</p>
+                    <h3 class="text-sm font-semibold text-gray-900">Income vs Expense (7 Days)</h3>
+                    <p class="text-xs text-gray-400">Daily income vs expenses</p>
                 </div>
             </div>
             <canvas id="incomeExpenseChart" height="200"></canvas>
@@ -198,24 +198,24 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
         <div class="bg-white rounded-xl border p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900">Mauzo vs Manunuzi (Miezi 12)</h3>
-                    <p class="text-xs text-gray-400">Sales vs Purchases trend</p>
+                    <h3 class="text-sm font-semibold text-gray-900">Sales vs Purchases (12 Months)</h3>
+                    <p class="text-xs text-gray-400">Monthly trend comparison</p>
                 </div>
             </div>
             <canvas id="monthlyChart" height="200"></canvas>
         </div>
 
         <div class="bg-white rounded-xl border p-5">
-            <h3 class="text-sm font-semibold text-gray-900 mb-4">Bidhaa Bora (Mwezi)</h3>
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Top Products (Month)</h3>
             <div class="space-y-2">
                 @forelse($topProducts as $i => $p)
                 <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                     <span class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 font-bold grid place-items-center text-[10px] shrink-0">{{ $i + 1 }}</span>
-                    <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-gray-900 truncate">{{ $p->product->name }}</p><p class="text-[10px] text-gray-400">{{ $p->total_qty }} vimeuzwa</p></div>
+                    <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-gray-900 truncate">{{ $p->product->name }}</p><p class="text-[10px] text-gray-400">{{ $p->total_qty }} sold</p></div>
                     <span class="text-[11px] font-bold text-emerald-600 shrink-0">TZS {{ number_format($p->total_revenue, 0) }}</span>
                 </div>
                 @empty
-                <p class="text-sm text-gray-400 text-center py-4">Hakuna data bado.</p>
+                <p class="text-sm text-gray-400 text-center py-4">No data yet.</p>
                 @endforelse
             </div>
         </div>
@@ -226,21 +226,21 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
         {{-- Recent sales --}}
         <div class="bg-white rounded-xl border overflow-hidden">
             <div class="px-5 py-4 border-b flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-gray-900">Mauzo ya Karibuni</h3>
-                <a href="{{ route('reports.sales') }}" class="text-xs font-medium text-emerald-600 hover:text-emerald-700">Yote →</a>
+                <h3 class="text-sm font-semibold text-gray-900">Recent Sales</h3>
+                <a href="{{ route('reports.sales') }}" class="text-xs font-medium text-emerald-600 hover:text-emerald-700">View All →</a>
             </div>
             <div class="p-5 space-y-2">
                 @forelse($recentSales as $sale)
                 <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                     <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 grid place-items-center text-xs font-bold shrink-0">{{ strtoupper(substr($sale->customer?->name ?? 'K', 0, 1)) }}</div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-900 truncate">{{ $sale->customer?->name ?? 'Mteja wa Kawaida' }}</p>
+                        <p class="text-xs font-semibold text-gray-900 truncate">{{ $sale->customer?->name ?? 'Walk-in Customer' }}</p>
                         <p class="text-[10px] text-gray-400">{{ $sale->receipt_no }} • {{ $sale->created_at->format('d/m H:i') }}</p>
                     </div>
                     <span class="text-xs font-bold text-emerald-600 shrink-0">TZS {{ number_format($sale->total, 0) }}</span>
                 </div>
                 @empty
-                <p class="text-sm text-gray-400 text-center py-8">Hakuna mauzo bado. <a href="{{ route('pos.index') }}" class="text-emerald-600 hover:text-emerald-700 font-medium">Anza kuuza</a></p>
+                <p class="text-sm text-gray-400 text-center py-8">No sales yet. <a href="{{ route('pos.index') }}" class="text-emerald-600 hover:text-emerald-700 font-medium">Start selling</a></p>
                 @endforelse
             </div>
         </div>
@@ -249,7 +249,7 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
         <div class="space-y-6">
             <div class="bg-white rounded-xl border overflow-hidden">
                 <div class="px-5 py-4 border-b">
-                    <h3 class="text-sm font-semibold text-gray-900">Tahadhari za Stoo</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">Low Stock Alerts</h3>
                 </div>
                 <div class="p-5 space-y-2">
                     @forelse($lowStockItems as $item)
@@ -261,7 +261,7 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
                     @empty
                     <p class="text-sm text-gray-400 text-center py-4 flex items-center justify-center gap-1.5">
                         <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Stoo yote nzuri!
+                        All stock is good!
                     </p>
                     @endforelse
                 </div>
@@ -269,7 +269,7 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
 
             <div class="bg-white rounded-xl border overflow-hidden">
                 <div class="px-5 py-4 border-b">
-                    <h3 class="text-sm font-semibold text-gray-900">Wateja Bora (Mwezi)</h3>
+                    <h3 class="text-sm font-semibold text-gray-900">Top Customers (Month)</h3>
                 </div>
                 <div class="p-5 space-y-2">
                     @forelse($topCustomers as $i => $c)
@@ -279,7 +279,7 @@ $fmt = fn($n) => $n >= 1000000000 ? number_format($n/1000000000,2).'B' : ($n >= 
                         <span class="text-[11px] font-bold text-emerald-600 shrink-0">TZS {{ number_format($c->total_spent, 0) }}</span>
                     </div>
                     @empty
-                    <p class="text-sm text-gray-400 text-center py-4">Hakuna data bado.</p>
+                    <p class="text-sm text-gray-400 text-center py-4">No data yet.</p>
                     @endforelse
                 </div>
             </div>
@@ -300,7 +300,7 @@ new Chart(salesCtx, {
     data: {
         labels: {{ json_encode($dailyLabels) }},
         datasets: [{
-            label: 'Mauzo (TZS)',
+            label: 'Sales (TZS)',
             data: {{ json_encode($dailyRevenue) }},
             backgroundColor: salesGradient,
             borderRadius: 6,
@@ -326,8 +326,8 @@ new Chart(ieCtx, {
     data: {
         labels: {{ json_encode(array_map(fn($i) => now()->subDays(6-$i)->format('D'), range(0,6))) }},
         datasets: [
-            { label: 'Mapato', data: {{ json_encode($dailyIncome) }}, backgroundColor: 'rgba(2,73,56,0.7)', borderRadius: 6, borderSkipped: false },
-            { label: 'Matumizi', data: {{ json_encode($dailyExpenses) }}, backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 6, borderSkipped: false },
+            { label: 'Income', data: {{ json_encode($dailyIncome) }}, backgroundColor: 'rgba(2,73,56,0.7)', borderRadius: 6, borderSkipped: false },
+            { label: 'Expenses', data: {{ json_encode($dailyExpenses) }}, backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 6, borderSkipped: false },
         ]
     },
     options: {
@@ -349,8 +349,8 @@ new Chart(monthlyCtx, {
     data: {
         labels: {{ json_encode($monthlyLabels) }},
         datasets: [
-            { label: 'Mauzo', data: {{ json_encode($monthlySales) }}, borderColor: '#024938', backgroundColor: 'rgba(2,73,56,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#024938' },
-            { label: 'Manunuzi', data: {{ json_encode($monthlyPurchases) }}, borderColor: '#f9ac00', backgroundColor: 'rgba(249,172,0,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f9ac00' },
+            { label: 'Sales', data: {{ json_encode($monthlySales) }}, borderColor: '#024938', backgroundColor: 'rgba(2,73,56,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#024938' },
+            { label: 'Purchases', data: {{ json_encode($monthlyPurchases) }}, borderColor: '#f9ac00', backgroundColor: 'rgba(249,172,0,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f9ac00' },
         ]
     },
     options: {

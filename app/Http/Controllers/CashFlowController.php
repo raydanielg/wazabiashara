@@ -31,7 +31,7 @@ class CashFlowController extends Controller
         $startOfMonth = now()->startOfMonth();
 
         $moneyIn = CashFlow::where('business_id', $businessId)->where('direction', 'in')->whereMonth('flow_date', now()->month)->sum('amount');
-        $moneyOut = CashFlow::where('business_id', $businessId)->where('direction', 'out')->whereMonth('now()->month')->sum('amount');
+        $moneyOut = CashFlow::where('business_id', $businessId)->where('direction', 'out')->whereMonth('flow_date', now()->month)->sum('amount');
         $currentBalance = ($cashBalance + $bankBalance + $mobileBalance);
 
         $flows = CashFlow::where('business_id', $businessId)

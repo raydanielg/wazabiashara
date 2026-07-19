@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'POS — Mauzo')
+@section('title', 'POS — Sales')
 
 @section('content')
 <div class="flex h-[calc(100vh-4rem)] overflow-hidden relative">
@@ -11,13 +11,13 @@
             <div class="flex gap-2 sm:gap-3 items-center">
                 <div class="relative flex-1">
                     <svg class="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input id="posSearch" type="text" placeholder="Tafuta bidhaa..."
+                    <input id="posSearch" type="text" placeholder="Search products..."
                            class="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 rounded-xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all">
                 </div>
                 <div class="relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                     <select id="posCategory" class="pl-9 pr-6 sm:pr-8 py-2 sm:py-2.5 rounded-xl border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium bg-white appearance-none cursor-pointer transition-all">
-                        <option value="">Zote</option>
+                        <option value="">All</option>
                         @foreach($categories as $cat)
                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                         @endforeach
@@ -27,13 +27,13 @@
             @if($activeShift)
             <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-emerald-600">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Zamu wazi — TZS {{ number_format($activeShift->opening_float, 0) }}
+                Shift open — TZS {{ number_format($activeShift->opening_float, 0) }}
             </div>
             @else
             <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-red-500">
                 <span class="h-2 w-2 rounded-full bg-red-500"></span>
-                Huna zamu wazi.
-                <a href="{{ route('shifts.index') }}" class="text-emerald-600 underline font-bold">Fungua hapa</a>
+                No active shift.
+                <a href="{{ route('shifts.index') }}" class="text-emerald-600 underline font-bold">Open here</a>
             </div>
             @endif
         </div>
@@ -56,7 +56,7 @@
                 </div>
                 <p class="font-semibold text-[11px] sm:text-xs text-gray-700 line-clamp-2 leading-tight">{{ $product->name }}</p>
                 <p class="mt-1 font-bold text-xs sm:text-sm text-emerald-600">TZS {{ number_format($product->selling_price, 0) }}</p>
-                <span class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full {{ $qty > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500' }}">{{ $qty > 0 ? $qty . ' ' . $product->unit : 'Hakuna' }}</span>
+                <span class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full {{ $qty > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500' }}">{{ $qty > 0 ? $qty . ' ' . $product->unit : 'Out' }}</span>
             </button>
             @endforeach
         </div>
@@ -76,13 +76,13 @@
         <div class="p-3 sm:p-4 border-b border-gray-100 flex items-center justify-between">
             <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                Kikapu
+                Cart
                 <span id="cartCount" class="text-[10px] font-bold text-white bg-emerald-500 rounded-full px-2 py-0.5">0</span>
             </h3>
             <div class="flex items-center gap-3">
                 <button onclick="clearCart()" class="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Futa
+                    Clear
                 </button>
                 <button onclick="toggleCart()" class="lg:hidden text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -95,7 +95,7 @@
             <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <select id="customerId" class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium appearance-none cursor-pointer transition-all">
-                    <option value="">Mteja wa Kawaida</option>
+                    <option value="">Walk-in Customer</option>
                     @foreach($customers as $c)
                     <option value="{{ $c->id }}">{{ $c->name }} — {{ $c->phone ?? 'N/A' }}</option>
                     @endforeach
@@ -107,7 +107,7 @@
         <div id="cartItems" class="flex-1 overflow-y-auto p-3 space-y-2">
             <div id="emptyCart" class="text-center py-12 text-gray-400">
                 <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                <p class="text-sm font-medium">Bofya bidhaa kuanza</p>
+                <p class="text-sm font-medium">Tap products to start</p>
             </div>
         </div>
 
@@ -115,30 +115,30 @@
         <div class="border-t border-gray-100">
             <div class="px-4 pt-3 space-y-1.5">
                 <div class="flex justify-between text-xs font-semibold text-gray-500">
-                    <span>Jumla:</span>
+                    <span>Subtotal:</span>
                     <span id="cartSubtotal">TZS 0</span>
                 </div>
                 <div class="flex justify-between text-xs font-semibold text-gray-500 items-center">
-                    <span>Punguzo:</span>
+                    <span>Discount:</span>
                     <input id="discountInput" type="number" value="0" min="0" onchange="updateTotals()" class="w-24 text-right px-2 py-1 rounded-lg border border-gray-200 text-xs font-semibold focus:border-emerald-400 focus:ring-1 focus:ring-emerald-100 outline-none">
                 </div>
                 <div class="flex justify-between text-base font-bold text-emerald-700 border-t border-gray-100 pt-2">
-                    <span>Jumla ya Kulipa:</span>
+                    <span>Total to Pay:</span>
                     <span id="cartTotal">TZS 0</span>
                 </div>
             </div>
 
             <div class="px-4 py-3 space-y-2">
                 <div>
-                    <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Njia ya Malipo</label>
+                    <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Payment Method</label>
                     <select id="paymentMethod" class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium appearance-none cursor-pointer transition-all">
-                        <option value="cash">Taslimu (Cash)</option>
+                        <option value="cash">Cash</option>
                         <option value="mpesa">M-Pesa</option>
                         <option value="tigo_pesa">Tigo Pesa</option>
                         <option value="airtel_money">Airtel Money</option>
                         <option value="halopesa">Halopesa</option>
-                        <option value="bank">Benki / Kadi</option>
-                        <option value="credit">Deni (Credit)</option>
+                        <option value="bank">Bank / Card</option>
+                        <option value="credit">Credit</option>
                     </select>
                 </div>
                 <div>
@@ -168,7 +168,7 @@
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span id="mobileCartCount" class="absolute -top-1.5 -right-1.5 text-[9px] font-bold text-white bg-emerald-500 rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">0</span>
             </div>
-            <span class="text-sm font-bold text-gray-700">Kikapu</span>
+            <span class="text-sm font-bold text-gray-700">Cart</span>
         </div>
         <div class="flex items-center gap-2">
             <span id="mobileCartTotal" class="text-sm font-bold text-emerald-600">TZS 0</span>
@@ -181,10 +181,10 @@
 let cart = [];
 
 function addToCart(id, name, price, stock) {
-    if (stock <= 0) { Swal.fire({icon:'warning',title:'Bidhaa imeishi',text:'Samahani, bidhaa hii haipo kwenye stoo.',confirmButtonColor:'#024938'}); return; }
+    if (stock <= 0) { Swal.fire({icon:'warning',title:'Out of Stock',text:'Sorry, this product is not available.',confirmButtonColor:'#024938'}); return; }
     const existing = cart.find(i => i.product_id === id);
     if (existing) {
-        if (existing.qty >= stock) { Swal.fire({icon:'warning',title:'Stoo haiitosi',text:'Umefikia idadi ya stoo.',confirmButtonColor:'#024938'}); return; }
+        if (existing.qty >= stock) { Swal.fire({icon:'warning',title:'Insufficient Stock',text:'You have reached the available stock.',confirmButtonColor:'#024938'}); return; }
         existing.qty++;
     } else {
         cart.push({ product_id: id, name, price, qty: 1, stock });
@@ -260,9 +260,9 @@ function updateChange() {
 }
 
 async function checkout() {
-    if (cart.length === 0) { Swal.fire({icon:'warning',title:'Kikapu tupu',text:'Ongeza bidhaa kwanza.',confirmButtonColor:'#024938'}); return; }
+    if (cart.length === 0) { Swal.fire({icon:'warning',title:'Empty Cart',text:'Add products first.',confirmButtonColor:'#024938'}); return; }
     const btn = document.getElementById('checkoutBtn');
-    btn.disabled = true; btn.textContent = 'Inashughulikia...';
+    btn.disabled = true; btn.textContent = 'Processing...';
 
     try {
         const res = await fetch('{{ route("pos.checkout") }}', {
@@ -284,11 +284,11 @@ async function checkout() {
         if (data.success) {
             Swal.fire({
                 icon: 'success',
-                title: 'Muuzo Umekamilika!',
-                html: `Risiti: <b>${data.receipt_no}</b><br>Jumla: <b>TZS ${formatNum(data.total)}</b><br>Change: <b>TZS ${formatNum(data.change)}</b>`,
-                confirmButtonText: 'Chapisha Risiti',
+                title: 'Sale Completed!',
+                html: `Receipt: <b>${data.receipt_no}</b><br>Total: <b>TZS ${formatNum(data.total)}</b><br>Change: <b>TZS ${formatNum(data.change)}</b>`,
+                confirmButtonText: 'Print Receipt',
                 showCancelButton: true,
-                cancelButtonText: 'Funga',
+                cancelButtonText: 'Close',
                 confirmButtonColor: '#024938'
             }).then(r => {
                 if (r.isConfirmed) {
@@ -298,13 +298,13 @@ async function checkout() {
                 location.reload();
             });
         } else {
-            Swal.fire({icon:'error', title:'Hitilafu!', text:data.message, confirmButtonColor:'#024938'});
+            Swal.fire({icon:'error', title:'Error!', text:data.message, confirmButtonColor:'#024938'});
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Tatizo la Mtandao', text:'Jaribu tena.', confirmButtonColor:'#024938'});
+        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Maliza Muuzo';
+        btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Complete Sale';
     }
 }
 

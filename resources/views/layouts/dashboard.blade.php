@@ -26,6 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -63,14 +64,34 @@
         .lang-btn { transition: all 0.25s ease; }
         .lang-btn.active { background: rgba(249,172,0,0.15); color: #d49700; border-color: rgba(249,172,0,0.3); }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .dark-mode-transition * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #01241f; }
         ::-webkit-scrollbar-thumb { background: #024938; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #f9ac00; }
+        /* Dark mode auto-styling for common patterns */
+        .dark .bg-white { background-color: #1f2937 !important; }
+        .dark .text-gray-900 { color: #f3f4f6 !important; }
+        .dark .text-gray-800 { color: #e5e7eb !important; }
+        .dark .text-gray-700 { color: #d1d5db !important; }
+        .dark .text-gray-600 { color: #9ca3af !important; }
+        .dark .border { border-color: #374151 !important; }
+        .dark .border-b { border-color: #374151 !important; }
+        .dark .border-t { border-color: #374151 !important; }
+        .dark .bg-gray-50 { background-color: #111827 !important; }
+        .dark .bg-gray-100 { background-color: #1f2937 !important; }
+        .dark .hover\:bg-gray-50:hover { background-color: #1f2937 !important; }
+        .dark .hover\:bg-gray-100:hover { background-color: #374151 !important; }
+        .dark .border-gray-100 { border-color: #374151 !important; }
+        .dark .border-gray-200 { border-color: #374151 !important; }
+        .dark .placeholder-gray-400::placeholder { color: #6b7280 !important; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
 </head>
-<body class="font-['Nunito',sans-serif] antialiased bg-gray-50 text-slate-800">
+<body class="font-['Nunito',sans-serif] antialiased bg-gray-50 text-slate-800 dark:bg-gray-900 dark:text-gray-100">
+    <script>if(localStorage.getItem('darkMode')==='true'{{ auth()->user() && auth()->user()->business && auth()->user()->business->dark_mode ? "||true" : "" }}){document.documentElement.classList.add('dark');document.body.classList.add('dark:bg-gray-900','dark:text-gray-100');}</script>
 
     {{-- Mobile Overlay --}}
     <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
@@ -258,28 +279,34 @@
     <div class="lg:ml-64 min-h-screen flex flex-col">
 
         {{-- Header --}}
-        <header class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between px-6 sticky top-0 z-30 transition-colors">
             <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <h1 class="text-lg font-bold text-gray-800">@yield('page_title', 'Dashboard')</h1>
+                <h1 class="text-lg font-bold text-gray-800 dark:text-gray-100">@yield('page_title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
                 {{-- Search --}}
-                <div class="hidden md:flex items-center bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
-                    <svg class="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" placeholder="Search..." class="bg-transparent text-sm outline-none w-48 text-gray-700 placeholder-gray-400">
+                <div class="hidden md:flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl px-3 py-2 border border-gray-200 dark:border-gray-600 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" placeholder="Search..." class="bg-transparent text-sm outline-none w-48 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500">
                 </div>
 
                 {{-- Language Switcher --}}
-                <div class="flex items-center gap-0.5 bg-gray-50 rounded-xl p-0.5 border border-gray-200">
-                    <button onclick="switchLang('sw')" id="langSW" class="lang-btn active px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-600 border border-transparent">SW</button>
-                    <button onclick="switchLang('en')" id="langEN" class="lang-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-400 border border-transparent">EN</button>
+                <div class="flex items-center gap-0.5 bg-gray-50 dark:bg-gray-700 rounded-xl p-0.5 border border-gray-200 dark:border-gray-600">
+                    <button onclick="switchLang('sw')" id="langSW" class="lang-btn active px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-transparent">SW</button>
+                    <button onclick="switchLang('en')" id="langEN" class="lang-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-400 dark:text-gray-500 border border-transparent">EN</button>
                 </div>
 
+                {{-- Dark Mode Toggle --}}
+                <button onclick="toggleDarkMode()" id="darkModeBtn" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors">
+                    <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
+
                 {{-- Notifications --}}
-                <button class="relative p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
+                <button class="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                     <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-gold-400 rounded-full"></span>
                 </button>
@@ -287,7 +314,7 @@
         </header>
 
         {{-- Page Content --}}
-        <main class="flex-1 p-6 animate-fade">
+        <main class="flex-1 p-6 animate-fade bg-gray-50 dark:bg-gray-900 transition-colors min-h-[calc(100vh-4rem)]">
             @yield('content')
         </main>
     </div>
@@ -382,6 +409,30 @@
             const saved = localStorage.getItem('app_lang');
             if (saved && saved !== 'sw') switchLang(saved);
         } catch(e) {}
+
+        // Dark Mode
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', isDark);
+            updateDarkModeIcons(isDark);
+            // Persist to server
+            fetch('/business/dark-mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+                body: JSON.stringify({ dark_mode: isDark })
+            }).catch(() => {});
+        }
+        function updateDarkModeIcons(isDark) {
+            const sun = document.getElementById('sunIcon');
+            const moon = document.getElementById('moonIcon');
+            if (sun) sun.classList.toggle('hidden', !isDark);
+            if (moon) moon.classList.toggle('hidden', isDark);
+        }
+        // Initialize dark mode icons on load
+        (function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateDarkModeIcons(isDark);
+        })();
     </script>
 
 </body>
