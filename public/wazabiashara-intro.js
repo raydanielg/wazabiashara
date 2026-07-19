@@ -1,5 +1,5 @@
 /*!
- * Wazabiashara — Logo Intro Animation
+ * Wazabiashara — Logo Intro Animation  (v2 RESPONSIVE)
  * Self-contained JS module. Include with a single <script> tag:
  *
  *   <script src="wazabiashara-intro.js"></script>
@@ -13,6 +13,17 @@
  *
  * Auto-mounts to <body> on load unless data-auto="false" is set on the
  * <script> tag, e.g. <script src="wazabiashara-intro.js" data-auto="false"></script>
+ *
+ * v2 CHANGES (Responsive kwa vifaa vyote):
+ *  - Ukubwa unahesabiwa kwa min(vmin, vw) — logo + neno "wazabiashara"
+ *    HAVIGONGANI wala kutoka nje ya skrini kwenye simu ndogo (320px+),
+ *    landscape, tablet na desktop
+ *  - Inacheza MARA MOJA kwa session (sessionStorage) — refresh haichezi tena
+ *  - Scroll inafungwa wakati intro inacheza, inafunguliwa ikiisha
+ *  - Gusa popote / bonyeza ESC ku-skip intro mara moja
+ *  - prefers-reduced-motion: intro inarukwa kabisa
+ *  - Safe-area insets (simu zenye notch) kwa replay button
+ *  - Landscape fupi (simu imelala): ukubwa unapungua ili kila kitu kionekane
  */
 (function (global) {
   "use strict";
@@ -31,16 +42,26 @@
   var TAGLINE = "Biashara Yako, Mkononi Mwako";
   var CSS_ID = "wz-intro-styles";
   var FONT_ID = "wz-intro-font";
+  var SESSION_KEY = "wz_intro_played";
 
+  /* ------------------------------------------------------------------
+     SIZING NOTES (jinsi ukubwa unavyokaa kila kifaa):
+     - Muundo mzima (logo + neno) una upana ≈ slide(1.27×logo) + neno.
+       Neno lina herufi 12 × ~0.56em ≈ 6.8 × font-size.
+     - Kwa hiyo font inafungwa kwa `min(5.2vmin, 6.2vw)` na logo kwa
+       `min(16vmin, 17vw)` — hata kwenye simu ya 320px au simu iliyolala
+       (landscape fupi), kila kitu kinaingia bila kugongana.
+     ------------------------------------------------------------------ */
   var CSS = "" +
     ".wz-stage{" +
-      "position:fixed;inset:0;z-index:99999;width:100%;height:100%;min-height:100vh;" +
+      "position:fixed;inset:0;z-index:99999;width:100%;height:100%;min-height:100vh;min-height:100dvh;" +
       "display:flex;align-items:center;justify-content:center;background:#FFFFFF;overflow:hidden;" +
       "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" +
       "transition:opacity .6s ease-out;" +
-      "--wz-logo:clamp(70px,16vmin,180px);" +
+      "-webkit-tap-highlight-color:transparent;touch-action:manipulation;" +
+      "--wz-logo:clamp(56px,min(16vmin,17vw),180px);" +
       "--wz-logo-h:calc(var(--wz-logo) * 1.027);" +
-      "--wz-font:clamp(22px,5.2vmin,60px);" +
+      "--wz-font:clamp(17px,min(5.2vmin,6.2vw),60px);" +
       "--wz-slide:calc(var(--wz-logo) * 1.27);" +
       "--wz-drop:calc(var(--wz-logo) * -2.8);" +
       "--wz-gap:calc(var(--wz-logo) * 0.12);" +
@@ -49,7 +70,7 @@
       "--wz-shadow-w:var(--wz-logo);" +
       "--wz-shadow-h:calc(var(--wz-logo) * 0.147);" +
       "--wz-tagline-y:calc(var(--wz-logo) * 0.213);" +
-      "--wz-tagline-fs:clamp(9px,1.5vmin,14px);" +
+      "--wz-tagline-fs:clamp(8px,min(1.5vmin,2.6vw),14px);" +
       "--wz-letter-y:calc(var(--wz-font) * -0.41);" +
       "--wz-blur:calc(var(--wz-logo) * 0.013);" +
     "}" +
@@ -57,9 +78,11 @@
     ".wz-ground-shadow{position:absolute;width:var(--wz-shadow-w);height:var(--wz-shadow-h);left:50%;top:calc(50% + var(--wz-shadow-y));transform:translate(-50%,0) scaleX(0.3);background:radial-gradient(ellipse at center, rgba(20,25,35,0.16) 0%, rgba(20,25,35,0) 72%);border-radius:50%;opacity:0;animation:wzShadowGrow .5s ease-out 1.05s forwards, wzShadowSlide .9s cubic-bezier(.65,0,.35,1) 1.75s forwards;filter:blur(calc(var(--wz-blur) * 150px));}" +
     ".wz-logo-wrap{position:absolute;display:flex;align-items:center;justify-content:center;width:var(--wz-logo);height:var(--wz-logo-h);transform:translate(0,var(--wz-drop)) scale(0.82);opacity:0;animation:wzDropIn 1.05s cubic-bezier(.31,1.6,.55,1) .15s forwards, wzSlideLeft .9s cubic-bezier(.65,0,.35,1) 1.75s forwards;}" +
     ".wz-logo-wrap svg{width:100%;height:100%;display:block;filter:drop-shadow(0 calc(var(--wz-logo) * 0.093) calc(var(--wz-logo) * 0.147) rgba(20,25,35,0.18));animation:wzSquash .42s ease-out 1.05s;transform-origin:50% 88%;}" +
-    ".wz-wordmark{position:absolute;left:50%;top:50%;display:flex;align-items:baseline;transform:translate(var(--wz-offset),-50%);white-space:nowrap;padding-left:var(--wz-gap);}" +
+    ".wz-wordmark{position:absolute;left:50%;top:50%;display:flex;align-items:baseline;transform:translate(var(--wz-offset),-50%);white-space:nowrap;padding-left:var(--wz-gap);max-width:96vw;}" +
     ".wz-wordmark span{display:inline-block;font-weight:900;font-size:var(--wz-font);letter-spacing:-0.02em;opacity:0;transform:translateY(var(--wz-letter-y)) scale(0.4) rotate(-14deg);animation:wzLetterBuild .5s cubic-bezier(.34,1.56,.64,1) forwards;font-family:'Nunito',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#024938;}" +
-    ".wz-tagline{position:absolute;left:50%;top:50%;transform:translate(var(--wz-offset),var(--wz-tagline-y));padding-left:var(--wz-gap);font-size:var(--wz-tagline-fs);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#f9ac00;font-family:'Nunito',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;opacity:0;animation:wzFadeUp .7s ease-out 3.05s forwards;}" +
+    ".wz-tagline{position:absolute;left:50%;top:50%;transform:translate(var(--wz-offset),var(--wz-tagline-y));padding-left:var(--wz-gap);font-size:var(--wz-tagline-fs);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#f9ac00;font-family:'Nunito',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;opacity:0;animation:wzFadeUp .7s ease-out 3.05s forwards;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis;}" +
+    ".wz-skip-hint{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);font-size:clamp(9px,2.4vw,12px);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#B9C2CD;font-family:'Nunito',ui-sans-serif,system-ui,sans-serif;opacity:0;animation:wzHintIn .6s ease-out 1.2s forwards;pointer-events:none;}" +
+    "@keyframes wzHintIn{to{opacity:1;}}" +
     "@keyframes wzDropIn{0%{transform:translate(0,var(--wz-drop)) scale(0.82);opacity:0;}8%{opacity:1;}58%{transform:translate(0,calc(var(--wz-logo) * 0.093)) scale(1.04);}72%{transform:translate(0,calc(var(--wz-logo) * -0.067)) scale(0.98);}86%{transform:translate(0,calc(var(--wz-logo) * 0.027)) scale(1.01);}100%{transform:translate(0,0) scale(1);opacity:1;}}" +
     "@keyframes wzSquash{0%{transform:scale(1,1);}30%{transform:scale(1.18,0.8);}55%{transform:scale(0.94,1.08);}75%{transform:scale(1.04,0.97);}100%{transform:scale(1,1);}}" +
     "@keyframes wzSlideLeft{0%{transform:translate(0,0) scale(1);}100%{transform:translate(calc(var(--wz-slide) * -1),0) scale(1);}}" +
@@ -67,10 +90,18 @@
     "@keyframes wzShadowSlide{0%{transform:translate(-50%,0) scaleX(1) translateX(0);}100%{transform:translate(-50%,0) scaleX(0.75) translateX(calc(var(--wz-slide) * -1));}}" +
     "@keyframes wzLetterBuild{0%{opacity:0;transform:translateY(var(--wz-letter-y)) scale(0.4) rotate(-14deg);}55%{opacity:1;transform:translateY(calc(var(--wz-font) * 0.063)) scale(1.08) rotate(3deg);}78%{transform:translateY(calc(var(--wz-font) * -0.031)) scale(0.97) rotate(-1deg);}100%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);}}" +
     "@keyframes wzFadeUp{0%{opacity:0;transform:translate(var(--wz-offset),calc(var(--wz-tagline-y) + 12px));}100%{opacity:1;transform:translate(var(--wz-offset),var(--wz-tagline-y));}}" +
-    ".wz-replay{position:absolute;bottom:calc(var(--wz-logo) * 0.227);left:50%;transform:translateX(-50%);background:#F4F6F9;border:1px solid #E3E7EE;color:#5B6472;font-size:var(--wz-tagline-fs);font-weight:700;font-family:'Nunito',ui-sans-serif,system-ui,sans-serif;letter-spacing:0.05em;padding:calc(var(--wz-logo) * 0.067) calc(var(--wz-logo) * 0.133);border-radius:999px;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease,transform .15s ease;}" +
+    ".wz-replay{position:absolute;bottom:calc(var(--wz-logo) * 0.227 + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#F4F6F9;border:1px solid #E3E7EE;color:#5B6472;font-size:var(--wz-tagline-fs);font-weight:700;font-family:'Nunito',ui-sans-serif,system-ui,sans-serif;letter-spacing:0.05em;padding:calc(var(--wz-logo) * 0.067) calc(var(--wz-logo) * 0.133);border-radius:999px;cursor:pointer;min-height:40px;transition:background .2s ease,border-color .2s ease,color .2s ease,transform .15s ease;}" +
     ".wz-replay:hover{background:#FFF8E8;border-color:#f9ac00;color:#8A6A00;transform:translateX(-50%) translateY(-1px);}" +
-    "@media (max-width:480px){.wz-stage{--wz-logo:clamp(60px,22vmin,120px);--wz-font:clamp(18px,6.5vmin,36px);--wz-tagline-fs:clamp(8px,2.2vmin,11px);}}" +
-    "@media (min-width:1200px){.wz-stage{--wz-logo:clamp(120px,14vmin,200px);--wz-font:clamp(40px,4.8vmin,72px);}}";
+    /* Simu ndogo (portrait) */
+    "@media (max-width:480px){.wz-stage{--wz-logo:clamp(52px,min(20vmin,16vw),110px);--wz-font:clamp(16px,min(6vmin,6.4vw),34px);--wz-tagline-fs:clamp(7px,min(2.2vmin,2.8vw),11px);}}" +
+    /* Simu ndogo sana (320px) */
+    "@media (max-width:360px){.wz-stage{--wz-logo:clamp(46px,15vw,90px);--wz-font:clamp(14px,6vw,28px);}}" +
+    /* Simu imelala (landscape fupi) — punguza urefu wa drop na ukubwa */
+    "@media (max-height:480px) and (orientation:landscape){.wz-stage{--wz-logo:clamp(44px,min(18vmin,10vw),100px);--wz-font:clamp(15px,min(6vmin,4.2vw),32px);--wz-drop:calc(var(--wz-logo) * -1.8);}}" +
+    /* Desktop kubwa */
+    "@media (min-width:1200px){.wz-stage{--wz-logo:clamp(120px,14vmin,200px);--wz-font:clamp(40px,4.8vmin,72px);}}" +
+    /* Mtumiaji hataki mwendo — usionyeshe animation nzito */
+    "@media (prefers-reduced-motion:reduce){.wz-stage *{animation-duration:.01s !important;animation-delay:0s !important;}}";
 
   function injectFont() {
     if (document.getElementById(FONT_ID)) return;
@@ -89,6 +120,32 @@
     document.head.appendChild(style);
   }
 
+  function prefersReducedMotion() {
+    try {
+      return global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) { return false; }
+  }
+
+  function hasPlayedThisSession() {
+    try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch (e) { return false; }
+  }
+  function markPlayed() {
+    try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) {}
+  }
+
+  /* Funga / fungua scroll ya ukurasa wakati intro inacheza */
+  var savedOverflow = null;
+  function lockScroll() {
+    if (savedOverflow !== null) return;
+    savedOverflow = document.documentElement.style.overflow || "";
+    document.documentElement.style.overflow = "hidden";
+  }
+  function unlockScroll() {
+    if (savedOverflow === null) return;
+    document.documentElement.style.overflow = savedOverflow;
+    savedOverflow = null;
+  }
+
   function buildWordSpans() {
     var frag = document.createDocumentFragment();
     var baseDelay = 1.85;
@@ -102,7 +159,7 @@
     return frag;
   }
 
-  function buildStage() {
+  function buildStage(showSkipHint) {
     var stage = document.createElement("div");
     stage.className = "wz-stage";
 
@@ -125,6 +182,13 @@
     tagline.textContent = TAGLINE;
     stage.appendChild(tagline);
 
+    if (showSkipHint) {
+      var hint = document.createElement("div");
+      hint.className = "wz-skip-hint";
+      hint.textContent = "Gusa popote kuruka";
+      stage.appendChild(hint);
+    }
+
     return stage;
   }
 
@@ -135,16 +199,28 @@
      * Mount and play the intro animation.
      * @param {string|HTMLElement} [target] - element or id to mount into. Defaults to document.body (full screen).
      * @param {Object} [opts]
-     * @param {boolean} [opts.showReplay=true] - show a "Cheza Tena" replay button.
-     * @param {boolean} [opts.autoDismiss=true] - auto fade out after animation completes.
-     * @param {number} [opts.duration=4200] - ms before auto dismiss.
-     * @returns {{replay: Function, el: HTMLElement, dismiss: Function}}
+     * @param {boolean} [opts.showReplay=true]      - show a "Cheza Tena" replay button.
+     * @param {boolean} [opts.autoDismiss=true]     - auto fade out after animation completes.
+     * @param {number}  [opts.duration=4200]        - ms before auto dismiss.
+     * @param {boolean} [opts.oncePerSession=false] - skip entirely if already played this session.
+     * @param {boolean} [opts.tapToSkip=true]       - tap/click or press ESC to dismiss immediately.
+     * @param {boolean} [opts.respectReducedMotion=true] - skip if user prefers reduced motion.
+     * @returns {{replay: Function, el: HTMLElement|null, dismiss: Function}}
      */
     mount: function (target, opts) {
       opts = opts || {};
       var showReplay = opts.showReplay !== false;
       var autoDismiss = opts.autoDismiss !== false;
       var duration = opts.duration || ANIM_DURATION;
+      var oncePerSession = opts.oncePerSession === true;
+      var tapToSkip = opts.tapToSkip !== false;
+      var respectRM = opts.respectReducedMotion !== false;
+
+      /* Usicheze kama tayari imecheza session hii, au mtumiaji hataki mwendo */
+      if ((oncePerSession && hasPlayedThisSession()) || (respectRM && prefersReducedMotion())) {
+        markPlayed();
+        return { replay: function () {}, el: null, dismiss: function () {} };
+      }
 
       injectFont();
       injectCSS();
@@ -161,16 +237,43 @@
         container = document.body;
       }
 
-      var stage = buildStage();
+      var isFullScreen = container === document.body;
+      var dismissed = false;
+      var dismissTimer = null;
+
+      var stage = buildStage(tapToSkip && isFullScreen);
       container.appendChild(stage);
+      if (isFullScreen) lockScroll();
+      markPlayed();
+
+      function cleanupListeners() {
+        if (tapToSkip) {
+          document.removeEventListener("keydown", onKey);
+        }
+      }
 
       function dismiss() {
+        if (dismissed) return;
+        dismissed = true;
+        if (dismissTimer) { clearTimeout(dismissTimer); dismissTimer = null; }
+        cleanupListeners();
         stage.classList.add("wz-hide");
         setTimeout(function () {
           if (stage.parentNode) stage.parentNode.removeChild(stage);
           var btn = container.querySelector(".wz-replay");
           if (btn) btn.remove();
+          if (isFullScreen) unlockScroll();
         }, 650);
+      }
+
+      function onKey(e) {
+        if (e.key === "Escape") dismiss();
+      }
+
+      function bindSkip(s) {
+        if (!tapToSkip) return;
+        s.addEventListener("click", dismiss);
+        document.addEventListener("keydown", onKey);
       }
 
       function addReplayBtn() {
@@ -186,18 +289,24 @@
         var existing = container.querySelector(".wz-replay");
         if (existing) existing.remove();
         if (stage.parentNode) stage.parentNode.removeChild(stage);
-        stage = buildStage();
+        cleanupListeners();
+        dismissed = false;
+        stage = buildStage(tapToSkip && isFullScreen);
         container.appendChild(stage);
+        if (isFullScreen) lockScroll();
+        bindSkip(stage);
         if (autoDismiss) {
-          setTimeout(dismiss, duration);
+          dismissTimer = setTimeout(dismiss, duration);
         }
         if (showReplay) {
           addReplayBtn();
         }
       }
 
+      bindSkip(stage);
+
       if (autoDismiss) {
-        setTimeout(dismiss, duration);
+        dismissTimer = setTimeout(dismiss, duration);
       }
 
       if (showReplay) {
@@ -214,12 +323,13 @@
   var currentScript = document.currentScript;
   var auto = !currentScript || currentScript.getAttribute("data-auto") !== "false";
   if (auto) {
+    var autoOpts = { showReplay: false, autoDismiss: true, oncePerSession: true, tapToSkip: true };
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
-        WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true });
+        WazabiasharaIntro.mount(document.body, autoOpts);
       });
     } else {
-      WazabiasharaIntro.mount(document.body, { showReplay: false, autoDismiss: true });
+      WazabiasharaIntro.mount(document.body, autoOpts);
     }
   }
 })(window);
