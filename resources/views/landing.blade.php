@@ -1,7 +1,7 @@
 <?php
 /*
 |--------------------------------------------------------------------------
-| WAZABIASHARA — Landing Page (landing.blade.php)  v2 FINTECH
+| WAZABIASHARA — Landing Page (landing.blade.php)  v3 FINTECH RESPONSIVE
 |--------------------------------------------------------------------------
 | Stack : Laravel Blade + Tailwind (CDN) + React 18 (CDN) + Animate.css
 |         + SweetAlert2 + AJAX (fetch)
@@ -10,6 +10,14 @@
 | Lugha : Kiswahili (default) + English — dropdown juu (topbar)
 | Icons : SVG pekee — HAKUNA emoji
 | Hero  : Picha halisi => weka public/images/hero.jpg (fallback ya mtandaoni ipo)
+|
+| v3 CHANGES (Responsive kwa vifaa vyote):
+|  - Simu ndogo (320px-420px): font scaling, floating cards ndani ya skrini,
+|    CTA buttons full-width, hero frame offsets ndogo
+|  - Tablet (768px-1023px): stats & features grid 3-4 cols, hero image capped
+|  - Safe-area insets (iPhone notch) kwa header, WhatsApp float na PWA banner
+|  - Stepper haitoki nje ya skrini (overflow-x-auto)
+|  - Imeongezwa icon 'star' iliyokuwa inakosekana kwenye wz_mini()
 */
 
 $appName  = config('app.name', 'Wazabiashara');
@@ -21,7 +29,7 @@ $year     = date('Y');
 <html lang="sw" id="htmlRoot" class="scroll-smooth">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ $appName }} — {{ $slogan }}</title>
 <meta name="description" content="Mfumo wa kifedha na usimamizi wa biashara za Tanzania — POS, stoo, matawi, madeni na ripoti. Web na Mobile. Offline mode. M-Pesa, Tigo Pesa, Airtel Money.">
 
@@ -45,7 +53,6 @@ $year     = date('Y');
 <meta name="twitter:title" content="{{ $appName }}">
 <meta name="twitter:description" content="{{ $slogan }}">
 <meta name="twitter:image" content="{{ asset('logo.png') }}">
-<meta property="og:type" content="website">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <!-- Font: Nunito (Bunny.net) -->
@@ -62,6 +69,7 @@ tailwind.config = {
   theme: {
     extend: {
       fontFamily: { sans: ['Nunito','sans-serif'] },
+      screens: { 'xs':'420px' }, // breakpoint mpya kwa simu ndogo sana
       colors: {
         emerald: {50:'#e6f5f1',100:'#b3e0d4',200:'#80cbc0',300:'#4db5a8',400:'#1a9f8e',500:'#024938',600:'#023d30',700:'#013028',800:'#01241f',900:'#001816'},
         gold:    {50:'#fff5e0',100:'#ffe6b3',200:'#ffd680',300:'#ffc64d',400:'#ffb71a',500:'#f9ac00',600:'#d49700',700:'#b07c00',800:'#8c6100',900:'#684600'}
@@ -87,8 +95,14 @@ tailwind.config = {
 <style>
   :root{ --em:#024938; --em4:#1a9f8e; --gd:#f9ac00; --gd3:#ffc64d; --ink:#3b4652; }
   ::selection{ background:#ffd680; color:#01241f; }
-  html{ -webkit-tap-highlight-color:transparent; }
+  html{ -webkit-tap-highlight-color:transparent; overflow-x:clip; }
+  body{ overflow-x:clip; }
   [x-cloak]{ display:none; }
+
+  /* ============ RESPONSIVE BASELINE ============ */
+  img,svg,video,canvas{ max-width:100%; }
+  h1,h2,h3{ overflow-wrap:break-word; text-wrap:balance; }
+  input,button,select,textarea{ font-size:inherit; } /* zuia iOS auto-zoom */
 
   /* ============ Awning strip (brand signature) ============ */
   .awning{ display:flex; height:22px; filter:drop-shadow(0 4px 6px rgba(1,36,31,.15)); }
@@ -140,6 +154,9 @@ tailwind.config = {
     border-radius:99px; background:linear-gradient(90deg,#f9ac00,#ffc64d); transition:width .3s; }
   .nav-link:hover::after{ width:100%; }
 
+  /* Topbar — safe area kwa simu zenye notch (iPhone n.k.) */
+  .topbar-safe{ padding-top:env(safe-area-inset-top); }
+
   /* Language dropdown */
   .lang-menu{ transform-origin:top right; transform:scale(.92); opacity:0; pointer-events:none;
     transition:transform .2s cubic-bezier(.22,.9,.3,1), opacity .2s; }
@@ -155,12 +172,32 @@ tailwind.config = {
     width:100%; height:100%; object-fit:cover; aspect-ratio:4/4.4; object-position:center top; }
   @media (min-width:1024px){ .hero-img{ aspect-ratio:4/4; } }
 
-  /* WhatsApp float */
-  .wa-btn{ animation:floaty 3.4s ease-in-out infinite; }
+  /* WhatsApp float — safe area chini */
+  .wa-btn{ animation:floaty 3.4s ease-in-out infinite;
+    bottom:calc(1.25rem + env(safe-area-inset-bottom)) !important; }
+  @media (min-width:640px){ .wa-btn{ bottom:calc(1.5rem + env(safe-area-inset-bottom)) !important; } }
   .wa-ring{ animation:pulse-ring 1.8s cubic-bezier(.4,0,.6,1) infinite; }
 
   .stat-strip{ background:linear-gradient(110deg,#013028 40%,#024938 50%,#013028 60%);
     background-size:1000px 100%; animation:shimmer 6s linear infinite; }
+
+  /* Stepper — isitoke nje ya skrini kwenye simu */
+  .stepper-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .stepper-scroll::-webkit-scrollbar{ display:none; }
+
+  /* ============ SIMU NDOGO (<= 640px) ============ */
+  @media (max-width:640px){
+    .awning{ height:16px; }
+    .awning span{ border-width:2px; }
+    .hero-frame::before{ inset:-8px -8px auto auto; border-radius:20px; }
+    .hero-frame::after{ inset:auto auto -8px -8px; border-radius:20px; }
+    .hero-img{ border-radius:20px; border-width:3px; box-shadow:0 20px 45px -20px rgba(1,36,31,.4); }
+  }
+
+  /* ============ SIMU NDOGO SANA (<= 360px) ============ */
+  @media (max-width:360px){
+    html{ font-size:15px; }
+  }
 
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{ animation:none !important; transition:none !important; }
@@ -243,6 +280,7 @@ if (!function_exists('wz_mini')) {
       case 'play':   return '<svg class="'.$cls.'" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
       case 'lock':   return '<svg class="'.$cls.'" viewBox="0 0 24 24" '.$s.'><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
       case 'flash':  return '<svg class="'.$cls.'" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>';
+      case 'star':   return '<svg class="'.$cls.'" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5 15 9l7 .8-5.2 4.7 1.4 6.9L12 18l-6.2 3.4 1.4-6.9L2 9.8 9 9z"/></svg>';
     }
     return '';
   }
@@ -253,14 +291,14 @@ if (!function_exists('wz_mini')) {
 <header id="siteHeader" class="fixed top-0 inset-x-0 z-50">
 
   <!-- ===== TOPBAR: mawasiliano + LANGUAGE DROPDOWN ===== -->
-  <div class="bg-emerald-900 text-emerald-100 text-[13px] font-bold relative z-[60]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-5 min-w-0">
+  <div class="topbar-safe bg-emerald-900 text-emerald-100 text-[12px] xs:text-[13px] font-bold relative z-[60]">
+    <div class="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 h-10 flex items-center justify-between gap-2 xs:gap-3">
+      <div class="flex items-center gap-3 sm:gap-5 min-w-0">
         <a href="tel:+{{ $whatsapp }}" class="hidden sm:inline-flex items-center gap-1.5 hover:text-gold-300 transition">
           {!! wz_mini('phone') !!} <span>+{{ $whatsapp }}</span>
         </a>
-        <a href="mailto:info@wazabiashara.co.tz" class="inline-flex items-center gap-1.5 hover:text-gold-300 transition truncate">
-          {!! wz_mini('mail') !!} <span class="truncate">info@wazabiashara.co.tz</span>
+        <a href="mailto:info@wazabiashara.co.tz" class="inline-flex items-center gap-1.5 hover:text-gold-300 transition min-w-0">
+          <span class="shrink-0">{!! wz_mini('mail') !!}</span> <span class="truncate">info@wazabiashara.co.tz</span>
         </a>
         <span class="hidden md:inline-flex items-center gap-1.5 text-emerald-300">
           {!! wz_mini('pin') !!} <span>Tanzania</span>
@@ -270,9 +308,10 @@ if (!function_exists('wz_mini')) {
       <!-- Language dropdown -->
       <div class="relative shrink-0">
         <button id="langBtn" aria-haspopup="listbox" aria-expanded="false"
-                class="inline-flex items-center gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-3 pr-2.5 py-1.5 transition">
+                class="inline-flex items-center gap-1.5 xs:gap-2 bg-emerald-800/80 hover:bg-emerald-700 border border-emerald-700 rounded-full pl-2.5 xs:pl-3 pr-2 xs:pr-2.5 py-1.5 transition">
           <span class="text-gold-400">{!! wz_mini('globe') !!}</span>
-          <span id="langLabel">Kiswahili</span>
+          <span id="langLabel" class="hidden xs:inline">Kiswahili</span>
+          <span id="langLabelShort" class="xs:hidden uppercase">SW</span>
           <span id="langChev" class="transition-transform duration-200">{!! wz_mini('chev','w-3.5 h-3.5') !!}</span>
         </button>
         <div id="langMenu" role="listbox"
@@ -297,21 +336,21 @@ if (!function_exists('wz_mini')) {
   </div>
 
   <!-- ===== NAVBAR ===== -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-[72px]">
+  <div class="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 sm:h-[72px]">
 
       <!-- Logo -->
-      <a href="#home" class="flex items-center gap-3 group">
-        <span class="relative">
+      <a href="#home" class="flex items-center gap-2.5 xs:gap-3 group min-w-0">
+        <span class="relative shrink-0">
           <img src="{{ asset('logo.png') }}" alt="{{ $appName }}"
-               class="h-11 w-11 rounded-2xl object-contain"
+               class="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl object-contain"
                onerror="this.style.display='none';document.getElementById('logoFallback').style.display='grid';">
           <span id="logoFallback" style="display:none"
-                class="h-11 w-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
+                class="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-2xl place-items-center border-[3px] border-emerald-800 shadow-card group-hover:rotate-6 transition-transform">W</span>
         </span>
-        <span class="leading-tight">
-          <span class="block font-black text-xl text-emerald-500 tracking-tight">{{ $appName }}</span>
-          <span class="block text-[11px] font-bold text-gold-600 -mt-0.5" data-i18n="slogan">{{ $slogan }}</span>
+        <span class="leading-tight min-w-0">
+          <span class="block font-black text-lg sm:text-xl text-emerald-500 tracking-tight truncate">{{ $appName }}</span>
+          <span class="block text-[10px] sm:text-[11px] font-bold text-gold-600 -mt-0.5 truncate" data-i18n="slogan">{{ $slogan }}</span>
         </span>
       </a>
 
@@ -339,7 +378,7 @@ if (!function_exists('wz_mini')) {
 
       <!-- Mobile burger -->
       <button id="burger" aria-label="Fungua menyu" aria-expanded="false"
-              class="lg:hidden relative h-11 w-11 grid place-items-center rounded-xl border-2 border-emerald-200 text-emerald-600 active:scale-95 transition-transform">
+              class="lg:hidden relative h-11 w-11 shrink-0 grid place-items-center rounded-xl border-2 border-emerald-200 text-emerald-600 active:scale-95 transition-transform">
         <svg id="burgerOpen" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
           <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
         <svg id="burgerClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.6" viewBox="0 0 24 24">
@@ -350,7 +389,7 @@ if (!function_exists('wz_mini')) {
 
   <!-- Mobile menu -->
   <div id="mobileMenu" class="lg:hidden hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-cardlg animate__animated animate__fadeIn animate__faster">
-    <nav class="px-6 py-5 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
+    <nav class="px-4 xs:px-6 py-5 flex flex-col gap-1 font-extrabold text-emerald-700 max-h-[70vh] overflow-y-auto">
       <a href="#home"       class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_home">Nyumbani</a>
       <a href="#huduma"     class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_features">Huduma</a>
       <a href="#jinsi"      class="mob-link px-4 py-3 rounded-xl hover:bg-emerald-50 active:bg-emerald-100" data-i18n="nav_how">Jinsi Inavyofanya Kazi</a>
@@ -359,12 +398,12 @@ if (!function_exists('wz_mini')) {
       <div class="flex gap-3 pt-3">
         @guest
           @if (Route::has('register'))
-            <a href="{{ route('register') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_getstarted">Anza Bure</a>
+            <a href="{{ route('register') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_getstarted">Anza Bure</a>
           @elseif (Route::has('login'))
-            <a href="{{ route('login') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_getstarted">Ingia Sasa</a>
+            <a href="{{ route('login') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_getstarted">Ingia Sasa</a>
           @endif
         @else
-          <a href="{{ url('/home') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_dash">Dashibodi</a>
+          <a href="{{ url('/home') }}" class="flex-1 text-center font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-5 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all" data-i18n="btn_dash">Dashibodi</a>
           <form id="logout-form-mobile" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
         @endguest
       </div>
@@ -373,22 +412,22 @@ if (!function_exists('wz_mini')) {
 </header>
 
 <!-- ================= HERO ================= -->
-<section id="home" class="relative pt-[150px] lg:pt-[168px] pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
+<section id="home" class="relative pt-[126px] xs:pt-[132px] sm:pt-[150px] lg:pt-[168px] pb-14 sm:pb-16 lg:pb-24 bg-gradient-to-b from-emerald-50 via-white to-white">
   <!-- ambient blobs -->
-  <div class="pointer-events-none absolute -top-10 -left-24 w-[420px] h-[420px] bg-emerald-400/15 anim-blob blur-2xl"></div>
-  <div class="pointer-events-none absolute top-40 -right-24 w-[380px] h-[380px] bg-gold-400/20 anim-blob blur-2xl" style="animation-delay:-4s"></div>
+  <div class="pointer-events-none absolute -top-10 -left-24 w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] bg-emerald-400/15 anim-blob blur-2xl"></div>
+  <div class="pointer-events-none absolute top-40 -right-24 w-[260px] h-[260px] sm:w-[380px] sm:h-[380px] bg-gold-400/20 anim-blob blur-2xl" style="animation-delay:-4s"></div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-14 items-center relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 md:gap-14 items-center relative">
 
     <!-- Copy -->
     <div class="text-center lg:text-left">
-      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-sm px-5 py-2.5 rounded-md shadow-md"
+      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-xs xs:text-sm px-4 xs:px-5 py-2 xs:py-2.5 rounded-md shadow-md"
             data-anim="fadeInDown">
-        <span class="text-gold-400">{!! wz_mini('shield','w-5 h-5') !!}</span>
+        <span class="text-gold-400 shrink-0">{!! wz_mini('shield','w-4 h-4 xs:w-5 xs:h-5') !!}</span>
         <span data-i18n="hero_badge">Jukwaa la kifedha la biashara za Tanzania</span>
       </span>
 
-      <h1 class="mt-6 font-black text-[38px] leading-[1.06] sm:text-6xl text-emerald-700" data-anim="fadeInUp">
+      <h1 class="mt-6 font-black text-[32px] xs:text-[38px] leading-[1.08] sm:text-5xl lg:text-6xl text-emerald-700" data-anim="fadeInUp">
         <span data-i18n="hero_h1a">Fedha za Biashara Yako,</span><br>
         <span class="relative inline-block text-emerald-500">
           <span data-i18n="hero_h1b">Udhibiti Kamili.</span>
@@ -398,37 +437,37 @@ if (!function_exists('wz_mini')) {
         </span>
       </h1>
 
-      <p class="mt-7 text-lg text-gray-500 font-semibold max-w-xl mx-auto lg:mx-0" data-anim="fadeInUp" data-delay="1"
+      <p class="mt-7 text-base sm:text-lg text-gray-500 font-semibold max-w-xl mx-auto lg:mx-0" data-anim="fadeInUp" data-delay="1"
          data-i18n-html="hero_p">
         Mauzo, stoo, matawi, wafanyakazi na madeni — kwenye mfumo mmoja salama.
         Inafanya kazi hata <span class="text-emerald-500 font-extrabold">bila intaneti</span>,
         na malipo ya <span class="text-emerald-500 font-extrabold">M-Pesa, Tigo Pesa na Airtel Money</span> moja kwa moja.
       </p>
 
-      <div class="mt-9 flex flex-wrap items-center justify-center lg:justify-start gap-4" data-anim="fadeInUp" data-delay="2">
+      <div class="mt-8 sm:mt-9 flex flex-col xs:flex-row flex-wrap items-stretch xs:items-center justify-center lg:justify-start gap-3 sm:gap-4" data-anim="fadeInUp" data-delay="2">
         @guest
           @if (Route::has('register'))
-            <a href="{{ route('register') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-7 sm:px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2">
+            <a href="{{ route('register') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-7 sm:px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
               <span data-i18n="hero_cta1">Fungua Akaunti Bure</span> {!! wz_mini('arrow','w-5 h-5') !!}
             </a>
           @endif
         @else
-          <a href="{{ url('/home') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-7 sm:px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2">
+          <a href="{{ url('/home') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-7 sm:px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
             <span data-i18n="btn_godash">Nenda Dashibodi</span> {!! wz_mini('arrow','w-5 h-5') !!}
           </a>
         @endguest
-        <a href="#jinsi" class="btn-ghost font-bold text-emerald-600 px-6 sm:px-7 py-4 rounded-xl border-2 border-emerald-200 inline-flex items-center gap-2">
+        <a href="#jinsi" class="btn-ghost font-bold text-emerald-600 px-6 sm:px-7 py-4 rounded-xl border-2 border-emerald-200 inline-flex items-center justify-center gap-2">
           {!! wz_mini('play','w-5 h-5') !!} <span data-i18n="hero_cta2">Ona Jinsi Inavyofanya</span>
         </a>
       </div>
 
       <!-- trust row -->
-      <div class="mt-9 flex items-center justify-center lg:justify-start gap-5" data-anim="fadeInUp" data-delay="3">
-        <div class="flex -space-x-3">
-          <span class="h-11 w-11 rounded-full border-[3px] border-white bg-emerald-400 grid place-items-center text-white font-black">J</span>
-          <span class="h-11 w-11 rounded-full border-[3px] border-white bg-gold-400 grid place-items-center text-emerald-800 font-black">N</span>
-          <span class="h-11 w-11 rounded-full border-[3px] border-white bg-emerald-600 grid place-items-center text-gold-300 font-black">B</span>
-          <span class="h-11 w-11 rounded-full border-[3px] border-white bg-gold-200 grid place-items-center text-emerald-700 font-black">+</span>
+      <div class="mt-8 sm:mt-9 flex items-center justify-center lg:justify-start gap-4 sm:gap-5" data-anim="fadeInUp" data-delay="3">
+        <div class="flex -space-x-3 shrink-0">
+          <span class="h-10 w-10 sm:h-11 sm:w-11 rounded-full border-[3px] border-white bg-emerald-400 grid place-items-center text-white font-black">J</span>
+          <span class="h-10 w-10 sm:h-11 sm:w-11 rounded-full border-[3px] border-white bg-gold-400 grid place-items-center text-emerald-800 font-black">N</span>
+          <span class="h-10 w-10 sm:h-11 sm:w-11 rounded-full border-[3px] border-white bg-emerald-600 grid place-items-center text-gold-300 font-black">B</span>
+          <span class="h-10 w-10 sm:h-11 sm:w-11 rounded-full border-[3px] border-white bg-gold-200 grid place-items-center text-emerald-700 font-black">+</span>
         </div>
         <p class="text-sm font-bold text-gray-500 text-left" data-i18n-html="hero_trust">
           Wafanyabiashara <span class="text-emerald-500">1,000+</span> wanaamini Wazabiashara
@@ -436,21 +475,21 @@ if (!function_exists('wz_mini')) {
       </div>
 
       <!-- security mini-badges (fintech trust) -->
-      <div class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-2.5 text-[12px] font-black text-white" data-anim="fadeInUp" data-delay="4">
-        <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3.5 py-2 shadow-md">
+      <div class="mt-6 sm:mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-2 xs:gap-2.5 text-[11px] xs:text-[12px] font-black text-white" data-anim="fadeInUp" data-delay="4">
+        <span class="inline-flex items-center gap-1.5 xs:gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3 xs:px-3.5 py-2 shadow-md">
           <span class="text-gold-400">{!! wz_mini('lock','w-4 h-4') !!}</span> <span data-i18n="badge_ssl">Usimbaji wa SSL/TLS</span>
         </span>
-        <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3.5 py-2 shadow-md">
+        <span class="inline-flex items-center gap-1.5 xs:gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3 xs:px-3.5 py-2 shadow-md">
           <span class="text-gold-400">{!! wz_mini('shield','w-4 h-4') !!}</span> <span data-i18n="badge_audit">Audit Trail Kamili</span>
         </span>
-        <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3.5 py-2 shadow-md">
+        <span class="inline-flex items-center gap-1.5 xs:gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 rounded-md px-3 xs:px-3.5 py-2 shadow-md">
           <span class="text-gold-400">{!! wz_mini('flash','w-4 h-4') !!}</span> <span data-i18n="badge_rt">Ripoti za Papo Hapo</span>
         </span>
       </div>
     </div>
 
     <!-- ===== Visual: PICHA HALISI + floating fintech cards ===== -->
-    <div class="relative hero-frame mx-2 sm:mx-6 lg:mx-0" data-anim="zoomIn" data-delay="1">
+    <div class="relative hero-frame w-full max-w-[420px] sm:max-w-md mx-auto lg:max-w-none mt-4 lg:mt-0" data-anim="zoomIn" data-delay="1">
       {{-- Picha halisi: public/images/2148761600.jpg (mfanyabiashara/POS).
            Fallback: public/images/2148777464.jpg --}}
       <img src="{{ asset('images/2148761600.jpg') }}"
@@ -458,30 +497,30 @@ if (!function_exists('wz_mini')) {
            alt="Mfanyabiashara akitumia Wazabiashara POS"
            class="hero-img" loading="eager">
 
-      <!-- Floating card: Mauzo (kushoto juu) -->
-      <div class="anim-float absolute -left-3 sm:-left-8 top-8 sm:top-14 bg-white rounded-2xl shadow-cardlg border-2 border-gray-100 px-4 sm:px-5 py-3.5 flex items-center gap-3 scale-90 sm:scale-100 origin-left">
-        <span class="h-11 w-11 grid place-items-center rounded-xl bg-emerald-50 border-2 border-emerald-200 text-emerald-500">
-          {!! wz_mini('chart','w-6 h-6') !!}
+      <!-- Floating card: Mauzo (kushoto juu) — inakaa NDANI ya skrini kwenye simu -->
+      <div class="anim-float absolute left-1 sm:-left-8 top-6 sm:top-14 bg-white rounded-2xl shadow-cardlg border-2 border-gray-100 px-3.5 sm:px-5 py-3 sm:py-3.5 flex items-center gap-2.5 sm:gap-3 scale-[.82] sm:scale-100 origin-left">
+        <span class="h-10 w-10 sm:h-11 sm:w-11 grid place-items-center rounded-xl bg-emerald-50 border-2 border-emerald-200 text-emerald-500">
+          {!! wz_mini('chart','w-5 h-5 sm:w-6 sm:h-6') !!}
         </span>
         <div>
-          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide" data-i18n="card_sales">Mauzo ya Leo</p>
-          <p class="font-black text-emerald-600 text-lg">TZS <span data-count="1240000">0</span></p>
+          <p class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wide whitespace-nowrap" data-i18n="card_sales">Mauzo ya Leo</p>
+          <p class="font-black text-emerald-600 text-base sm:text-lg whitespace-nowrap">TZS <span data-count="1240000">0</span></p>
         </div>
       </div>
 
       <!-- Floating card: Malipo yamepokelewa (kulia kati) -->
-      <div class="anim-float2 absolute -right-3 sm:-right-8 top-[42%] bg-white rounded-2xl shadow-cardlg border-2 border-gray-100 px-4 sm:px-5 py-3.5 flex items-center gap-3 scale-90 sm:scale-100 origin-right">
-        <span class="h-11 w-11 grid place-items-center rounded-xl bg-gold-50 border-2 border-gold-200 text-gold-600 anim-wiggle">
-          {!! wz_mini('moneyphone','w-6 h-6') !!}
+      <div class="anim-float2 absolute right-1 sm:-right-8 top-[42%] bg-white rounded-2xl shadow-cardlg border-2 border-gray-100 px-3.5 sm:px-5 py-3 sm:py-3.5 flex items-center gap-2.5 sm:gap-3 scale-[.82] sm:scale-100 origin-right">
+        <span class="h-10 w-10 sm:h-11 sm:w-11 grid place-items-center rounded-xl bg-gold-50 border-2 border-gold-200 text-gold-600 anim-wiggle">
+          {!! wz_mini('moneyphone','w-5 h-5 sm:w-6 sm:h-6') !!}
         </span>
         <div>
-          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide" data-i18n="card_pay">Malipo Yamepokelewa</p>
-          <p class="font-black text-emerald-600 text-sm">M-Pesa <span class="text-gray-400 font-bold">•</span> TZS 45,000</p>
+          <p class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wide whitespace-nowrap" data-i18n="card_pay">Malipo Yamepokelewa</p>
+          <p class="font-black text-emerald-600 text-xs sm:text-sm whitespace-nowrap">M-Pesa <span class="text-gray-400 font-bold">•</span> TZS 45,000</p>
         </div>
       </div>
 
       <!-- Floating chip: Offline (chini kushoto) -->
-      <div class="anim-float absolute left-4 -bottom-4 bg-emerald-500 text-white rounded-full px-4 py-2 text-xs font-extrabold shadow-cardlg flex items-center gap-2" style="animation-delay:-2.5s">
+      <div class="anim-float absolute left-3 sm:left-4 -bottom-3 sm:-bottom-4 bg-emerald-500 text-white rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-extrabold shadow-cardlg flex items-center gap-2" style="animation-delay:-2.5s">
         <span class="text-gold-400">{!! wz_mini('wifi','w-4 h-4') !!}</span> <span data-i18n="chip_offline">Offline Mode Imewashwa</span>
       </div>
 
@@ -493,8 +532,8 @@ if (!function_exists('wz_mini')) {
   </div>
 
   <!-- Ticker: njia za malipo (icons, si emoji) -->
-  <div class="ticker-wrap mt-14 border-y-2 border-emerald-100 bg-white/70 backdrop-blur overflow-hidden">
-    <div class="ticker-track flex whitespace-nowrap py-3.5 font-extrabold text-emerald-600/80 text-sm">
+  <div class="ticker-wrap mt-10 sm:mt-14 border-y-2 border-emerald-100 bg-white/70 backdrop-blur overflow-hidden">
+    <div class="ticker-track flex whitespace-nowrap py-3 sm:py-3.5 font-extrabold text-emerald-600/80 text-[13px] sm:text-sm">
       @php
         $ticks = [
           ['moneyphone','tick_mpesa','M-Pesa'], ['moneyphone','tick_tigo','Tigo Pesa'],
@@ -506,7 +545,7 @@ if (!function_exists('wz_mini')) {
       @endphp
       @for ($r=0; $r<2; $r++)
         @foreach ($ticks as $t)
-          <span class="mx-6 inline-flex items-center gap-2">
+          <span class="mx-4 sm:mx-6 inline-flex items-center gap-2">
             <span class="text-gold-500">{!! wz_mini($t[0],'w-4 h-4') !!}</span>
             <em class="not-italic" data-i18n="{{ $t[1] }}">{{ $t[2] }}</em>
           </span>
@@ -522,41 +561,41 @@ if (!function_exists('wz_mini')) {
   <div class="absolute inset-0 opacity-15" style="background-image:url('{{ asset('flat-abstract-background-pattern-vector_822782-866.jpg') }}');background-size:cover;background-position:center;"></div>
   <div class="absolute inset-0 bg-gradient-to-r from-emerald-800/90 via-emerald-800/80 to-emerald-900/90"></div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 relative z-10">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-4 py-6 text-center" data-anim="fadeInUp">
-        <p class="font-black text-3xl sm:text-4xl text-gold-400"><span data-count="1000">0</span>+</p>
-        <p class="mt-2 text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st1">Biashara Zinazotumia</p>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 relative z-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 xs:gap-4 sm:gap-6">
+      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-3 xs:px-4 py-5 sm:py-6 text-center" data-anim="fadeInUp">
+        <p class="font-black text-2xl xs:text-3xl sm:text-4xl text-gold-400"><span data-count="1000">0</span>+</p>
+        <p class="mt-2 text-[11px] xs:text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st1">Biashara Zinazotumia</p>
       </div>
-      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-4 py-6 text-center" data-anim="fadeInUp" data-delay="1">
-        <p class="font-black text-3xl sm:text-4xl text-gold-400"><span data-count="26">0</span></p>
-        <p class="mt-2 text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st2">Mikoa ya Tanzania</p>
+      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-3 xs:px-4 py-5 sm:py-6 text-center" data-anim="fadeInUp" data-delay="1">
+        <p class="font-black text-2xl xs:text-3xl sm:text-4xl text-gold-400"><span data-count="26">0</span></p>
+        <p class="mt-2 text-[11px] xs:text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st2">Mikoa ya Tanzania</p>
       </div>
-      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-4 py-6 text-center" data-anim="fadeInUp" data-delay="2">
-        <p class="font-black text-3xl sm:text-4xl text-gold-400"><span data-count="99">0</span>.5%</p>
-        <p class="mt-2 text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st3">Upatikanaji (Uptime)</p>
+      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-3 xs:px-4 py-5 sm:py-6 text-center" data-anim="fadeInUp" data-delay="2">
+        <p class="font-black text-2xl xs:text-3xl sm:text-4xl text-gold-400"><span data-count="99">0</span>.5%</p>
+        <p class="mt-2 text-[11px] xs:text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st3">Upatikanaji (Uptime)</p>
       </div>
-      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-4 py-6 text-center" data-anim="fadeInUp" data-delay="3">
-        <p class="font-black text-3xl sm:text-4xl text-gold-400"><span data-count="15">0</span>s</p>
-        <p class="mt-2 text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st4">Kukamilisha Muuzo</p>
+      <div class="bg-white/10 backdrop-blur-md border-2 border-emerald-400/20 rounded-2xl px-3 xs:px-4 py-5 sm:py-6 text-center" data-anim="fadeInUp" data-delay="3">
+        <p class="font-black text-2xl xs:text-3xl sm:text-4xl text-gold-400"><span data-count="15">0</span>s</p>
+        <p class="mt-2 text-[11px] xs:text-[12px] sm:text-sm font-bold text-emerald-100" data-i18n="st4">Kukamilisha Muuzo</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ================= FEATURES ================= -->
-<section id="huduma" class="py-20 sm:py-24 bg-white relative">
+<section id="huduma" class="py-16 sm:py-24 bg-white relative">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-2xl mx-auto">
-      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
+      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest px-4 sm:px-5 py-2 sm:py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
         <span class="text-gold-400">{!! wz_mini('store','w-4 h-4') !!}</span>
         <span data-i18n="feat_eyebrow">Huduma Zetu</span>
       </span>
-      <h2 class="mt-5 font-black text-3xl sm:text-5xl text-emerald-700" data-anim="fadeInUp" data-i18n="feat_h2">Miundombinu ya Kifedha ya Biashara Yako</h2>
-      <p class="mt-4 text-gray-500 font-semibold" data-anim="fadeInUp" data-delay="1" data-i18n="feat_p">Kuanzia kaunta ya duka hadi ripoti za mmiliki — kila muamala uko salama na unaonekana.</p>
+      <h2 class="mt-5 font-black text-[26px] xs:text-3xl sm:text-4xl lg:text-5xl text-emerald-700" data-anim="fadeInUp" data-i18n="feat_h2">Miundombinu ya Kifedha ya Biashara Yako</h2>
+      <p class="mt-4 text-gray-500 font-semibold text-sm sm:text-base" data-anim="fadeInUp" data-delay="1" data-i18n="feat_p">Kuanzia kaunta ya duka hadi ripoti za mmiliki — kila muamala uko salama na unaonekana.</p>
     </div>
 
-    <div class="mt-14 sm:mt-16 grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div class="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-3 gap-3 xs:gap-4 sm:gap-6">
       @php
       $features = [
         ['k'=>'f1','img'=>'pos.png'],
@@ -577,9 +616,9 @@ if (!function_exists('wz_mini')) {
       @endphp
 
       @foreach($features as $i => $f)
-      <article class="fcard bg-white rounded-2xl border-2 border-gray-100 shadow-card p-5 sm:p-7" data-anim="fadeInUp" data-delay="{{ ($i%3)+1 }}">
-        <img src="{{ asset('images/' . $f['img']) }}" alt="{{ $ftxt[$f['k']][0] }}" class="w-12 h-12 sm:w-14 sm:h-14 object-contain" loading="lazy">
-        <h3 class="mt-4 font-black text-base sm:text-xl text-emerald-700" data-i18n="{{ $f['k'] }}_t">{{ $ftxt[$f['k']][0] }}</h3>
+      <article class="fcard bg-white rounded-2xl border-2 border-gray-100 shadow-card p-4 xs:p-5 sm:p-7" data-anim="fadeInUp" data-delay="{{ ($i%3)+1 }}">
+        <img src="{{ asset('images/' . $f['img']) }}" alt="{{ $ftxt[$f['k']][0] }}" class="w-11 h-11 xs:w-12 xs:h-12 sm:w-14 sm:h-14 object-contain" loading="lazy">
+        <h3 class="mt-3 sm:mt-4 font-black text-[15px] xs:text-base sm:text-xl text-emerald-700" data-i18n="{{ $f['k'] }}_t">{{ $ftxt[$f['k']][0] }}</h3>
         <p class="mt-2 text-gray-500 font-semibold text-xs sm:text-[15px] leading-relaxed" data-i18n="{{ $f['k'] }}_d">{{ $ftxt[$f['k']][1] }}</p>
       </article>
       @endforeach
@@ -588,18 +627,18 @@ if (!function_exists('wz_mini')) {
 </section>
 
 <!-- ================= HOW IT WORKS ================= -->
-<section id="jinsi" class="py-20 sm:py-24 bg-gradient-to-b from-emerald-50/60 to-white">
+<section id="jinsi" class="py-16 sm:py-24 bg-gradient-to-b from-emerald-50/60 to-white">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-2xl mx-auto">
-      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
+      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest px-4 sm:px-5 py-2 sm:py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
         <span class="text-gold-400">{!! wz_mini('flash','w-4 h-4') !!}</span>
         <span data-i18n="how_eyebrow">Hatua 3 Tu</span>
       </span>
-      <h2 class="mt-5 font-black text-3xl sm:text-5xl text-emerald-700" data-anim="fadeInUp" data-i18n="how_h2">Jisajili Leo, Uza Leo</h2>
+      <h2 class="mt-5 font-black text-[26px] xs:text-3xl sm:text-4xl lg:text-5xl text-emerald-700" data-anim="fadeInUp" data-i18n="how_h2">Jisajili Leo, Uza Leo</h2>
     </div>
 
     {{-- Stepper --}}
-    <div class="mt-14 sm:mt-16 max-w-5xl mx-auto" data-anim="fadeInUp" data-delay="1">
+    <div class="mt-12 sm:mt-16 max-w-5xl mx-auto" data-anim="fadeInUp" data-delay="1">
       @php
       $stxt = [
         ['1','Jisajili kwa Simu','Weka jina, namba ya simu na jina la biashara yako. Thibitisha kwa OTP — dakika 2 tu.'],
@@ -608,24 +647,26 @@ if (!function_exists('wz_mini')) {
       ];
       @endphp
 
-      {{-- Horizontal stepper bar --}}
-      <ol class="flex items-center w-full p-4 sm:p-6 space-x-2 sm:space-x-4 text-sm font-bold text-center bg-emerald-50 border-2 border-emerald-200 rounded-2xl shadow-card">
-        @foreach($stxt as $i => $s)
-        <li class="flex items-center {{ $i === 0 ? 'text-emerald-700' : 'text-gray-400' }} {{ $i === count($stxt)-1 ? 'flex-1' : 'flex-1' }}">
-          <span class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 me-2 text-sm sm:text-base font-black border-2 {{ $i === 0 ? 'border-emerald-600 text-emerald-700 bg-white' : 'border-gray-300 text-gray-400 bg-white' }} rounded-full shrink-0">
-            {{ $s[0] }}
-          </span>
-          <span class="hidden sm:inline">{{ $s[1] }}</span>
-          <span class="sm:hidden">{{ explode(' ', $s[1])[0] }}</span>
-          @if($i < count($stxt)-1)
-          <svg class="w-5 h-5 ms-2 mx-auto" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 16 4-4-4-4m6 8 4-4-4-4"/></svg>
-          @endif
-        </li>
-        @endforeach
-      </ol>
+      {{-- Horizontal stepper bar (inaweza ku-scroll pembeni kwenye simu ndogo) --}}
+      <div class="stepper-scroll">
+        <ol class="flex items-center w-full min-w-[300px] p-3 xs:p-4 sm:p-6 space-x-2 sm:space-x-4 text-xs xs:text-sm font-bold text-center bg-emerald-50 border-2 border-emerald-200 rounded-2xl shadow-card">
+          @foreach($stxt as $i => $s)
+          <li class="flex items-center flex-1 {{ $i === 0 ? 'text-emerald-700' : 'text-gray-400' }}">
+            <span class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 me-1.5 xs:me-2 text-sm sm:text-base font-black border-2 {{ $i === 0 ? 'border-emerald-600 text-emerald-700 bg-white' : 'border-gray-300 text-gray-400 bg-white' }} rounded-full shrink-0">
+              {{ $s[0] }}
+            </span>
+            <span class="hidden sm:inline">{{ $s[1] }}</span>
+            <span class="sm:hidden">{{ explode(' ', $s[1])[0] }}</span>
+            @if($i < count($stxt)-1)
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 ms-1.5 sm:ms-2 mx-auto shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 16 4-4-4-4m6 8 4-4-4-4"/></svg>
+            @endif
+          </li>
+          @endforeach
+        </ol>
+      </div>
 
       {{-- Step details --}}
-      <div class="mt-8 grid sm:grid-cols-3 gap-6">
+      <div class="mt-6 sm:mt-8 grid sm:grid-cols-3 gap-4 sm:gap-6">
         @foreach($stxt as $i => $s)
         <div class="bg-white rounded-2xl border-2 border-gray-100 shadow-card p-5 sm:p-6" data-anim="fadeInUp" data-delay="{{ $i+1 }}">
           <span class="flex items-center justify-center w-10 h-10 mb-3 font-black text-lg border-2 border-emerald-600 text-emerald-700 bg-emerald-50 rounded-full">
@@ -638,15 +679,15 @@ if (!function_exists('wz_mini')) {
       </div>
     </div>
 
-    <div class="mt-12 text-center" data-anim="fadeInUp" data-delay="3">
+    <div class="mt-10 sm:mt-12 text-center px-2" data-anim="fadeInUp" data-delay="3">
       @guest
         @if (Route::has('register'))
-          <a href="{{ route('register') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-8 sm:px-9 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2">
+          <a href="{{ route('register') }}" class="w-full xs:w-auto font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-8 sm:px-9 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
             <span data-i18n="how_cta">Fungua Akaunti Sasa</span> {!! wz_mini('arrow','w-5 h-5') !!}
           </a>
         @endif
       @else
-        <a href="{{ url('/home') }}" class="font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-8 sm:px-9 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2">
+        <a href="{{ url('/home') }}" class="w-full xs:w-auto font-bold text-base sm:text-lg text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-8 sm:px-9 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
           <span data-i18n="btn_godash">Nenda Dashibodi</span> {!! wz_mini('arrow','w-5 h-5') !!}
         </a>
       @endguest
@@ -655,27 +696,27 @@ if (!function_exists('wz_mini')) {
 </section>
 
 <!-- ================= TESTIMONIALS (REACT) ================= -->
-<section id="maoni" class="py-20 sm:py-24 relative overflow-hidden bg-emerald-800">
+<section id="maoni" class="py-16 sm:py-24 relative overflow-hidden bg-emerald-800">
   {{-- Background pattern image --}}
   <div class="absolute inset-0 opacity-20" style="background-image:url('{{ asset('flat-abstract-background-pattern-vector_822782-866.jpg') }}');background-size:cover;background-position:center;"></div>
   <div class="absolute inset-0 bg-gradient-to-b from-emerald-800/80 via-emerald-800/70 to-emerald-900/90"></div>
 
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="text-center">
-      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
+      <span class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 border-2 border-emerald-800 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest px-4 sm:px-5 py-2 sm:py-2.5 rounded-md shadow-md" data-anim="fadeInDown">
         <span class="text-gold-400">{!! wz_mini('star','w-4 h-4') !!}</span>
         <span data-i18n="rev_eyebrow">Maoni ya Wateja</span>
       </span>
-      <h2 class="mt-5 font-black text-3xl sm:text-5xl text-white" data-anim="fadeInUp" data-i18n="rev_h2">Wafanyabiashara Wanasemaje?</h2>
+      <h2 class="mt-5 font-black text-[26px] xs:text-3xl sm:text-4xl lg:text-5xl text-white" data-anim="fadeInUp" data-i18n="rev_h2">Wafanyabiashara Wanasemaje?</h2>
     </div>
-    <div id="react-testimonials" class="mt-12 sm:mt-14"></div>
+    <div id="react-testimonials" class="mt-10 sm:mt-14"></div>
   </div>
 </section>
 
 <!-- ================= NEWSLETTER (AJAX + SweetAlert) ================= -->
-<section id="newsletter" class="py-20 sm:py-24 bg-white">
+<section id="newsletter" class="py-16 sm:py-24 bg-white">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="relative rounded-[32px] bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 p-8 sm:p-14 overflow-hidden shadow-cardlg" data-anim="zoomIn">
+    <div class="relative rounded-3xl sm:rounded-[32px] bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900 p-6 xs:p-8 sm:p-14 overflow-hidden shadow-cardlg" data-anim="zoomIn">
       <div class="absolute -top-14 -right-14 h-52 w-52 rounded-full bg-gold-400/20 blur-xl"></div>
       <div class="absolute -bottom-16 -left-10 h-44 w-44 rounded-full bg-emerald-400/20 blur-xl"></div>
       <div class="awning absolute top-0 inset-x-0" aria-hidden="true">
@@ -683,14 +724,14 @@ if (!function_exists('wz_mini')) {
       </div>
 
       <div class="relative text-center">
-        <h2 class="font-black text-2xl sm:text-4xl text-white" data-i18n-html="news_h2">Usikose Habari za <span class="text-gold-400">Wazabiashara</span></h2>
+        <h2 class="font-black text-[22px] xs:text-2xl sm:text-4xl text-white" data-i18n-html="news_h2">Usikose Habari za <span class="text-gold-400">Wazabiashara</span></h2>
         <p class="mt-3 text-emerald-100 font-semibold max-w-xl mx-auto text-sm sm:text-base" data-i18n="news_p">Jiunge na jarida letu — vidokezo vya fedha na biashara, huduma mpya na ofa maalum, moja kwa moja kwenye barua pepe yako.</p>
 
-        <form id="newsletterForm" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto" novalidate>
+        <form id="newsletterForm" class="mt-7 sm:mt-8 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto" novalidate>
           <div class="relative flex-1">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-300">{!! wz_mini('mail','w-5 h-5') !!}</span>
-            <input id="newsEmail" type="email" required placeholder="Barua pepe yako…" data-i18n-ph="news_ph"
-                   class="w-full rounded-2xl bg-white/95 pl-12 pr-4 py-4 font-bold text-emerald-800 placeholder:text-gray-400 outline-none border-2 border-transparent focus:border-gold-400 transition">
+            <input id="newsEmail" type="email" inputmode="email" autocomplete="email" required placeholder="Barua pepe yako…" data-i18n-ph="news_ph"
+                   class="w-full rounded-2xl bg-white/95 pl-12 pr-4 py-4 text-base font-bold text-emerald-800 placeholder:text-gray-400 outline-none border-2 border-transparent focus:border-gold-400 transition">
           </div>
           <button id="newsBtn" type="submit"
                   class="font-bold text-gray-900 bg-gradient-to-r from-gold-300 to-gold-400 hover:from-gold-400 hover:to-gold-500 px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2 min-w-[150px]">
@@ -705,7 +746,7 @@ if (!function_exists('wz_mini')) {
 </section>
 
 <!-- ================= FOOTER ================= -->
-<footer class="bg-emerald-900 text-emerald-100 pt-14 sm:pt-16 pb-8 relative overflow-hidden">
+<footer class="bg-emerald-900 text-emerald-100 pt-12 sm:pt-16 pb-8 relative overflow-hidden">
   {{-- Subtle pattern overlay --}}
   <div class="absolute inset-0 opacity-5" style="background-image:url('{{ asset('flat-abstract-background-pattern-vector_822782-866.jpg') }}');background-size:cover;background-position:center;"></div>
 
@@ -715,19 +756,19 @@ if (!function_exists('wz_mini')) {
       {{-- Brand --}}
       <div class="sm:col-span-2">
         <a href="#home" class="flex items-center gap-3">
-          <img src="{{ asset('logo.png') }}" alt="{{ $appName }}" class="h-12 w-12 rounded-xl object-contain"
+          <img src="{{ asset('logo.png') }}" alt="{{ $appName }}" class="h-11 w-11 sm:h-12 sm:w-12 rounded-xl object-contain"
                onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
           <span style="display:none"
-                class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-2xl grid place-items-center border-2 border-emerald-700">W</span>
+                class="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-gold-400 font-black text-2xl grid place-items-center border-2 border-emerald-700">W</span>
           <span>
-            <span class="block font-black text-xl text-white">{{ $appName }}</span>
+            <span class="block font-black text-lg sm:text-xl text-white">{{ $appName }}</span>
             <span class="block text-[11px] font-bold text-gold-400" data-i18n="slogan">{{ $slogan }}</span>
           </span>
         </a>
         <p class="mt-5 text-sm font-semibold text-emerald-200/80 max-w-sm" data-i18n="foot_about">Jukwaa la kifedha na usimamizi wa biashara za Tanzania — POS, stoo, matawi, madeni na ripoti. Web na Mobile, hata bila intaneti.</p>
 
         {{-- Social media icons --}}
-        <div class="mt-6 flex items-center gap-3">
+        <div class="mt-6 flex flex-wrap items-center gap-3">
           <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noopener" aria-label="WhatsApp"
              class="grid place-items-center h-10 w-10 rounded-xl bg-emerald-800 border-2 border-emerald-700 text-emerald-300 hover:bg-gold-400 hover:text-emerald-900 hover:border-gold-500 transition-all">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.3 1.27.49 1.7.63.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.85 9.85 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88a9.82 9.82 0 0 1 7 2.9 9.82 9.82 0 0 1 2.9 7c0 5.45-4.45 9.87-9.9 9.87zm8.42-18.3A11.8 11.8 0 0 0 12.04 0C5.46 0 .1 5.35.1 11.93c0 2.1.55 4.16 1.6 5.97L0 24l6.24-1.64a11.93 11.93 0 0 0 5.8 1.48h.01c6.58 0 11.93-5.35 11.93-11.93 0-3.19-1.24-6.19-3.5-8.42z"/></svg>
@@ -772,15 +813,15 @@ if (!function_exists('wz_mini')) {
           <span data-i18n="foot_contact">Mawasiliano</span>
         </h4>
         <ul class="mt-4 space-y-3 text-sm font-bold">
-          <li class="flex items-center gap-2"><span class="text-gold-400">{!! wz_mini('phone') !!}</span> +{{ $whatsapp }}</li>
-          <li class="flex items-center gap-2"><span class="text-gold-400">{!! wz_mini('mail') !!}</span> info@wazabiashara.co.tz</li>
-          <li class="flex items-center gap-2"><span class="text-gold-400">{!! wz_mini('pin') !!}</span> Tanzania</li>
+          <li class="flex items-center gap-2"><span class="text-gold-400 shrink-0">{!! wz_mini('phone') !!}</span> +{{ $whatsapp }}</li>
+          <li class="flex items-center gap-2 min-w-0"><span class="text-gold-400 shrink-0">{!! wz_mini('mail') !!}</span> <span class="truncate">info@wazabiashara.co.tz</span></li>
+          <li class="flex items-center gap-2"><span class="text-gold-400 shrink-0">{!! wz_mini('pin') !!}</span> Tanzania</li>
         </ul>
       </div>
     </div>
 
     {{-- Bottom bar --}}
-    <div class="mt-12 pt-6 border-t border-emerald-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-emerald-300/80">
+    <div class="mt-10 sm:mt-12 pt-6 border-t border-emerald-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-emerald-300/80 text-center sm:text-left">
       <p>&copy; {{ $year }} {{ $appName }}. <span data-i18n="foot_rights">Haki zote zimehifadhiwa.</span></p>
       <div class="flex items-center gap-2">
         <span data-i18n="foot_made">Imetengenezwa Tanzania</span>
@@ -796,12 +837,12 @@ if (!function_exists('wz_mini')) {
 <!-- ================= WHATSAPP FLOAT ================= -->
 <a href="https://wa.me/{{ $whatsapp }}?text={{ rawurlencode('Habari! Nataka kujua zaidi kuhusu Wazabiashara.') }}"
    target="_blank" rel="noopener" aria-label="WhatsApp"
-   class="wa-btn fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 group">
+   class="wa-btn fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 group">
   <span class="wa-ring absolute inset-0 rounded-full bg-[#25D366]"></span>
   <span class="relative grid place-items-center h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-[#25D366] shadow-cardlg border-[3px] border-white">
     <svg class="w-7 h-7 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="#fff"><path d="M17.5 14.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.3 1.27.49 1.7.63.72.23 1.37.2 1.88.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.85 9.85 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88a9.82 9.82 0 0 1 7 2.9 9.82 9.82 0 0 1 2.9 7c0 5.45-4.45 9.87-9.9 9.87zm8.42-18.3A11.8 11.8 0 0 0 12.04 0C5.46 0 .1 5.35.1 11.93c0 2.1.55 4.16 1.6 5.97L0 24l6.24-1.64a11.93 11.93 0 0 0 5.8 1.48h.01c6.58 0 11.93-5.35 11.93-11.93 0-3.19-1.24-6.19-3.5-8.42z"/></svg>
   </span>
-  <span class="absolute right-[68px] sm:right-[76px] top-1/2 -translate-y-1/2 whitespace-nowrap bg-white text-emerald-700 font-extrabold text-sm px-4 py-2 rounded-xl shadow-card border-2 border-gray-100 opacity-0 translate-x-2 pointer-events-none transition-all group-hover:opacity-100 group-hover:translate-x-0"
+  <span class="hidden sm:block absolute right-[76px] top-1/2 -translate-y-1/2 whitespace-nowrap bg-white text-emerald-700 font-extrabold text-sm px-4 py-2 rounded-xl shadow-card border-2 border-gray-100 opacity-0 translate-x-2 pointer-events-none transition-all group-hover:opacity-100 group-hover:translate-x-0"
         data-i18n="wa_tip">Tuandikie WhatsApp</span>
 </a>
 
@@ -909,6 +950,8 @@ function applyLang(lang){
   document.querySelectorAll('[data-i18n-html]').forEach(el => { const k = el.dataset.i18nHtml; if (d[k] != null) el.innerHTML = d[k]; });
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.dataset.i18nPh; if (d[k] != null) el.placeholder = d[k]; });
   document.getElementById('langLabel').textContent = LANG === 'sw' ? 'Kiswahili' : 'English';
+  const shortLbl = document.getElementById('langLabelShort');
+  if (shortLbl) shortLbl.textContent = LANG.toUpperCase();
   document.querySelectorAll('.lang-opt').forEach(btn => {
     btn.querySelector('.lang-check').classList.toggle('hidden', btn.dataset.lang !== LANG);
   });
@@ -948,6 +991,9 @@ burger.addEventListener('click', () => {
   burger.setAttribute('aria-expanded', open);
 });
 document.querySelectorAll('.mob-link').forEach(a => a.addEventListener('click', closeMenu));
+
+/* Funga mobile menu skrini ikigeuzwa kuwa desktop (orientation change / resize) */
+addEventListener('resize', () => { if (innerWidth >= 1024) closeMenu(); }, {passive:true});
 
 /* ---------- Scroll reveal (Animate.css) ---------- */
 const DELAYS = ['0s','.12s','.24s','.36s','.48s','.6s'];
@@ -1074,30 +1120,42 @@ function Testimonials(){
     return () => clearInterval(t);
   }, [i, go, DATA.length]);
 
+  /* Swipe support kwa simu na tablet */
+  const touch = React.useRef({x:0, y:0});
+  const onTouchStart = e => { touch.current = { x:e.touches[0].clientX, y:e.touches[0].clientY }; };
+  const onTouchEnd = e => {
+    const dx = e.changedTouches[0].clientX - touch.current.x;
+    const dy = e.changedTouches[0].clientY - touch.current.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+      if (dx < 0) go((i+1) % DATA.length); else go((i-1+DATA.length) % DATA.length);
+    }
+  };
+
   const c = DATA[i];
 
   return (
-    <div className="relative">
-      <div className={"bg-white rounded-2xl shadow-cardlg border-2 border-emerald-100 px-6 py-10 sm:px-14 sm:py-12 text-center transition-all duration-300 " + (fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3")}>
+    <div className="relative px-8 sm:px-0">
+      <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+        className={"bg-white rounded-2xl shadow-cardlg border-2 border-emerald-100 px-5 py-8 sm:px-14 sm:py-12 text-center transition-all duration-300 " + (fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3")}>
         <span className="inline-grid place-items-center h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 border-2 border-emerald-800 text-2xl sm:text-3xl font-black text-white mb-5 shadow-md">
           {c.name.charAt(0)}
         </span>
         <Stars n={c.stars}/>
-        <p className="mt-5 text-base sm:text-xl font-bold text-emerald-800 leading-relaxed max-w-2xl mx-auto">&ldquo;{c.text}&rdquo;</p>
+        <p className="mt-5 text-[15px] sm:text-xl font-bold text-emerald-800 leading-relaxed max-w-2xl mx-auto">&ldquo;{c.text}&rdquo;</p>
         <p className="mt-6 font-black text-emerald-600">{c.name}</p>
         <p className="text-sm font-bold text-gray-400">{c.biz}</p>
       </div>
 
       <button onClick={() => go((i-1+DATA.length)%DATA.length)} aria-label="Prev"
-        className="absolute -left-1 sm:-left-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 border-2 border-gold-500 shadow-md grid place-items-center text-emerald-900 hover:scale-110 transition-transform">
+        className="absolute left-0 sm:-left-6 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 border-2 border-gold-500 shadow-md grid place-items-center text-emerald-900 hover:scale-110 transition-transform">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
       </button>
       <button onClick={() => go((i+1)%DATA.length)} aria-label="Next"
-        className="absolute -right-1 sm:-right-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 border-2 border-gold-500 shadow-md grid place-items-center text-emerald-900 hover:scale-110 transition-transform">
+        className="absolute right-0 sm:-right-6 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 border-2 border-gold-500 shadow-md grid place-items-center text-emerald-900 hover:scale-110 transition-transform">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 6 6 6-6 6"/></svg>
       </button>
 
-      <div className="mt-8 flex justify-center gap-2.5">
+      <div className="mt-7 sm:mt-8 flex justify-center gap-2.5">
         {DATA.map((_,d)=>(
           <button key={d} onClick={()=>go(d)} aria-label={"#"+(d+1)}
             className={"h-3 rounded-md transition-all duration-300 " + (d===i ? "w-9 bg-gold-400" : "w-3 bg-emerald-300/50 hover:bg-emerald-300")}/>
@@ -1133,10 +1191,10 @@ function showInstallBanner() {
   if (!deferredPrompt) return;
   const banner = document.createElement('div');
   banner.id = 'pwa-install-banner';
-  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#024938,#013028);border-top:3px solid #f9ac00;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:slideUp .4s ease';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#024938,#013028);border-top:3px solid #f9ac00;padding:14px 16px calc(14px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:slideUp .4s ease';
   banner.innerHTML = `
     <img src="/logo.png" alt="Wazabiashara" style="width:42px;height:42px;border-radius:10px;flex-shrink:0">
-    <div style="flex:1;min-width:0">
+    <div style="flex:1;min-width:140px">
       <p style="font-weight:900;color:#fff;font-size:14px;margin:0;font-family:Nunito,sans-serif">Sakinisha Wazabiashara</p>
       <p style="font-weight:600;color:#a7d3cc;font-size:12px;margin:2px 0 0;font-family:Nunito,sans-serif">Tumia kama app — haraka na offline</p>
     </div>
