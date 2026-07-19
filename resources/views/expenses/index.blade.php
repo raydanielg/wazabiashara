@@ -243,13 +243,10 @@ function submitExpForm() {
     });
 }
 function deleteExp(id) {
-    Swal.fire({
+    saConfirm({
         title: 'Are you sure?', text: 'This expense will be permanently deleted.',
-        icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#dc2626', cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, Delete', cancelButtonText: 'Cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
+        icon: 'danger', confirmText: 'Yes, Delete', confirmColor: 'red',
+        onConfirm: () => {
             fetch('/expenses/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
             .then(r => r.json())
             .then(res => {

@@ -205,21 +205,13 @@ async function submitCat() {
         const data = await res.json();
         if (data.success) {
             closeCatModal();
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-                timer: 1800,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            }).then(() => location.reload());
+            showToast('success', 'Success!', data.message); setTimeout(() => location.reload(), 800);
         } else {
             const errors = data.errors ? Object.values(data.errors).join('\n') : data.message || 'An error occurred.';
-            Swal.fire({icon:'error', title:'Error!', text:errors, confirmButtonColor:'#024938'});
+            showToast('error', 'Error!', errors);
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
+        showToast('error', 'Network Error', 'Please try again.');
     } finally {
         btn.disabled = false;
         btn.innerHTML = isEdit
@@ -229,18 +221,13 @@ async function submitCat() {
 }
 
 async function deleteCat(id) {
-    const result = await Swal.fire({
-        icon: 'warning',
+    saConfirm({
         title: 'Delete Category?',
         text: 'Are you sure you want to delete this category?',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Delete',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280'
-    });
-    if (!result.isConfirmed) return;
-
+        icon: 'danger',
+        confirmText: 'Yes, Delete',
+        confirmColor: 'red',
+        onConfirm: async () => {
     try {
         const res = await fetch('{{ url("/categories") }}/' + id, {
             method: 'POST',
@@ -255,13 +242,15 @@ async function deleteCat(id) {
         if (data.success) {
             const row = document.getElementById('catrow-' + id);
             if (row) row.remove();
-            Swal.fire({icon:'success', title:'Deleted!', text:data.message, timer:1500, showConfirmButton:false, toast:true, position:'top-end'});
+            showToast('success', 'Deleted!', data.message);
         } else {
-            Swal.fire({icon:'error', title:'Error!', text:data.message || 'Failed to delete.', confirmButtonColor:'#024938'});
+            showToast('error', 'Error!', data.message || 'Failed to delete.');
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
+        showToast('error', 'Network Error', 'Please try again.');
     }
+    }
+    });
 }
 
 document.addEventListener('keydown', function(e) {

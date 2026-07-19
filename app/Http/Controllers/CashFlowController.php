@@ -75,9 +75,9 @@ class CashFlowController extends Controller
         ]);
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Akaunti imeongezwa!', 'account' => $account]);
+            return response()->json(['success' => true, 'message' => 'Account added successfully!', 'account' => $account]);
         }
-        return redirect()->route('cash-flow.index')->with('success', 'Akaunti imeongezwa!');
+        return redirect()->route('cash-flow.index')->with('success', 'Account added successfully!');
     }
 
     public function destroyAccount(Account $account)
@@ -86,8 +86,8 @@ class CashFlowController extends Controller
         $account->delete();
 
         if (request()->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Akaunti imefutwa.']);
+            return response()->json(['success' => true, 'message' => 'Account deleted successfully.']);
         }
-        return redirect()->route('cash-flow.index')->with('success', 'Akaunti imefutwa.');
+        return redirect()->route('cash-flow.index')->with('success', 'Account deleted successfully.');
     }
 }

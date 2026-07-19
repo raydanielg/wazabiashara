@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Ripoti ya Stoo')
+@section('title', 'Inventory Report')
 
-@section('page_title', 'Ripoti ya Stoo')
+@section('page_title', 'Inventory Report')
 
 @section('content')
 <div class="space-y-5">
@@ -12,20 +12,20 @@
         <div>
             <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                Ripoti ya Stoo
+                Inventory Report
             </h1>
-            <p class="text-sm text-gray-500 mt-0.5">Thamani na hali ya stoo yako</p>
+            <p class="text-sm text-gray-500 mt-0.5">Value and status of your stock</p>
         </div>
     </div>
 
     {{-- KPI Cards --}}
     <div class="grid grid-cols-2 gap-4">
         <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-5 text-white shadow-sm">
-            <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wide">Thamani ya Stoo (Cost)</p>
+            <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wide">Stock Value (Cost)</p>
             <p class="font-bold text-2xl mt-2">TZS {{ number_format($stockValue, 0) }}</p>
         </div>
         <div class="bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl p-5 text-white shadow-sm">
-            <p class="text-xs font-semibold text-gold-100 uppercase tracking-wide">Thamani ya Uziao (Retail)</p>
+            <p class="text-xs font-semibold text-gold-100 uppercase tracking-wide">Retail Value</p>
             <p class="font-bold text-2xl mt-2">TZS {{ number_format($retailValue, 0) }}</p>
         </div>
     </div>
@@ -35,7 +35,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-500 font-semibold text-xs uppercase tracking-wide">
-                    <tr><th class="px-4 py-3 text-left">Bidhaa</th><th class="px-4 py-3 text-left hidden sm:table-cell">Kategoria</th><th class="px-4 py-3 text-right">Qty</th><th class="px-4 py-3 text-right hidden md:table-cell">Cost</th><th class="px-4 py-3 text-right hidden md:table-cell">Bei ya Uziao</th><th class="px-4 py-3 text-right">Thamani</th><th class="px-4 py-3 text-center">Status</th></tr>
+                    <tr><th class="px-4 py-3 text-left">Product</th><th class="px-4 py-3 text-left hidden sm:table-cell">Category</th><th class="px-4 py-3 text-right">Qty</th><th class="px-4 py-3 text-right hidden md:table-cell">Cost</th><th class="px-4 py-3 text-right hidden md:table-cell">Retail Price</th><th class="px-4 py-3 text-right">Value</th><th class="px-4 py-3 text-center">Status</th></tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($stock as $s)
@@ -48,14 +48,14 @@
                         <td class="px-4 py-3 text-right font-bold text-emerald-600">TZS {{ number_format($s->qty * $s->product->cost_price, 0) }}</td>
                         <td class="px-4 py-3 text-center">
                             <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $s->qty <= 0 ? 'bg-red-50 text-red-500' : ($s->qty <= $s->reorder_level ? 'bg-gold-50 text-gold-600' : 'bg-emerald-50 text-emerald-600') }}">
-                                {{ $s->qty <= 0 ? 'Hakuna' : ($s->qty <= $s->reorder_level ? 'Karibu Kuisha' : 'Nzuri') }}
+                                {{ $s->qty <= 0 ? 'Out of Stock' : ($s->qty <= $s->reorder_level ? 'Low Stock' : 'Good') }}
                             </span>
                         </td>
                     </tr>
                     @empty
                     <tr><td colspan="7" class="px-4 py-16 text-center">
                         <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                        <p class="text-gray-400 font-medium text-sm">Hakuna stoo.</p>
+                        <p class="text-gray-400 font-medium text-sm">No stock found.</p>
                     </td></tr>
                     @endforelse
                 </tbody>

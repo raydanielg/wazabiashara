@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Aina za Biashara')
-@section('page_title', 'Aina za Biashara')
+@section('title', 'Business Types')
+@section('page_title', 'Business Types')
 
 @section('content')
 <div class="space-y-5">
@@ -10,13 +10,13 @@
         <div>
             <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                Aina za Biashara
+                Business Types
             </h1>
-            <p class="text-sm text-gray-500 mt-0.5">Dhibiti aina za biashara zinazopatikana kwenye usajili</p>
+            <p class="text-sm text-gray-500 mt-0.5">Manage available business types for registration</p>
         </div>
         <button onclick="openCreateModal()" class="btn-gold font-bold px-4 py-2 rounded-lg inline-flex items-center gap-2 text-sm shadow-sm hover:shadow-md transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Ongeza Aina
+            Add Type
         </button>
     </div>
 
@@ -72,7 +72,7 @@
             <div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             </div>
-            Ongeza Aina ya Biashara
+            Add Business Type
         </h2>
         <button onclick="closeModal()" class="w-9 h-9 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -82,16 +82,16 @@
     <form id="typeForm" class="flex-1 overflow-y-auto p-5 space-y-4">
         <input type="hidden" id="typeId" value="">
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Jina</label>
-            <input id="typeName" type="text" required class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all" placeholder="Mfano: Duka la Jumla">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Name</label>
+            <input id="typeName" type="text" required class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all" placeholder="e.g. Wholesale Store">
         </div>
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Slug (Hiari)</label>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Slug (Optional)</label>
             <input id="typeSlug" type="text" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-mono transition-all" placeholder="retail">
         </div>
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Icon (Hiari)</label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Icon (Optional)</label>
                 <input id="typeIcon" type="text" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all" placeholder="shopping-bag">
             </div>
             <div>
@@ -100,8 +100,8 @@
             </div>
         </div>
         <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Maelezo (Hiari)</label>
-            <textarea id="typeDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all" placeholder="Maelezo ya aina hii..."></textarea>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Description (Optional)</label>
+            <textarea id="typeDesc" rows="2" class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none text-sm font-medium transition-all" placeholder="Description for this type..."></textarea>
         </div>
         <div id="activeWrap" class="hidden">
             <label class="flex items-center gap-2 cursor-pointer">
@@ -114,7 +114,7 @@
     <div class="p-5 border-t border-gray-100 flex-shrink-0">
         <button type="submit" form="typeForm" id="typeSubmitBtn" class="w-full btn-gold font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Hifadhi
+            Save
         </button>
     </div>
 </div>
@@ -123,7 +123,7 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
 function openCreateModal() {
-    document.getElementById('modalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></div> Ongeza Aina ya Biashara';
+    document.getElementById('modalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></div> Add Business Type';
     document.getElementById('typeId').value = '';
     document.getElementById('typeName').value = '';
     document.getElementById('typeSlug').value = '';
@@ -136,7 +136,7 @@ function openCreateModal() {
 }
 
 function openEditModal(id, name, slug, icon, desc, sort, active) {
-    document.getElementById('modalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div> Rekebisha Aina ya Biashara';
+    document.getElementById('modalTitle').innerHTML = '<div class="w-8 h-8 rounded-xl bg-emerald-50 grid place-items-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div> Edit Business Type';
     document.getElementById('typeId').value = id;
     document.getElementById('typeName').value = name;
     document.getElementById('typeSlug').value = slug;
@@ -167,7 +167,7 @@ document.getElementById('typeForm').addEventListener('submit', function(e) {
     const id = document.getElementById('typeId').value;
     const btn = document.getElementById('typeSubmitBtn');
     btn.disabled = true;
-    btn.textContent = 'Inahifadhi...';
+    btn.textContent = 'Saving...';
 
     const data = {
         name: document.getElementById('typeName').value,
@@ -198,20 +198,20 @@ document.getElementById('typeForm').addEventListener('submit', function(e) {
     .then(r => r.json())
     .then(res => {
         btn.disabled = false;
-        btn.textContent = 'Hifadhi';
+        btn.textContent = 'Save';
         if (res.success) {
-            showToast('success', 'Imefanikiwa', res.message);
+            showToast('success', 'Success', res.message);
             setTimeout(() => location.reload(), 800);
         } else if (res.errors) {
-            Object.keys(res.errors).forEach(k => res.errors[k].forEach(m => showToast('error', 'Hitilafu', m)));
+            Object.keys(res.errors).forEach(k => res.errors[k].forEach(m => showToast('error', 'Error', m)));
         } else {
-            showToast('error', 'Hitilafu', res.message || 'Imeshindwa.');
+            showToast('error', 'Error', res.message || 'Failed.');
         }
     })
     .catch(() => {
         btn.disabled = false;
-        btn.textContent = 'Hifadhi';
-        showToast('error', 'Hitilafu', 'Tatizo la mtandao.');
+        btn.textContent = 'Save';
+        showToast('error', 'Error', 'Network error.');
     });
 });
 
@@ -223,24 +223,20 @@ function toggleType(id) {
     .then(r => r.json())
     .then(res => {
         if (res.success) {
-            showToast('success', 'Imefanikiwa', res.message);
+            showToast('success', 'Success', res.message);
             setTimeout(() => location.reload(), 600);
         }
     });
 }
 
 function deleteType(id) {
-    Swal.fire({
-        title: 'Una uhakika?',
-        text: 'Aina hii itafutwa kabisa.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Ndiyo, Futa',
-        cancelButtonText: 'Ghairi',
-    }).then((result) => {
-        if (result.isConfirmed) {
+    saConfirm({
+        title: 'Are you sure?',
+        text: 'This type will be permanently deleted.',
+        icon: 'danger',
+        confirmText: 'Yes, Delete',
+        confirmColor: 'red',
+        onConfirm: () => {
             fetch('/admin/business-types/' + id, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
@@ -248,7 +244,7 @@ function deleteType(id) {
             .then(r => r.json())
             .then(res => {
                 if (res.success) {
-                    showToast('success', 'Imefanikiwa', res.message);
+                    showToast('success', 'Success', res.message);
                     setTimeout(() => location.reload(), 600);
                 }
             });

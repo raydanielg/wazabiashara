@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Rudisha Bidhaa')
+@section('title', 'Returns')
 @section('page_title', 'Returns Management')
 
 @section('content')
@@ -14,14 +14,14 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl border border-red-400 p-4 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
             <div class="relative z-10">
-                <span class="text-[10px] font-medium text-red-100 uppercase">Rudisha Mauzo</span>
+                <span class="text-[10px] font-medium text-red-100 uppercase">Sale Returns</span>
                 <p class="text-xl font-bold mt-1">TZS {{ $fmt($totalSaleReturns) }}</p>
             </div>
         </div>
         <div class="bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl border border-amber-300 p-4 text-white relative overflow-hidden">
             <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8"></div>
             <div class="relative z-10">
-                <span class="text-[10px] font-medium text-amber-50 uppercase">Rudisha Manunuzi</span>
+                <span class="text-[10px] font-medium text-amber-50 uppercase">Purchase Returns</span>
                 <p class="text-xl font-bold mt-1">TZS {{ $fmt($totalPurchaseReturns) }}</p>
             </div>
         </div>
@@ -30,14 +30,14 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
                 <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <p class="text-lg font-bold text-gray-900">{{ number_format($pendingReturns) }}</p>
-            <p class="text-[10px] text-gray-500 font-medium">Zinasubiri</p>
+            <p class="text-[10px] text-gray-500 font-medium">Pending</p>
         </div>
     </div>
 
     {{-- Tabs --}}
     <div class="flex gap-2 border-b">
-        <button onclick="switchTab('sale')" id="tab-sale" class="px-4 py-2 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600">Rudisha Mauzo</button>
-        <button onclick="switchTab('purchase')" id="tab-purchase" class="px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-gray-500">Rudisha Manunuzi</button>
+        <button onclick="switchTab('sale')" id="tab-sale" class="px-4 py-2 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600">Sale Returns</button>
+        <button onclick="switchTab('purchase')" id="tab-purchase" class="px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-gray-500">Purchase Returns</button>
     </div>
 
     {{-- Sale Returns Tab --}}
@@ -47,11 +47,11 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
                 <thead>
                     <tr class="border-b bg-gray-50">
                         <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Reference</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Mteja</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Bidhaa</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Sababu</th>
-                        <th class="text-right px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Kiasi</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Hali</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Customer</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Item</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Reason</th>
+                        <th class="text-right px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Amount</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,7 +65,7 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">{{ ucfirst($return->status ?? 'approved') }}</span></td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-4 py-12 text-center text-sm text-gray-400">Hakuna rudisha mauzo.</td></tr>
+                    <tr><td colspan="6" class="px-4 py-12 text-center text-sm text-gray-400">No sale returns found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -81,9 +81,9 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
                     <tr class="border-b bg-gray-50">
                         <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Reference</th>
                         <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Supplier</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Sababu</th>
-                        <th class="text-right px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Kiasi</th>
-                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Hali</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Reason</th>
+                        <th class="text-right px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Amount</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-semibold text-gray-500 uppercase">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,7 +96,7 @@ $fmt = fn($n) => $n >= 1000000 ? number_format($n/1000000,2).'M' : ($n >= 1000 ?
                         <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">{{ ucfirst($return->status) }}</span></td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="px-4 py-12 text-center text-sm text-gray-400">Hakuna rudisha manunuzi.</td></tr>
+                    <tr><td colspan="5" class="px-4 py-12 text-center text-sm text-gray-400">No purchase returns found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

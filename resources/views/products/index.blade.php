@@ -255,7 +255,7 @@ function editProduct(id) {
         document.getElementById('saveBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Save Changes';
         showModal();
     })
-    .catch(() => Swal.fire({icon:'error', title:'Error!', text:'Failed to load data.', confirmButtonColor:'#024938'}));
+    .catch(() => showToast('error', 'Error!', 'Failed to load data.'));
 }
 
 function showModal() {
@@ -299,21 +299,13 @@ async function submitProduct() {
         const data = await res.json();
         if (data.success) {
             closeProductModal();
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-                timer: 1800,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            }).then(() => location.reload());
+            showToast('success', 'Success!', data.message); setTimeout(() => location.reload(), 800);
         } else {
             const errors = data.errors ? Object.values(data.errors).join('\n') : data.message || 'An error occurred.';
-            Swal.fire({icon:'error', title:'Error!', text:errors, confirmButtonColor:'#024938'});
+            showToast('error', 'Error!', errors);
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
+        showToast('error', 'Network Error', 'Please try again.');
     } finally {
         btn.disabled = false;
         btn.innerHTML = isEdit
@@ -323,18 +315,13 @@ async function submitProduct() {
 }
 
 async function deleteProduct(id) {
-    const result = await Swal.fire({
-        icon: 'warning',
+    saConfirm({
         title: 'Delete Product?',
         text: 'Are you sure you want to delete this product?',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, Delete',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#dc2626',
-        cancelButtonColor: '#6b7280'
-    });
-    if (!result.isConfirmed) return;
-
+        icon: 'danger',
+        confirmText: 'Yes, Delete',
+        confirmColor: 'red',
+        onConfirm: async () => {
     try {
         const res = await fetch('{{ url("/products") }}/' + id, {
             method: 'POST',
@@ -349,13 +336,15 @@ async function deleteProduct(id) {
         if (data.success) {
             const row = document.getElementById('row-' + id);
             if (row) row.remove();
-            Swal.fire({icon:'success', title:'Deleted!', text:data.message, timer:1500, showConfirmButton:false, toast:true, position:'top-end'});
+            showToast('success', 'Deleted!', data.message);
         } else {
-            Swal.fire({icon:'error', title:'Error!', text:data.message || 'Failed to delete.', confirmButtonColor:'#024938'});
+            showToast('error', 'Error!', data.message || 'Failed to delete.');
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
+        showToast('error', 'Network Error', 'Please try again.');
     }
+    }
+    });
 }
 
 // Close modal on Escape

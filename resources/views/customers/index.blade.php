@@ -234,13 +234,10 @@ function submitCustForm() {
     });
 }
 function deleteCust(id) {
-    Swal.fire({
+    saConfirm({
         title: 'Are you sure?', text: 'This customer will be permanently deleted.',
-        icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#dc2626', cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, Delete', cancelButtonText: 'Cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
+        icon: 'danger', confirmText: 'Yes, Delete', confirmColor: 'red',
+        onConfirm: () => {
             fetch('/customers/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
             .then(r => r.json())
             .then(res => {

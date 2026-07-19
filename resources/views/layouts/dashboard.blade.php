@@ -11,12 +11,12 @@
     <link rel="shortcut icon" href="{{ asset('favicon.png') }}">
     <meta name="theme-color" content="#001816">
     <meta property="og:title" content="{{ config('app.name', 'Wazabiashara') }}">
-    <meta property="og:description" content="Biashara yako, Mkononi mwako">
+    <meta property="og:description" content="Your business, in your hands">
     <meta property="og:image" content="{{ asset('favicon.png') }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ config('app.name', 'Wazabiashara') }}">
-    <meta name="twitter:description" content="Biashara yako, Mkononi mwako">
+    <meta name="twitter:description" content="Your business, in your hands">
     <meta name="twitter:image" content="{{ asset('favicon.png') }}">
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito:400,500,600,700,800,900&display=swap" rel="stylesheet">
@@ -86,7 +86,6 @@
         .dark .border-gray-200 { border-color: #374151 !important; }
         .dark .placeholder-gray-400::placeholder { color: #6b7280 !important; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
 </head>
@@ -120,7 +119,7 @@
             {{-- POS --}}
             <a href="{{ route('pos.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('pos.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                <span data-lang="sw">POS — Mauzo</span>
+                <span data-lang="sw">POS — Sales</span>
                 <span class="hidden" data-lang="en">POS — Sales</span>
             </a>
 
@@ -134,14 +133,14 @@
             {{-- Products --}}
             <a href="{{ route('products.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('products.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                <span data-lang="sw">Bidhaa & Stoo</span>
+                <span data-lang="sw">Products & Stock</span>
                 <span class="hidden" data-lang="en">Products & Stock</span>
             </a>
 
             {{-- Categories --}}
             <a href="{{ route('categories.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('categories.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                <span data-lang="sw">Kategoria</span>
+                <span data-lang="sw">Categories</span>
                 <span class="hidden" data-lang="en">Categories</span>
             </a>
 
@@ -149,21 +148,21 @@
             {{-- Branches --}}
             <a href="{{ route('branches.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('branches.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <span data-lang="sw">Matawi</span>
+                <span data-lang="sw">Branches</span>
                 <span class="hidden" data-lang="en">Branches</span>
             </a>
 
             {{-- Stock Transfers --}}
             <a href="{{ route('stock-transfers.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                <span data-lang="sw">Uhamisho wa Stoo</span>
+                <span data-lang="sw">Stock Transfers</span>
                 <span class="hidden" data-lang="en">Stock Transfers</span>
             </a>
 
             {{-- Suppliers & Purchases --}}
             <a href="{{ route('suppliers.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
-                <span data-lang="sw">Wasambazaji & Manunuzi</span>
+                <span data-lang="sw">Suppliers & Purchases</span>
                 <span class="hidden" data-lang="en">Suppliers & Purchases</span>
             </a>
             @endif
@@ -171,80 +170,80 @@
             {{-- Customers --}}
             <a href="{{ route('customers.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('customers.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span data-lang="sw">Wateja & Madeni</span>
+                <span data-lang="sw">Customers & Debts</span>
                 <span class="hidden" data-lang="en">Customers & Debts</span>
             </a>
 
             {{-- Incomes --}}
             <a href="{{ route('incomes.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('incomes.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                <span data-lang="sw">Mapato</span>
+                <span data-lang="sw">Income</span>
                 <span class="hidden" data-lang="en">Income</span>
             </a>
 
             {{-- Expenses --}}
             <a href="{{ route('expenses.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-                <span data-lang="sw">Matumizi</span>
+                <span data-lang="sw">Expenses</span>
                 <span class="hidden" data-lang="en">Expenses</span>
             </a>
 
             {{-- Payments --}}
             <a href="{{ route('payments.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('payments.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                <span data-lang="sw">Malipo</span>
+                <span data-lang="sw">Payments</span>
                 <span class="hidden" data-lang="en">Payments</span>
             </a>
 
             {{-- Cash Flow --}}
             <a href="{{ route('cash-flow.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('cash-flow.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                <span data-lang="sw">Mtiririko wa Fedha</span>
+                <span data-lang="sw">Cash Flow</span>
                 <span class="hidden" data-lang="en">Cash Flow</span>
             </a>
 
             {{-- Returns --}}
             <a href="{{ route('returns.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('returns.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
-                <span data-lang="sw">Rudisha Bidhaa</span>
+                <span data-lang="sw">Returns</span>
                 <span class="hidden" data-lang="en">Returns</span>
             </a>
 
             {{-- Shifts --}}
             <a href="{{ route('shifts.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('shifts.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span data-lang="sw">Zamu (Shifts)</span>
+                <span data-lang="sw">Shifts</span>
                 <span class="hidden" data-lang="en">Shifts</span>
             </a>
 
             {{-- Reminders --}}
             <a href="{{ route('reminders.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('reminders.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                <span data-lang="sw">Vikumbusho</span>
+                <span data-lang="sw">Reminders</span>
                 <span class="hidden" data-lang="en">Reminders</span>
             </a>
 
             {{-- Reports --}}
             <a href="{{ route('reports.index') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span data-lang="sw">Ripoti & Takwimu</span>
+                <span data-lang="sw">Reports & Analytics</span>
                 <span class="hidden" data-lang="en">Reports & Analytics</span>
             </a>
 
             {{-- Cards --}}
             <button onclick="toggleMenu('menu-cards')" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('cards.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3v1a1 1 0 001 1h3a1 1 0 001-1V3m0 0V2a1 1 0 00-1-1H5a1 1 0 00-1 1v1m4 0h.01M7 3h.01M20 3v1a1 1 0 01-1 1h-3a1 1 0 01-1-1V3m0 0V2a1 1 0 011-1h5a1 1 0 011 1v1m-4 0h.01M17 3h.01M7 8h10M7 12h10M7 16h6"/></svg>
-                <span data-lang="sw">Kadi</span>
+                <span data-lang="sw">Cards</span>
                 <span class="hidden" data-lang="en">Cards</span>
                 <svg id="arrow-cards" class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="menu-cards" class="sidebar-submenu {{ request()->routeIs('cards.*') ? 'open' : '' }}">
                 <a href="{{ route('cards.greeting') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('cards.greeting*') ? 'active' : '' }}">
-                    <span data-lang="sw">Kadi za Salamu</span>
+                    <span data-lang="sw">Greeting Cards</span>
                     <span class="hidden" data-lang="en">Greeting Cards</span>
                 </a>
                 <a href="{{ route('cards.business') }}" class="sidebar-link w-full flex items-center gap-3 pl-10 pr-3 py-2 rounded-lg text-emerald-200/70 text-xs font-medium {{ request()->routeIs('cards.business') ? 'active' : '' }}">
-                    <span data-lang="sw">Kadi za Biashara</span>
+                    <span data-lang="sw">Business Cards</span>
                     <span class="hidden" data-lang="en">Business Cards</span>
                 </a>
             </div>
@@ -252,7 +251,7 @@
             {{-- Business Profile --}}
             <a href="{{ route('business.profile') }}" class="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-emerald-100 text-sm font-medium {{ request()->routeIs('business.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span data-lang="sw">Wasifu wa Biashara</span>
+                <span data-lang="sw">Business Profile</span>
                 <span class="hidden" data-lang="en">Business Profile</span>
             </a>
         </div>
@@ -295,8 +294,8 @@
 
                 {{-- Language Switcher --}}
                 <div class="flex items-center gap-0.5 bg-gray-50 dark:bg-gray-700 rounded-xl p-0.5 border border-gray-200 dark:border-gray-600">
-                    <button onclick="switchLang('sw')" id="langSW" class="lang-btn active px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-transparent">SW</button>
-                    <button onclick="switchLang('en')" id="langEN" class="lang-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-400 dark:text-gray-500 border border-transparent">EN</button>
+                    <button onclick="switchLang('sw')" id="langSW" class="lang-btn px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-400 dark:text-gray-500 border border-transparent">SW</button>
+                    <button onclick="switchLang('en')" id="langEN" class="lang-btn active px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-transparent">EN</button>
                 </div>
 
                 {{-- Dark Mode Toggle --}}
@@ -368,7 +367,7 @@
         @endif
         @if($errors->any())
             @foreach($errors->all() as $error)
-                showToast('error', 'Hitilafu', {!! json_encode($error) !!});
+                showToast('error', 'Error', {!! json_encode($error) !!});
             @endforeach
         @endif
     })();
@@ -407,7 +406,7 @@
 
         try {
             const saved = localStorage.getItem('app_lang');
-            if (saved && saved !== 'sw') switchLang(saved);
+            if (saved && saved === 'en') switchLang('en'); else switchLang('en');
         } catch(e) {}
 
         // Dark Mode

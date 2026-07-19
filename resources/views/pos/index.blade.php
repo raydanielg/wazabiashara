@@ -181,10 +181,10 @@
 let cart = [];
 
 function addToCart(id, name, price, stock) {
-    if (stock <= 0) { Swal.fire({icon:'warning',title:'Out of Stock',text:'Sorry, this product is not available.',confirmButtonColor:'#024938'}); return; }
+    if (stock <= 0) { showToast('warning', 'Out of Stock', 'Sorry, this product is not available.'); return; }
     const existing = cart.find(i => i.product_id === id);
     if (existing) {
-        if (existing.qty >= stock) { Swal.fire({icon:'warning',title:'Insufficient Stock',text:'You have reached the available stock.',confirmButtonColor:'#024938'}); return; }
+        if (existing.qty >= stock) { showToast('warning', 'Insufficient Stock', 'You have reached the available stock.'); return; }
         existing.qty++;
     } else {
         cart.push({ product_id: id, name, price, qty: 1, stock });
@@ -260,7 +260,7 @@ function updateChange() {
 }
 
 async function checkout() {
-    if (cart.length === 0) { Swal.fire({icon:'warning',title:'Empty Cart',text:'Add products first.',confirmButtonColor:'#024938'}); return; }
+    if (cart.length === 0) { showToast('warning', 'Empty Cart', 'Add products first.'); return; }
     const btn = document.getElementById('checkoutBtn');
     btn.disabled = true; btn.textContent = 'Processing...';
 
@@ -282,26 +282,17 @@ async function checkout() {
         });
         const data = await res.json();
         if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Sale Completed!',
-                html: `Receipt: <b>${data.receipt_no}</b><br>Total: <b>TZS ${formatNum(data.total)}</b><br>Change: <b>TZS ${formatNum(data.change)}</b>`,
-                confirmButtonText: 'Print Receipt',
-                showCancelButton: true,
-                cancelButtonText: 'Close',
-                confirmButtonColor: '#024938'
-            }).then(r => {
-                if (r.isConfirmed) {
-                    window.open('{{ url("/pos/receipt") }}/' + data.sale_id, '_blank');
-                }
+            showToast('success', 'Sale Completed!', `Receipt: ${data.receipt_no} | Total: TZS ${formatNum(data.total)} | Change: TZS ${formatNum(data.change)}`);
+            setTimeout(() => {
+                window.open('{{ url("/pos/receipt") }}/' + data.sale_id, '_blank');
                 clearCart();
                 location.reload();
-            });
+            }, 1500);
         } else {
-            Swal.fire({icon:'error', title:'Error!', text:data.message, confirmButtonColor:'#024938'});
+            showToast('error', 'Error!', data.message);
         }
     } catch(e) {
-        Swal.fire({icon:'error', title:'Network Error', text:'Please try again.', confirmButtonColor:'#024938'});
+        showToast('error', 'Network Error', 'Please try again.');
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Complete Sale';
