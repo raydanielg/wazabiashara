@@ -41,6 +41,12 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Send welcome email
+        Mail::send('emails.welcome', ['user' => $user], function ($message) use ($user) {
+            $message->to($user->email, $user->name);
+            $message->subject('Karibu Wazabiashara!');
+        });
+
         $tokenResult = $user->createToken('mobile-app');
 
         return response()->json([

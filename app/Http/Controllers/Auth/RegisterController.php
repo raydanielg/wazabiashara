@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -64,13 +65,20 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'phone' => $data['phone'],
             'email' => $data['email'],
             'role' => 'user',
             'password' => Hash::make($data['password']),
         ]);
+
+        Mail::send('emails.welcome', ['user' => $user], function ($message) use ($user) {
+            $message->to($user->email, $user->name);
+            $message->subject('Karibu Wazabiashara!');
+        });
+
+        return $user;
     }
 
     public function ajaxRegister(Request $request)
