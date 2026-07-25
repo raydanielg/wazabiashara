@@ -803,6 +803,8 @@ if (!function_exists('wz_mini')) {
           <li><a class="inline-flex items-center gap-1.5 hover:text-gold-300 transition" href="#jinsi" data-i18n="nav_how"><span class="text-gold-500/60">&rsaquo;</span>Jinsi Inavyofanya Kazi</a></li>
           <li><a class="inline-flex items-center gap-1.5 hover:text-gold-300 transition" href="#maoni" data-i18n="nav_reviews"><span class="text-gold-500/60">&rsaquo;</span>Maoni</a></li>
           <li><a class="inline-flex items-center gap-1.5 hover:text-gold-300 transition" href="#newsletter" data-i18n="nav_join"><span class="text-gold-500/60">&rsaquo;</span>Jiunge</a></li>
+          <li><a class="inline-flex items-center gap-1.5 hover:text-gold-300 transition" href="{{ route('terms') }}"><span class="text-gold-500/60">&rsaquo;</span>Sheria na Masharti</a></li>
+          <li><a class="inline-flex items-center gap-1.5 hover:text-gold-300 transition" href="{{ route('privacy.policy') }}"><span class="text-gold-500/60">&rsaquo;</span>Sera ya Faragha</a></li>
         </ul>
       </div>
 
@@ -822,7 +824,13 @@ if (!function_exists('wz_mini')) {
 
     {{-- Bottom bar --}}
     <div class="mt-10 sm:mt-12 pt-6 border-t border-emerald-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-emerald-300/80 text-center sm:text-left">
-      <p>&copy; {{ $year }} {{ $appName }}. <span data-i18n="foot_rights">Haki zote zimehifadhiwa.</span></p>
+      <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+        <p>&copy; {{ $year }} {{ $appName }}. <span data-i18n="foot_rights">Haki zote zimehifadhiwa.</span></p>
+        <div class="flex items-center gap-4">
+          <a href="{{ route('terms') }}" class="hover:text-gold-300 transition">Sheria na Masharti</a>
+          <a href="{{ route('privacy.policy') }}" class="hover:text-gold-300 transition">Sera ya Faragha</a>
+        </div>
+      </div>
       <div class="flex items-center gap-2">
         <span data-i18n="foot_made">Imetengenezwa Tanzania</span>
         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-800 border border-emerald-700 text-emerald-200">

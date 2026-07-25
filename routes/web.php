@@ -31,6 +31,10 @@ Route::get('/', function () {
 
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
+// Legal Pages
+Route::get('/terms', fn () => view('pages.terms'))->name('terms');
+Route::get('/privacy-policy', fn () => view('pages.privacy-policy'))->name('privacy.policy');
+
 Auth::routes();
 
 Route::post('/ajax/login', [App\Http\Controllers\Auth\LoginController::class, 'ajaxLogin'])->name('ajax.login');
