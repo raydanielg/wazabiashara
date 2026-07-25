@@ -3,7 +3,7 @@ class AppConfig {
   static const String appTagline = 'Your Business, In Your Hands';
 
   // API Configuration
-  static const String baseUrl = 'https://app.wazaelimuforum.com';
+  static const String baseUrl = 'https://wazabiashara.com';
   static const String apiVersion = '/api';
   static const Duration apiTimeout = Duration(seconds: 30);
 

@@ -56,10 +56,10 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/icons/appicon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#024938"
-  adaptive_icon_foreground: "assets/images/logo.png"
+  adaptive_icon_foreground: "assets/icons/appicon.png"
   remove_alpha_ios: true
   background_color_ios: "#024938"
 
@@ -71,3 +71,4 @@ flutter:
     - assets/icons/
     - assets/lottie/
     - assets/translations/
+    - assets/Duka Rahisi.gif

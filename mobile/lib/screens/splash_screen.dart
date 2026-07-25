@@ -18,35 +18,27 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _ctrl;
-  late Animation<double> _logoDrop;
-  late Animation<double> _logoOpacity;
-  late Animation<double> _squash;
-  late Animation<double> _shadowGrow;
-  late Animation<double> _slideLeft;
+  late Animation<double> _gifFade;
+  late Animation<double> _gifScale;
+  late Animation<double> _nameFade;
+  late Animation<double> _nameSlide;
   late Animation<double> _taglineFade;
   late Animation<double> _taglineSlide;
   late Animation<double> _fadeout;
 
-  static const _word = 'wazabiashara';
+  static const _word = 'Wazabiashara';
   static const _tagline = 'Biashara Yako, Mkononi Mwako';
-  static const _totalMs = 2500;
+  static const _totalMs = 4000;
 
   // Timeline (ms)
-  static const _dropStart = 100.0;
-  static const _dropDur = 600.0;
-  static const _shadowStart = 600.0;
-  static const _shadowDur = 300.0;
-  static const _squashStart = 600.0;
-  static const _squashDur = 250.0;
-  static const _slideStart = 900.0;
-  static const _slideDur = 500.0;
-  static const _letterBase = 1000.0;
-  static const _letterStep = 50.0;
-  static const _letterDur = 300.0;
-  static const _taglineStart = 1700.0;
-  static const _taglineDur = 400.0;
-  static const _fadeoutStart = 2100.0;
-  static const _fadeoutDur = 300.0;
+  static const _gifStart = 0.0;
+  static const _gifDur = 2000.0;
+  static const _nameStart = 2200.0;
+  static const _nameDur = 600.0;
+  static const _taglineStart = 2900.0;
+  static const _taglineDur = 500.0;
+  static const _fadeoutStart = 3500.0;
+  static const _fadeoutDur = 500.0;
 
   double _norm(double ms) => (ms / _totalMs).clamp(0.0, 1.0);
 
@@ -59,117 +51,63 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     );
 
-    // Logo drop: translateY -420 -> 0 with bounce
-    _logoDrop = Tween<double>(begin: -420.0, end: 0.0).animate(
+    // GIF fade in + scale
+    _gifFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_dropStart),
-          _norm(_dropStart + _dropDur),
-          curve: Curves.easeOutBack,
-        ),
+        curve: Interval(_norm(_gifStart), _norm(_gifStart + 400),
+            curve: Curves.easeIn),
       ),
     );
 
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _gifScale = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_dropStart),
-          _norm(_dropStart + _dropDur * 0.3),
-          curve: Curves.easeIn,
-        ),
+        curve: Interval(_norm(_gifStart), _norm(_gifStart + _gifDur),
+            curve: Curves.easeOutBack),
       ),
     );
 
-    // Squash: scale bounce on impact
-    _squash = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 1.18)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.18, end: 0.94)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 25,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 0.94, end: 1.04)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.04, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 25,
-      ),
-    ]).animate(
+    // App name fade + slide up
+    _nameFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_squashStart),
-          _norm(_squashStart + _squashDur),
-        ),
+        curve: Interval(_norm(_nameStart), _norm(_nameStart + _nameDur),
+            curve: Curves.easeOut),
       ),
     );
 
-    // Shadow grow
-    _shadowGrow = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _nameSlide = Tween<double>(begin: 30.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_shadowStart),
-          _norm(_shadowStart + _shadowDur),
-          curve: Curves.easeOut,
-        ),
+        curve: Interval(_norm(_nameStart), _norm(_nameStart + _nameDur),
+            curve: Curves.easeOutBack),
       ),
     );
 
-    // Slide left
-    _slideLeft = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: Interval(
-          _norm(_slideStart),
-          _norm(_slideStart + _slideDur),
-          curve: Curves.easeInOutCubic,
-        ),
-      ),
-    );
-
-    // Tagline
+    // Tagline fade + slide
     _taglineFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_taglineStart),
-          _norm(_taglineStart + _taglineDur),
-          curve: Curves.easeOut,
-        ),
+        curve: Interval(_norm(_taglineStart), _norm(_taglineStart + _taglineDur),
+            curve: Curves.easeOut),
       ),
     );
 
-    _taglineSlide = Tween<double>(begin: 12.0, end: 0.0).animate(
+    _taglineSlide = Tween<double>(begin: 15.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_taglineStart),
-          _norm(_taglineStart + _taglineDur),
-          curve: Curves.easeOut,
-        ),
+        curve: Interval(_norm(_taglineStart), _norm(_taglineStart + _taglineDur),
+            curve: Curves.easeOut),
       ),
     );
 
-    // Fade out everything
+    // Final fade out
     _fadeout = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: Interval(
-          _norm(_fadeoutStart),
-          _norm(_fadeoutStart + _fadeoutDur),
-          curve: Curves.easeOut,
-        ),
+        curve: Interval(_norm(_fadeoutStart), _norm(_fadeoutStart + _fadeoutDur),
+            curve: Curves.easeInOut),
       ),
     );
 
@@ -190,11 +128,15 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (auth.isAuthenticated) {
       final needsSetup = auth.user?.businessId == null;
-      final targetRoute = needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard;
+      final targetRoute =
+          needsSetup ? AppRoutes.businessSetup : AppRoutes.dashboard;
       final lockEnabled = await StorageService().getAppLockEnabled();
       if (!mounted) return;
       if (lockEnabled) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PinLockScreen(targetRoute: targetRoute)));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (_) => PinLockScreen(targetRoute: targetRoute)));
       } else {
         Navigator.pushReplacementNamed(context, targetRoute);
       }
@@ -214,8 +156,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final logoSize = size.width * 0.18;
-    final slideOffset = logoSize * 0.65;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -231,97 +171,61 @@ class _SplashScreenState extends State<SplashScreen>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Shadow
-                  Positioned(
-                    top: size.height * 0.5 + logoSize * 0.45,
+                  // GIF Animation — center
+                  Opacity(
+                    opacity: _gifFade.value,
                     child: Transform.scale(
-                      scaleX: 0.15 + _shadowGrow.value * 0.85,
-                      scaleY: 1.0,
-                      child: Container(
-                        width: logoSize * 0.85,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.16 * _shadowGrow.value),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
+                      scale: _gifScale.value,
+                      child: Image.asset(
+                        'assets/Duka Rahisi.gif',
+                        fit: BoxFit.contain,
+                        width: size.width * 0.80,
                       ),
                     ),
                   ),
 
-                  // Logo + Wordmark row
-                  Transform.translate(
-                    offset: Offset(
-                      -_slideLeft.value * slideOffset,
-                      _logoDrop.value,
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                  // App name + tagline — bottom area
+                  Positioned(
+                    bottom: size.height * 0.15,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Logo
+                        // Animated letters
                         Opacity(
-                          opacity: _logoOpacity.value,
-                          child: Transform.scale(
-                            scaleX: _squash.value,
-                            scaleY: 2.0 - _squash.value,
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              width: logoSize,
-                              height: logoSize,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(width: logoSize * 0.12),
-
-                        // Wordmark — letter by letter
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                          opacity: _nameFade.value,
+                          child: Transform.translate(
+                            offset: Offset(0, _nameSlide.value),
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
                               children: List.generate(_word.length, (i) {
                                 return _AnimatedLetter(
                                   letter: _word[i],
                                   animation: _ctrl,
-                                  begin: _norm(_letterBase + i * _letterStep),
-                                  end: _norm(_letterBase + i * _letterStep + _letterDur),
+                                  begin: _norm(_nameStart + i * 40),
+                                  end: _norm(_nameStart + i * 40 + 300),
                                 );
                               }),
                             ),
-                            SizedBox(height: logoSize * 0.08),
-                            // Tagline
-                            Transform.translate(
-                              offset: Offset(0, _taglineSlide.value),
-                              child: Opacity(
-                                opacity: _taglineFade.value,
-                                child: Text(
-                                  _tagline.toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: size.width * 0.028,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 2.5,
-                                    color: AppColors.gold,
-                                  ),
-                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Tagline
+                        Transform.translate(
+                          offset: Offset(0, _taglineSlide.value),
+                          child: Opacity(
+                            opacity: _taglineFade.value,
+                            child: Text(
+                              _tagline.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: size.width * 0.030,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 2.5,
+                                color: AppColors.gold,
                               ),
                             ),
-                          ],
+                          ),
                         ),
                       ],
-                    ),
                     ),
                   ),
                 ],
@@ -356,24 +260,17 @@ class _AnimatedLetter extends StatelessWidget {
       ),
     );
 
-    final slide = Tween<double>(begin: -26.0, end: 0.0).animate(
+    final slide = Tween<double>(begin: -20.0, end: 0.0).animate(
       CurvedAnimation(
         parent: animation,
         curve: Interval(begin, end, curve: Curves.easeOutBack),
       ),
     );
 
-    final scale = Tween<double>(begin: 0.4, end: 1.0).animate(
+    final scale = Tween<double>(begin: 0.3, end: 1.0).animate(
       CurvedAnimation(
         parent: animation,
         curve: Interval(begin, end, curve: Curves.easeOutBack),
-      ),
-    );
-
-    final rotate = Tween<double>(begin: -0.24, end: 0.0).animate(
-      CurvedAnimation(
-        parent: animation,
-        curve: Interval(begin, end, curve: Curves.easeOut),
       ),
     );
 
@@ -384,12 +281,9 @@ class _AnimatedLetter extends StatelessWidget {
           opacity: fade.value,
           child: Transform.translate(
             offset: Offset(0, slide.value),
-            child: Transform.rotate(
-              angle: rotate.value,
-              child: Transform.scale(
-                scale: scale.value,
-                child: child,
-              ),
+            child: Transform.scale(
+              scale: scale.value,
+              child: child,
             ),
           ),
         );
@@ -397,9 +291,9 @@ class _AnimatedLetter extends StatelessWidget {
       child: Text(
         letter,
         style: TextStyle(
-          fontSize: 48,
+          fontSize: 32,
           fontWeight: FontWeight.w900,
-          letterSpacing: -1.0,
+          letterSpacing: -0.5,
           color: AppColors.primary,
           fontFamily: 'Nunito',
         ),
